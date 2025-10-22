@@ -1,3 +1,61 @@
 <resources>
     <string name="app_name">SendaSnap</string>
+    
+    <!-- Common strings -->
+    <string name="search">Search</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="warning">Warning</string>
+    <string name="info">Info</string>
+    
+    <!-- Login -->
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="remember_me">Remember me</string>
+    <string name="login_successful">Login Successful</string>
+    <string name="login_failed">Login Failed</string>
+    <string name="invalid_credentials">Invalid username or password</string>
+    
+    <!-- Vehicle -->
+    <string name="search_vehicle">Search Vehicle</string>
+    <string name="chassis_number">Chassis Number</string>
+    <string name="vehicle_found">Vehicle Found</string>
+    <string name="vehicle_details">Vehicle Details</string>
+    <string name="recent_vehicles">Recent Vehicles</string>
+    <string name="view_all">View All</string>
+    <string name="no_vehicles_found">No vehicles found</string>
+    <string name="search_vehicle_to_get_started">Search for a vehicle to get started</string>
+    
+    <!-- History -->
+    <string name="search_history">Search History</string>
+    <string name="clear_history">Clear History</string>
+    <string name="no_search_history">No search history</string>
+    <string name="searched_vehicles_will_appear_here">Your searched vehicles will appear here</string>
+    
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="haptic_feedback">Haptic Feedback</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="logout">Logout</string>
+    <string name="receive_push_notifications">Receive push notifications</string>
+    <string name="vibration_on_interactions">Vibration on interactions</string>
+    <string name="remove_all_cached_data">Remove all cached data</string>
+    
+    <!-- Network -->
+    <string name="no_internet">No Internet</string>
+    <string name="check_internet_connection">Please check your internet connection</string>
+    
+    <!-- Permissions -->
+    <string name="camera_permission_required">Camera permission is required to take photos</string>
+    <string name="storage_permission_required">Storage permission is required to access photos</string>
+    
+    <!-- App Info -->
+    <string name="app_version">SendaSnap v1.0.0</string>
+    <string name="copyright">© 2024 SendaSnap. All rights reserved.</string>
 </resources>

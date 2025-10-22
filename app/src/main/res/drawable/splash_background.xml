@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="@color/background"
+                android:centerColor="@color/surface_variant"
+                android:endColor="@color/background_blur"
+                android:angle="135" />
+        </shape>
+    </item>
+    
+    <!-- Logo container -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@color/surface_container" />
+            <size
+                android:width="200dp"
+                android:height="200dp" />
+        </shape>
+    </item>
+</layer-list>

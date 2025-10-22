@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="photo_indicator_size">8dp</dimen>
+    <dimen name="bottom_nav_icon_size">18dp</dimen>
+    <dimen name="bottom_nav_text_size">10sp</dimen>
+</resources>
