@@ -12,8 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.activities.HistoryActivity;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.databinding.FragmentProfileBinding;
+import com.sendajapan.sendasnap.ui.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -39,6 +41,7 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
+        setupToolbar();
         setupClickListeners();
         loadUserData();
     }
@@ -46,6 +49,21 @@ public class ProfileFragment extends Fragment {
     private void initHelpers() {
         prefsManager = SharedPrefsManager.getInstance(requireContext());
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
+    }
+
+    private void setupToolbar() {
+        // Set up toolbar with drawer
+        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
+            com.sendajapan.sendasnap.activities.MainActivity mainActivity = (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
+
+            // Set title only
+            binding.toolbar.setTitle("Profile");
+
+            // Update drawer controller with this fragment's toolbar
+            if (mainActivity.drawerController != null) {
+                mainActivity.drawerController.updateToolbar(binding.toolbar);
+            }
+        }
     }
 
     private void setupClickListeners() {
@@ -75,14 +93,9 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        binding.btnClearCache.setOnClickListener(v -> {
+        binding.layoutHistory.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            clearCache();
-        });
-
-        binding.btnLogout.setOnClickListener(v -> {
-            hapticHelper.vibrateClick();
-            logout();
+            openHistory();
         });
     }
 
@@ -103,37 +116,9 @@ public class ProfileFragment extends Fragment {
         binding.switchHaptic.setChecked(prefsManager.isHapticEnabled());
     }
 
-    private void clearCache() {
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("Clear Cache")
-                .setMessage(
-                        "Are you sure you want to clear all cached data? This will remove all vehicle search history.")
-                .setPositiveButton("Clear", (dialog, which) -> {
-                    prefsManager.clearVehicleCache();
-                    MotionToastHelper.showSuccess(requireContext(), "Cache Cleared",
-                            "All cached data has been removed", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void logout() {
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("Logout", (dialog, which) -> {
-                    prefsManager.logout();
-                    MotionToastHelper.showInfo(requireContext(), "Logged Out", "You have been logged out successfully",
-                            MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-
-                    // Navigate to login activity
-                    Intent intent = new Intent(requireContext(), LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    requireActivity().finish();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+    private void openHistory() {
+        Intent intent = new Intent(requireContext(), HistoryActivity.class);
+        startActivity(intent);
     }
 
     @Override

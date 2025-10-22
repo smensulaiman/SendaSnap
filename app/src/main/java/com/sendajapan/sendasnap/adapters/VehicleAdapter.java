@@ -63,20 +63,28 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
     class VehicleViewHolder extends RecyclerView.ViewHolder {
         private ImageView imgVehicle;
         private TextView txtVehicleName;
+        private TextView txtMakeModel;
         private TextView txtChassisNumber;
         private TextView txtYear;
         private TextView txtColor;
         private TextView txtSearchDate;
+        private TextView txtBuyingPrice;
+        private TextView txtSellingPrice;
+        private TextView txtProfit;
 
         public VehicleViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgVehicle = itemView.findViewById(R.id.imgVehicle);
             txtVehicleName = itemView.findViewById(R.id.txtVehicleName);
+            txtMakeModel = itemView.findViewById(R.id.txtMakeModel);
             txtChassisNumber = itemView.findViewById(R.id.txtChassisNumber);
             txtYear = itemView.findViewById(R.id.txtYear);
             txtColor = itemView.findViewById(R.id.txtColor);
             txtSearchDate = itemView.findViewById(R.id.txtSearchDate);
+            txtBuyingPrice = itemView.findViewById(R.id.txtBuyingPrice);
+            txtSellingPrice = itemView.findViewById(R.id.txtSellingPrice);
+            txtProfit = itemView.findViewById(R.id.txtProfit);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -87,8 +95,14 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         }
 
         public void bind(Vehicle vehicle) {
+            // Load vehicle image
+            loadVehicleImage(vehicle);
+
             // Set vehicle name
             txtVehicleName.setText(vehicle.getDisplayName());
+
+            // Set make and model
+            txtMakeModel.setText(vehicle.getMake() + " " + vehicle.getModel() + " " + vehicle.getYear());
 
             // Set chassis number
             txtChassisNumber.setText("Chassis: " + vehicle.getSerialNumber());
@@ -97,11 +111,21 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtYear.setText(vehicle.getYear());
             txtColor.setText(vehicle.getColor());
 
+            // Set financial information
+            String buyingPriceStr = vehicle.getBuyingPrice() != null ? vehicle.getBuyingPrice() : "0";
+            double buyingPrice = parsePrice(buyingPriceStr);
+            txtBuyingPrice.setText("Buy: $" + formatPrice(buyingPrice));
+
+            // Mock selling price (in real app this would come from API)
+            double sellingPrice = buyingPrice * 1.2; // 20% markup
+            txtSellingPrice.setText("Sell: $" + formatPrice(sellingPrice));
+
+            // Calculate and set profit
+            double profit = sellingPrice - buyingPrice;
+            txtProfit.setText("Profit: $" + formatPrice(profit));
+
             // Set search date (mock - in real app this would be actual search time)
             txtSearchDate.setText("Searched " + getTimeAgo());
-
-            // Load vehicle image
-            loadVehicleImage(vehicle);
         }
 
         private void loadVehicleImage(Vehicle vehicle) {
@@ -117,6 +141,20 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             } else {
                 // Use placeholder
                 imgVehicle.setImageResource(R.drawable.ic_car_placeholder);
+            }
+        }
+
+        private String formatPrice(double price) {
+            return String.format("%,.0f", price);
+        }
+
+        private double parsePrice(String priceStr) {
+            try {
+                // Remove any non-numeric characters except decimal point
+                String cleanPrice = priceStr.replaceAll("[^0-9.]", "");
+                return Double.parseDouble(cleanPrice);
+            } catch (NumberFormatException e) {
+                return 0.0;
             }
         }
 

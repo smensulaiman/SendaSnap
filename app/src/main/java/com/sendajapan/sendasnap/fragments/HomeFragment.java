@@ -1,11 +1,13 @@
 package com.sendajapan.sendasnap.fragments;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +21,7 @@ import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
 import com.sendajapan.sendasnap.models.Vehicle;
+import com.sendajapan.sendasnap.ui.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.VehicleCache;
@@ -47,14 +50,31 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
+        setupToolbar();
         setupRecyclerView();
         setupClickListeners();
+        setupFAB();
         loadRecentVehicles();
     }
 
     private void initHelpers() {
         vehicleCache = VehicleCache.getInstance(requireContext());
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
+    }
+
+    private void setupToolbar() {
+        // Set up toolbar with drawer
+        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
+            com.sendajapan.sendasnap.activities.MainActivity mainActivity = (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
+
+            // Set title only
+            binding.toolbar.setTitle("Home");
+
+            // Update drawer controller with this fragment's toolbar
+            if (mainActivity.drawerController != null) {
+                mainActivity.drawerController.updateToolbar(binding.toolbar);
+            }
+        }
     }
 
     private void setupRecyclerView() {
@@ -64,55 +84,87 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void setupClickListeners() {
-        binding.btnSearch.setOnClickListener(v -> {
-            hapticHelper.vibrateClick();
-            performSearch();
-        });
-
         binding.btnViewAll.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
             // Navigate to history fragment
             // This will be handled by MainActivity
         });
 
-        binding.fabQuickSearch.setOnClickListener(v -> {
+        binding.btnQuickSearch.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            binding.etChassisNumber.requestFocus();
+            showSearchDialog();
+        });
+
+        binding.btnViewStats.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            // TODO: Navigate to stats/analytics screen
+            Toast.makeText(getContext(), "Stats feature coming soon!", Toast.LENGTH_SHORT).show();
+        });
+
+    }
+
+    private void setupFAB() {
+        binding.fabSearch.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            showSearchDialog();
         });
     }
 
-    private void performSearch() {
-        String chassisNumber = binding.etChassisNumber.getText().toString().trim();
-
-        // Clear previous errors
-        binding.tilChassisNumber.setError(null);
-
-        // Validate input
-        if (TextUtils.isEmpty(chassisNumber)) {
-            binding.tilChassisNumber.setError("Chassis number is required");
-            binding.etChassisNumber.requestFocus();
-            hapticHelper.vibrateError();
-            return;
+    private void showSearchDialog() {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_vehicle_search);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         }
 
-        if (chassisNumber.length() < 3) {
-            binding.tilChassisNumber.setError("Chassis number must be at least 3 characters");
-            binding.etChassisNumber.requestFocus();
-            hapticHelper.vibrateError();
-            return;
-        }
+        // Get views from dialog
+        com.google.android.material.textfield.TextInputLayout tilChassisNumber = dialog
+                .findViewById(R.id.tilChassisNumber);
+        com.google.android.material.textfield.TextInputEditText etChassisNumber = dialog
+                .findViewById(R.id.etChassisNumber);
+        com.google.android.material.button.MaterialButton btnCancel = dialog.findViewById(R.id.btnCancel);
+        com.google.android.material.button.MaterialButton btnSearch = dialog.findViewById(R.id.btnSearch);
 
+        // Setup click listeners
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnSearch.setOnClickListener(v -> {
+            String chassisNumber = etChassisNumber.getText().toString().trim();
+
+            // Clear previous errors
+            tilChassisNumber.setError(null);
+
+            // Validate input
+            if (TextUtils.isEmpty(chassisNumber)) {
+                tilChassisNumber.setError("Chassis number is required");
+                etChassisNumber.requestFocus();
+                hapticHelper.vibrateError();
+                return;
+            }
+
+            if (chassisNumber.length() < 3) {
+                tilChassisNumber.setError("Chassis number must be at least 3 characters");
+                etChassisNumber.requestFocus();
+                hapticHelper.vibrateError();
+                return;
+            }
+
+            // Close dialog and perform search
+            dialog.dismiss();
+            performSearchFromDialog(chassisNumber);
+        });
+
+        dialog.show();
+    }
+
+    private void performSearchFromDialog(String chassisNumber) {
         // Perform search (mock implementation)
         searchVehicle(chassisNumber);
     }
 
     private void searchVehicle(String chassisNumber) {
-        // Show loading state
-        binding.btnSearch.setEnabled(false);
-        binding.btnSearch.setText("Searching...");
-
         // Simulate API call delay
-        binding.etChassisNumber.postDelayed(() -> {
+        binding.recyclerViewVehicles.postDelayed(() -> {
             // Mock vehicle data
             Vehicle mockVehicle = createMockVehicle(chassisNumber);
 
@@ -127,14 +179,9 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
             intent.putExtra("vehicle", mockVehicle);
             startActivity(intent);
 
-            // Reset search button
-            binding.btnSearch.setEnabled(true);
-            binding.btnSearch.setText("Search Vehicle");
-
-            // Clear input
-            binding.etChassisNumber.setText("");
             // Show success feedback
-            MotionToastHelper.showSuccess(requireContext(), "Vehicle Found", "Vehicle details loaded successfully!", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+            MotionToastHelper.showSuccess(requireContext(), "Vehicle Found", "Vehicle details loaded successfully!",
+                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
 
         }, 1500); // 1.5 second delay to simulate network call
     }

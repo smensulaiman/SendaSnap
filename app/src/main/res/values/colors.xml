@@ -3,10 +3,10 @@
     <!-- Professional color palette inspired by reference design -->
     <color name="primary">#1A1A1A</color>
     <color name="primary_dark">#000000</color>
-    <color name="primary_light">#333333</color>
+    <color name="primary_light">#E0F2FE</color>
     <color name="accent">#FF6B35</color>
     <color name="accent_dark">#E55A2B</color>
-    <color name="accent_light">#FF8A65</color>
+    <color name="accent_light">#F3E8FF</color>
 
     <!-- Background colors with blur support -->
     <color name="background">#FFFFFF</color>
@@ -51,6 +51,17 @@
     <color name="blur_overlay">#80000000</color>
     <color name="blur_background">#F0F0F0</color>
     <color name="glass_effect">#80FFFFFF</color>
+
+    <!-- Task status colors -->
+    <color name="status_running">#3B82F6</color>        <!-- Blue -->
+    <color name="status_running_light">#DBEAFE</color>
+    <color name="status_pending">#F59E0B</color>         <!-- Amber -->
+    <color name="status_pending_light">#FEF3C7</color>
+    <color name="status_completed">#10B981</color>       <!-- Green -->
+    <color name="status_completed_light">#D1FAE5</color>
+    <color name="status_cancelled">#EF4444</color>       <!-- Red -->
+    <color name="status_cancelled_light">#FEE2E2</color>
+    <color name="badge_new">#FF6B35</color>              <!-- Orange accent -->
 
     <!-- Legacy colors for compatibility -->
     <color name="purple_200">#FFBB86FC</color>

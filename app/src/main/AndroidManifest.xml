@@ -65,6 +65,18 @@
             android:exported="false"
             android:theme="@style/Theme.SendaSnap"
             android:screenOrientation="portrait" />
+        
+        <!-- History Activity -->
+        <activity
+            android:name=".activities.HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SendaSnap" />
+        
+        <!-- Task Details Activity -->
+        <activity
+            android:name=".activities.TaskDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SendaSnap" />
     </application>
 
 </manifest>
