@@ -46,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
             controller.setAppearanceLightNavigationBars(true);
         }
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.white, getTheme()));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

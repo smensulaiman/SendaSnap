@@ -104,7 +104,7 @@ public class ProfileFragment extends Fragment {
         String email = prefsManager.getEmail();
 
         if (!username.isEmpty()) {
-            binding.txtUserName.setText(username);
+            //binding.txtUserName.setText(username);
         }
 
         if (!email.isEmpty()) {

@@ -40,6 +40,10 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         binding = ActivityVehicleDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Set status bar and navigation bar colors
+        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

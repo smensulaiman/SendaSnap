@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/white"
     android:clickable="true"
     android:focusable="true"
     app:cardCornerRadius="0dp"
@@ -133,6 +134,16 @@
                         android:textColor="@color/text_hint" />
 
                 </LinearLayout>
+
+                <!-- File Attachment Icon -->
+                <ImageView
+                    android:id="@+id/imgAttachment"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_attach_file"
+                    android:visibility="gone"
+                    app:tint="@color/primary" />
 
                 <!-- Status Chip -->
                 <com.google.android.material.chip.Chip

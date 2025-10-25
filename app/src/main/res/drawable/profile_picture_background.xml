@@ -4,5 +4,5 @@
     <solid android:color="@color/surface_variant" />
     <stroke
         android:width="2dp"
-        android:color="@color/primary_light" />
+        android:color="@color/primary" />
 </shape>

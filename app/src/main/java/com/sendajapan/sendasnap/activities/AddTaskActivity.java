@@ -3,9 +3,13 @@ package com.sendajapan.sendasnap.activities;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -24,10 +28,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
 import com.sendajapan.sendasnap.models.Task;
+import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class AddTaskActivity extends AppCompatActivity {
@@ -40,6 +47,8 @@ public class AddTaskActivity extends AppCompatActivity {
             "Lisa Davis" };
     private Task editingTask; // Task being edited
     private boolean isEditMode = false;
+    private List<TaskAttachment> attachments = new ArrayList<>();
+    private static final int FILE_PICKER_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,10 @@ public class AddTaskActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Set status bar and navigation bar colors
+        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
 
         // Handle system UI insets properly
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
@@ -109,6 +122,11 @@ public class AddTaskActivity extends AppCompatActivity {
             hapticHelper.vibrateClick();
             saveTask();
         });
+
+        binding.buttonAddFile.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            showFilePicker();
+        });
     }
 
     private void setupInitialValues() {
@@ -169,6 +187,13 @@ public class AddTaskActivity extends AppCompatActivity {
 
         // Set status chip
         setStatusChip(editingTask.getStatus());
+
+        // Load existing attachments
+        if (editingTask.getAttachments() != null) {
+            attachments.clear();
+            attachments.addAll(editingTask.getAttachments());
+            updateFileDisplay();
+        }
     }
 
     private void setDefaultValues() {
@@ -273,6 +298,7 @@ public class AddTaskActivity extends AppCompatActivity {
             task.setWorkTime(workTime);
             task.setStatus(status);
             task.setAssignee(assignee);
+            task.setAttachments(attachments);
             task.setUpdatedAt(System.currentTimeMillis());
         } else {
             // Create new task
@@ -284,6 +310,7 @@ public class AddTaskActivity extends AppCompatActivity {
                     workTime,
                     status);
             task.setAssignee(assignee);
+            task.setAttachments(attachments);
         }
 
         // Return result to calling activity
@@ -307,6 +334,239 @@ public class AddTaskActivity extends AppCompatActivity {
         }
 
         return Task.TaskStatus.RUNNING; // Default
+    }
+
+    private void showFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Select File"), FILE_PICKER_REQUEST_CODE);
+    }
+
+    private void addMockFile() {
+        // Create a mock file attachment
+        String[] mockFiles = {
+                "document.pdf", "image.jpg", "spreadsheet.xlsx", "presentation.pptx", "text.txt"
+        };
+        String[] mockSizes = { "2.4 MB", "1.2 MB", "856 KB", "3.1 MB", "45 KB" };
+
+        int randomIndex = (int) (Math.random() * mockFiles.length);
+        String fileName = mockFiles[randomIndex];
+        String fileSize = mockSizes[randomIndex];
+
+        TaskAttachment attachment = new TaskAttachment(
+                String.valueOf(System.currentTimeMillis()),
+                fileName,
+                "/mock/path/" + fileName,
+                getFileExtension(fileName),
+                parseFileSize(fileSize),
+                getMimeType(fileName));
+
+        attachments.add(attachment);
+        updateFileDisplay();
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        }
+        return "";
+    }
+
+    private long parseFileSize(String sizeStr) {
+        // Simple parsing for demo - in real app, you'd get actual file size
+        if (sizeStr.contains("MB")) {
+            return (long) (Double.parseDouble(sizeStr.replace(" MB", "")) * 1024 * 1024);
+        } else if (sizeStr.contains("KB")) {
+            return (long) (Double.parseDouble(sizeStr.replace(" KB", "")) * 1024);
+        } else {
+            return Long.parseLong(sizeStr.replace(" B", ""));
+        }
+    }
+
+    private String getMimeType(String fileName) {
+        String extension = getFileExtension(fileName);
+        switch (extension) {
+            case "pdf":
+                return "application/pdf";
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "xlsx":
+                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "pptx":
+                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "txt":
+                return "text/plain";
+            default:
+                return "application/octet-stream";
+        }
+    }
+
+    private void updateFileDisplay() {
+        if (attachments.isEmpty()) {
+            binding.layoutAttachedFiles.setVisibility(View.GONE);
+            binding.textNoFiles.setVisibility(View.VISIBLE);
+        } else {
+            binding.layoutAttachedFiles.setVisibility(View.VISIBLE);
+            binding.textNoFiles.setVisibility(View.GONE);
+
+            // Clear existing file items (except template)
+            binding.layoutAttachedFiles.removeAllViews();
+
+            // Add file items for each attachment
+            for (int i = 0; i < attachments.size(); i++) {
+                TaskAttachment attachment = attachments.get(i);
+                addFileItem(attachment, i);
+            }
+        }
+    }
+
+    private void addFileItem(TaskAttachment attachment, int index) {
+        // Create file item layout
+        LinearLayout fileItem = new LinearLayout(this);
+        fileItem.setOrientation(LinearLayout.HORIZONTAL);
+        fileItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        fileItem.setPadding(48, 48, 48, 48); // 12dp padding
+        fileItem.setBackgroundColor(getColor(R.color.surface));
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = 32; // 8dp margin
+        fileItem.setLayoutParams(params);
+
+        // Add file icon
+        ImageView fileIcon = new ImageView(this);
+        fileIcon.setLayoutParams(new LinearLayout.LayoutParams(96, 96)); // 24dp
+        fileIcon.setImageResource(R.drawable.ic_file);
+        fileIcon.setColorFilter(getColor(R.color.primary));
+        fileIcon.setPadding(0, 0, 48, 0); // 12dp margin end
+        fileItem.addView(fileIcon);
+
+        // Add file info
+        LinearLayout fileInfo = new LinearLayout(this);
+        fileInfo.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        fileInfo.setLayoutParams(infoParams);
+
+        TextView fileName = new TextView(this);
+        fileName.setText(attachment.getFileName());
+        fileName.setTextAppearance(R.style.TextAppearance_Montserrat_BodyMedium);
+        fileName.setTextColor(getColor(R.color.text_primary));
+        fileName.setTextSize(12);
+        fileName.setTypeface(null, android.graphics.Typeface.BOLD);
+        fileInfo.addView(fileName);
+
+        TextView fileSize = new TextView(this);
+        fileSize.setText(attachment.getFormattedFileSize());
+        fileSize.setTextAppearance(R.style.TextAppearance_Montserrat_BodySmall);
+        fileSize.setTextColor(getColor(R.color.text_secondary));
+        fileSize.setTextSize(10);
+        fileInfo.addView(fileSize);
+
+        fileItem.addView(fileInfo);
+
+        // Add remove button
+        MaterialButton removeButton = new MaterialButton(this, null,
+                com.google.android.material.R.style.Widget_Material3_Button_TextButton);
+        removeButton.setIconResource(R.drawable.ic_delete);
+        removeButton.setIconSize(56); // 14dp
+        removeButton.setIconTint(getColorStateList(R.color.error));
+        removeButton.setIconPadding(0);
+        removeButton.setMinWidth(48); // 48dp minimum width for touch target
+        removeButton.setMinHeight(48); // 48dp minimum height for touch target
+
+        removeButton.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            attachments.remove(index);
+            updateFileDisplay();
+        });
+
+        fileItem.addView(removeButton);
+        binding.layoutAttachedFiles.addView(fileItem);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+            if (fileUri != null) {
+                addFileFromUri(fileUri);
+            }
+        }
+    }
+
+    private void addFileFromUri(Uri fileUri) {
+        try {
+            // Get file information
+            String fileName = getFileName(fileUri);
+            String mimeType = getContentResolver().getType(fileUri);
+            long fileSize = getFileSize(fileUri);
+
+            // Create attachment
+            TaskAttachment attachment = new TaskAttachment(
+                    String.valueOf(System.currentTimeMillis()),
+                    fileName,
+                    fileUri.toString(),
+                    getFileExtension(fileName),
+                    fileSize,
+                    mimeType);
+
+            attachments.add(attachment);
+            updateFileDisplay();
+
+            Toast.makeText(this, "File added: " + fileName, Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error adding file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String getFileName(Uri uri) {
+        String fileName = null;
+        try {
+            String[] projection = { android.provider.MediaStore.MediaColumns.DISPLAY_NAME };
+            android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
+                if (nameIndex != -1) {
+                    fileName = cursor.getString(nameIndex);
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (fileName == null) {
+            fileName = "Unknown File";
+        }
+
+        return fileName;
+    }
+
+    private long getFileSize(Uri uri) {
+        try {
+            android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int sizeIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.SIZE);
+                if (sizeIndex != -1) {
+                    long size = cursor.getLong(sizeIndex);
+                    cursor.close();
+                    return size;
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     @Override

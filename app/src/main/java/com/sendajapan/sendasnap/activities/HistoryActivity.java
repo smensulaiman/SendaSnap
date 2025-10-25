@@ -40,6 +40,10 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
         binding = ActivityHistoryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Set status bar and navigation bar colors
+        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
+
         // Ensure light status bar (dark icons)
         WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
         if (controller != null) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -54,6 +55,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         private TextView textTaskTime;
         private TextView badgeNew;
         private Chip chipTaskStatus;
+        private ImageView imgAttachment;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -63,6 +65,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             textTaskTime = itemView.findViewById(R.id.textTaskTime);
             badgeNew = itemView.findViewById(R.id.badgeNew);
             chipTaskStatus = itemView.findViewById(R.id.chipTaskStatus);
+            imgAttachment = itemView.findViewById(R.id.imgAttachment);
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
@@ -84,6 +87,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 badgeNew.setVisibility(View.VISIBLE);
             } else {
                 badgeNew.setVisibility(View.GONE);
+            }
+
+            // Show attachment icon if task has attachments
+            if (task.getAttachments() != null && !task.getAttachments().isEmpty()) {
+                imgAttachment.setVisibility(View.VISIBLE);
+            } else {
+                imgAttachment.setVisibility(View.GONE);
             }
         }
 

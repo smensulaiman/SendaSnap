@@ -1,6 +1,8 @@
 package com.sendajapan.sendasnap.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Task implements Serializable {
     private String id;
@@ -10,6 +12,7 @@ public class Task implements Serializable {
     private String workTime;
     private TaskStatus status;
     private String assignee; // Task assignee
+    private List<TaskAttachment> attachments; // File attachments
     private long createdAt;
     private long updatedAt;
     private boolean isNew; // For NEW badge
@@ -25,6 +28,7 @@ public class Task implements Serializable {
         this.workTime = workTime;
         this.status = status;
         this.assignee = ""; // Default empty assignee
+        this.attachments = new ArrayList<>(); // Initialize empty attachments list
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.isNew = true;
@@ -111,6 +115,30 @@ public class Task implements Serializable {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    public List<TaskAttachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<TaskAttachment> attachments) {
+        this.attachments = attachments;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void addAttachment(TaskAttachment attachment) {
+        if (this.attachments == null) {
+            this.attachments = new ArrayList<>();
+        }
+        this.attachments.add(attachment);
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void removeAttachment(TaskAttachment attachment) {
+        if (this.attachments != null) {
+            this.attachments.remove(attachment);
+            this.updatedAt = System.currentTimeMillis();
+        }
     }
 
     public enum TaskStatus {

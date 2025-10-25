@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityTaskDetailsBinding;
 import com.sendajapan.sendasnap.models.Task;
+import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.activities.AddTaskActivity;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
@@ -36,6 +41,10 @@ public class TaskDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityTaskDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Set status bar and navigation bar colors
+        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
 
         // Ensure light status bar (dark icons)
         WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
@@ -105,6 +114,9 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         // Set status chip
         setStatusChip(task.getStatus());
+
+        // Display file attachments
+        displayAttachments();
     }
 
     private void setStatusChip(Task.TaskStatus status) {
@@ -127,6 +139,89 @@ public class TaskDetailsActivity extends AppCompatActivity {
                 binding.chipTaskStatus.setChipBackgroundColor(getColorStateList(R.color.status_cancelled_light));
                 binding.chipTaskStatus.setChipStrokeColor(getColorStateList(R.color.status_cancelled));
                 break;
+        }
+    }
+
+    private void displayAttachments() {
+        if (task.getAttachments() != null && !task.getAttachments().isEmpty()) {
+            binding.layoutAttachments.setVisibility(View.VISIBLE);
+            binding.textAttachmentCount.setText(task.getAttachments().size() + " file(s) attached");
+
+            // Clear existing file items
+            binding.layoutAttachedFiles.removeAllViews();
+
+            // Add file items for each attachment
+            for (TaskAttachment attachment : task.getAttachments()) {
+                addAttachmentItem(attachment);
+            }
+        } else {
+            binding.layoutAttachments.setVisibility(View.GONE);
+        }
+    }
+
+    private void addAttachmentItem(TaskAttachment attachment) {
+        // Create file item layout
+        LinearLayout fileItem = new LinearLayout(this);
+        fileItem.setOrientation(LinearLayout.HORIZONTAL);
+        fileItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        fileItem.setPadding(48, 48, 48, 48); // 12dp padding
+        fileItem.setBackgroundColor(getColor(R.color.surface));
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = 32; // 8dp margin
+        fileItem.setLayoutParams(params);
+
+        // Add file icon
+        ImageView fileIcon = new ImageView(this);
+        fileIcon.setLayoutParams(new LinearLayout.LayoutParams(96, 96)); // 24dp
+        fileIcon.setImageResource(R.drawable.ic_file);
+        fileIcon.setColorFilter(getColor(R.color.primary));
+        fileIcon.setPadding(0, 0, 48, 0); // 12dp margin end
+        fileItem.addView(fileIcon);
+
+        // Add file info
+        LinearLayout fileInfo = new LinearLayout(this);
+        fileInfo.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        fileInfo.setLayoutParams(infoParams);
+
+        TextView fileName = new TextView(this);
+        fileName.setText(attachment.getFileName());
+        fileName.setTextAppearance(R.style.TextAppearance_Montserrat_BodyMedium);
+        fileName.setTextColor(getColor(R.color.text_primary));
+        fileName.setTextSize(12);
+        fileName.setTypeface(null, android.graphics.Typeface.BOLD);
+        fileInfo.addView(fileName);
+
+        TextView fileSize = new TextView(this);
+        fileSize.setText(attachment.getFormattedFileSize());
+        fileSize.setTextAppearance(R.style.TextAppearance_Montserrat_BodySmall);
+        fileSize.setTextColor(getColor(R.color.text_secondary));
+        fileSize.setTextSize(10);
+        fileInfo.addView(fileSize);
+
+        fileItem.addView(fileInfo);
+
+        // Add click listener to open file
+        fileItem.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            openFile(attachment);
+        });
+
+        binding.layoutAttachedFiles.addView(fileItem);
+    }
+
+    private void openFile(TaskAttachment attachment) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(android.net.Uri.parse(attachment.getFilePath()), attachment.getMimeType());
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Open File"));
+        } catch (Exception e) {
+            Toast.makeText(this, "Cannot open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

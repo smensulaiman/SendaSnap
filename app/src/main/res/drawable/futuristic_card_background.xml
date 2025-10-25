@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Base gradient background -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="@color/futuristic_base_1"
+                android:centerColor="@color/futuristic_base_2"
+                android:endColor="@color/futuristic_base_3"
+                android:type="linear" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    
+    <!-- Subtle border glow -->
+    <item android:top="1dp" android:left="1dp" android:right="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="@color/futuristic_glow_start"
+                android:centerColor="@color/futuristic_glow_center"
+                android:endColor="@color/futuristic_glow_end"
+                android:type="linear" />
+            <corners android:radius="15dp" />
+        </shape>
+    </item>
+    
+    <!-- AI circuit pattern overlay -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="45"
+                android:startColor="@color/futuristic_overlay_start"
+                android:centerColor="@color/futuristic_overlay_center"
+                android:endColor="@color/futuristic_overlay_end"
+                android:type="linear" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    
+</layer-list>

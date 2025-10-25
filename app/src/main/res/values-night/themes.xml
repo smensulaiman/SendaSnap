@@ -28,7 +28,7 @@
         <item name="colorOnErrorContainer">@color/error</item>
         
         <!-- Status bar and navigation bar for dark mode -->
-        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:statusBarColor">@color/surface_variant</item>
         <item name="android:navigationBarColor">@color/black</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>

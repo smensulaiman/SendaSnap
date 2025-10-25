@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary colors -->
-    <color name="primary">#1A1A1A</color>
+    <color name="primary">#0F1523</color>
     <color name="primary_dark">#000000</color>
     <color name="primary_light">#E0F2FE</color>
     <color name="accent">#FF6B35</color>
     <color name="on_primary">#FFFFFF</color>
 
     <!-- Background colors -->
-    <color name="background">#FFFFFF</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#F5F5F5</color>
+    <color name="background">#EEEAE6</color>
+    <color name="surface">#CCC9C1</color>
+    <color name="surface_variant">#EEEAE6</color>
     <color name="surface_container">#FAFAFA</color>
 
     <!-- Text colors -->
@@ -50,4 +50,22 @@
     <!-- Basic colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Futuristic card colors -->
+    <color name="futuristic_base_1">#EEEAE6</color>
+    <color name="futuristic_base_2">#DFDFDD</color>
+    <color name="futuristic_base_3">#F0EAE5</color>
+    <color name="futuristic_glow_start">#00ffffff</color>
+    <color name="futuristic_glow_center">#1affffff</color>
+    <color name="futuristic_glow_end">#00ffffff</color>
+    <color name="futuristic_overlay_start">#00000000</color>
+    <color name="futuristic_overlay_center">#10ffffff</color>
+    <color name="futuristic_overlay_end">#00000000</color>
+    
+    <!-- Button colors -->
+    <color name="button_secondary_bg">#CCC9C1</color>
+    
+    <!-- Status bar and navigation colors -->
+    <color name="status_bar_color">@color/surface</color>
+    <color name="navigation_bar_color">@color/surface</color>
 </resources>

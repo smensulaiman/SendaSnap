@@ -28,12 +28,12 @@
             android:layout_height="90dp"
             android:layout_gravity="bottom"
             app:menu="@menu/smooth_bottom_nav_menu"
-            app:backgroundColor="@color/surface"
-            app:indicatorColor="@color/surface_variant"
+            app:backgroundColor="@color/surface_variant"
+            app:indicatorColor="@color/primary_light"
             app:indicatorRadius="@dimen/dimen_24"
             app:cornerRadius="24dp"
             app:textColor="@color/text_primary"
-            app:iconTintActive="@color/green_accent"
+            app:iconTintActive="@color/primary"
             app:iconTint="@color/text_secondary"
             app:activeItem="0"
             app:duration="200"
@@ -41,7 +41,6 @@
             app:iconSize="22dp"
             app:sideMargins="16dp"
             app:itemPadding="8dp" />
-
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
