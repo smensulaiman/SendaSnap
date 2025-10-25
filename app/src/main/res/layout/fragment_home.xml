@@ -49,11 +49,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome back!"
+                android:text="Welcome back, Shiroyama!"
                 android:textColor="@color/text_primary"
-                android:textSize="24sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif-black" />
+                android:fontFamily="@font/montserrat_semi_bold" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -62,11 +62,9 @@
                 android:text="Search for vehicles by chassis number"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp"
-                android:fontFamily="sans-serif" />
+                android:fontFamily="@font/montserrat_regular" />
 
         </LinearLayout>
-
-        
 
         <!-- Quick Actions Section -->
         <com.google.android.material.card.MaterialCardView
@@ -105,7 +103,7 @@
                         android:textColor="@color/text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium" />
+                        android:fontFamily="@font/montserrat_regular" />
 
                 </LinearLayout>
 
@@ -140,12 +138,12 @@
                         android:text="View Stats"
                         android:textSize="12sp"
                         android:fontFamily="sans-serif-medium"
-                        app:backgroundTint="@color/accent_light"
+                        app:backgroundTint="@color/surface_variant"
                         app:cornerRadius="24dp"
                         app:icon="@drawable/ic_stats"
                         app:iconGravity="textStart"
-                        app:iconTint="@color/accent"
-                        android:textColor="@color/accent" />
+                        app:iconTint="@color/primary"
+                        android:textColor="@color/primary" />
 
                 </LinearLayout>
 
@@ -163,16 +161,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_recent_vehicles"
-                        app:tint="@color/primary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -180,9 +171,9 @@
                         android:layout_weight="1"
                         android:text="Recent Vehicles"
                         android:textColor="@color/text_primary"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium" />
+                        android:fontFamily="@font/montserrat" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnViewAll"
@@ -203,6 +194,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                tools:itemCount="4"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_vehicle" />
 
@@ -239,7 +231,7 @@
                     android:text="Search for a vehicle to get started"
                     android:textColor="@color/text_hint"
                     android:textSize="12sp"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/montserrat_regular" />
 
             </LinearLayout>
 
@@ -256,8 +248,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        android:contentDescription="TODO"
         android:src="@drawable/ic_search"
         app:backgroundTint="@color/primary"
-        app:tint="@color/white" />
+        app:tint="@color/white"
+        app:fabSize="normal"
+        app:elevation="8dp"
+        app:pressedTranslationZ="12dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.RoundedFAB" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

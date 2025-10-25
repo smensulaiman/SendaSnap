@@ -17,7 +17,7 @@ import java.util.List;
 
 public class VehiclePhotoAdapter extends RecyclerView.Adapter<VehiclePhotoAdapter.PhotoViewHolder> {
 
-    private List<String> photos;
+    private final List<String> photos;
 
     public VehiclePhotoAdapter(List<String> photos) {
         this.photos = photos;
@@ -52,13 +52,13 @@ public class VehiclePhotoAdapter extends RecyclerView.Adapter<VehiclePhotoAdapte
         public void bind(String photoUrl) {
             if ("placeholder1".equals(photoUrl) || "placeholder2".equals(photoUrl)) {
                 // Use placeholder image
-                imgPhoto.setImageResource(R.drawable.ic_car_placeholder);
+                imgPhoto.setImageResource(R.drawable.no_image);
             } else {
                 // Load actual image with Glide
                 Glide.with(itemView.getContext())
                         .load(photoUrl)
-                        .placeholder(R.drawable.ic_car_placeholder)
-                        .error(R.drawable.ic_car_placeholder)
+                        .placeholder(R.drawable.no_image)
+                        .error(R.drawable.no_image)
                         .apply(RequestOptions.bitmapTransform(new RoundedCorners(16)))
                         .into(imgPhoto);
             }

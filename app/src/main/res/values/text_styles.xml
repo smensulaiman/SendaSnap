@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Montserrat Text Styles -->
+    <style name="TextAppearance.Montserrat.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+    
+    <style name="TextAppearance.Montserrat.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+</resources>

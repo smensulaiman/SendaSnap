@@ -17,6 +17,7 @@ import com.sendajapan.sendasnap.activities.HistoryActivity;
 import com.sendajapan.sendasnap.activities.MainActivity;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 public class DrawerController {
 
@@ -114,13 +115,17 @@ public class DrawerController {
     }
 
     private void handleLogoutNavigation() {
-        // TODO: Implement proper logout with session clearing
-        Toast.makeText(activity, "Logout functionality coming soon!", Toast.LENGTH_SHORT).show();
+        // Clear user session/preferences
+        SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(activity);
+        prefsManager.logout();
 
-        // For now, just show a toast. Later this should:
-        // 1. Clear user session/preferences
-        // 2. Navigate to LoginActivity
-        // 3. Finish current activity
+        // Navigate to LoginActivity
+        Intent intent = new Intent(activity, com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activity.startActivity(intent);
+
+        // Finish current activity
+        activity.finish();
     }
 
     public void setToolbarTitle(String title) {

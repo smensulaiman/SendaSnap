@@ -59,13 +59,6 @@
             android:exported="false"
             android:theme="@style/Theme.SendaSnap" />
         
-        <!-- Camera Activity -->
-        <activity
-            android:name=".activities.CameraActivity"
-            android:exported="false"
-            android:theme="@style/Theme.SendaSnap"
-            android:screenOrientation="portrait" />
-        
         <!-- History Activity -->
         <activity
             android:name=".activities.HistoryActivity"
@@ -77,6 +70,13 @@
             android:name=".activities.TaskDetailsActivity"
             android:exported="false"
             android:theme="@style/Theme.SendaSnap" />
+        
+        <!-- Add Task Activity -->
+        <activity
+            android:name=".activities.AddTaskActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SendaSnap"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

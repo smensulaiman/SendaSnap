@@ -9,6 +9,7 @@ public class Task implements Serializable {
     private String workDate; // ISO 8601 format
     private String workTime;
     private TaskStatus status;
+    private String assignee; // Task assignee
     private long createdAt;
     private long updatedAt;
     private boolean isNew; // For NEW badge
@@ -23,6 +24,7 @@ public class Task implements Serializable {
         this.workDate = workDate;
         this.workTime = workTime;
         this.status = status;
+        this.assignee = ""; // Default empty assignee
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.isNew = true;
@@ -75,6 +77,15 @@ public class Task implements Serializable {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
         this.updatedAt = System.currentTimeMillis();
     }
 

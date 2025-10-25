@@ -126,7 +126,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
 
         for (int i = 0; i < photoCount; i++) {
             View indicator = new View(this);
-            indicator.setBackgroundResource(R.drawable.photo_indicator_unselected);
+            indicator.setBackgroundResource(R.drawable.blur_background);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     getResources().getDimensionPixelSize(R.dimen.photo_indicator_size),
@@ -153,7 +153,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (i == selectedPosition) {
                 indicator.setBackgroundResource(R.drawable.photo_indicator_selected);
             } else {
-                indicator.setBackgroundResource(R.drawable.photo_indicator_unselected);
+                indicator.setBackgroundResource(R.drawable.blur_background);
             }
         }
     }

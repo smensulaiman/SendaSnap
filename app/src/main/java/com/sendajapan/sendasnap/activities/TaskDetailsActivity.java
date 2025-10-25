@@ -1,5 +1,6 @@
 package com.sendajapan.sendasnap.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +14,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityTaskDetailsBinding;
 import com.sendajapan.sendasnap.models.Task;
-import com.sendajapan.sendasnap.ui.AddTaskBottomSheet;
+import com.sendajapan.sendasnap.activities.AddTaskActivity;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 
@@ -25,6 +26,7 @@ import www.sanju.motiontoast.MotionToast;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 
+    private static final int EDIT_TASK_REQUEST_CODE = 1002;
     private ActivityTaskDetailsBinding binding;
     private Task task;
     private HapticFeedbackHelper hapticHelper;
@@ -173,21 +175,9 @@ public class TaskDetailsActivity extends AppCompatActivity {
     }
 
     private void editTask() {
-        AddTaskBottomSheet bottomSheet = new AddTaskBottomSheet();
-        bottomSheet.setOnTaskSavedListener(updatedTask -> {
-            // Update the current task with new data
-            task.setTitle(updatedTask.getTitle());
-            task.setDescription(updatedTask.getDescription());
-            task.setWorkDate(updatedTask.getWorkDate());
-            task.setWorkTime(updatedTask.getWorkTime());
-            task.setStatus(updatedTask.getStatus());
-
-            displayTask();
-            MotionToastHelper.showSuccess(this, "Task Updated",
-                    "Task has been updated successfully",
-                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-        });
-        bottomSheet.show(getSupportFragmentManager(), "EditTaskBottomSheet");
+        Intent intent = new Intent(this, AddTaskActivity.class);
+        intent.putExtra("task", task);
+        startActivityForResult(intent, EDIT_TASK_REQUEST_CODE);
     }
 
     private void showDeleteDialog() {
@@ -225,5 +215,28 @@ public class TaskDetailsActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDIT_TASK_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            Task updatedTask = (Task) data.getSerializableExtra("task");
+            if (updatedTask != null) {
+                // Update the current task with new data
+                task.setTitle(updatedTask.getTitle());
+                task.setDescription(updatedTask.getDescription());
+                task.setWorkDate(updatedTask.getWorkDate());
+                task.setWorkTime(updatedTask.getWorkTime());
+                task.setStatus(updatedTask.getStatus());
+                task.setAssignee(updatedTask.getAssignee());
+
+                displayTask();
+                MotionToastHelper.showSuccess(this, "Task Updated",
+                        "Task has been updated successfully",
+                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+            }
+        }
     }
 }

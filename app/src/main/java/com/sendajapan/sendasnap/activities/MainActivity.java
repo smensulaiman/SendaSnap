@@ -40,12 +40,13 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Ensure light status bar (dark icons) for visibility
         WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
         if (controller != null) {
             controller.setAppearanceLightStatusBars(true);
             controller.setAppearanceLightNavigationBars(true);
         }
+
+        getWindow().setStatusBarColor(getResources().getColor(R.color.white, getTheme()));
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -58,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupNetworkMonitoring();
 
-        // Load default fragment
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
         }
@@ -70,18 +70,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawer() {
-        // Initialize drawer controller without toolbar - will be set per fragment
         drawerController = new DrawerController(this,
-                findViewById(R.id.drawerLayout),
-                findViewById(R.id.navigationView),
+                binding.drawerLayout,
+                binding.navigationView,
                 null);
     }
 
     private void setupBottomNavigation() {
-        SmoothBottomBar bottomNav = findViewById(R.id.bottomNavigation);
-
-        // Set item selection listener
-        bottomNav.setOnItemSelectedListener(new OnItemSelectedListener() {
+        binding.bottomNavigation.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public boolean onItemSelect(int pos) {
                 hapticHelper.vibrateClick();
@@ -122,22 +118,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupFragmentDrawer(Fragment fragment) {
-        // Get the toolbar from the fragment and set up drawer
         if (fragment instanceof HomeFragment) {
-            // HomeFragment will handle its own toolbar setup
         } else if (fragment instanceof ScheduleFragment) {
-            // ScheduleFragment will handle its own toolbar setup
         } else if (fragment instanceof ChatFragment) {
-            // ChatFragment will handle its own toolbar setup
         } else if (fragment instanceof ProfileFragment) {
-            // ProfileFragment will handle its own toolbar setup
         }
     }
 
     public void switchToProfileTab() {
-        // Switch to Profile tab (index 3)
-        SmoothBottomBar bottomNav = findViewById(R.id.bottomNavigation);
-        bottomNav.setItemActiveIndex(3);
+        binding.bottomNavigation.setItemActiveIndex(3);
         loadFragment(new ProfileFragment());
     }
 
@@ -146,13 +135,10 @@ public class MainActivity extends AppCompatActivity {
 
         networkUtils.getIsConnected().observe(this, isConnected -> {
             if (isConnected) {
-                // Network is available
                 if (isNetworkToastShowing) {
                     isNetworkToastShowing = false;
-                    // Toast will automatically dismiss
                 }
             } else {
-                // No network
                 if (!isNetworkToastShowing) {
                     isNetworkToastShowing = true;
                     showNoInternetToast();

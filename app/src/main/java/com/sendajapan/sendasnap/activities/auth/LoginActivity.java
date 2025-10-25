@@ -2,6 +2,7 @@ package com.sendajapan.sendasnap.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +18,8 @@ import com.sendajapan.sendasnap.models.User;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+
+import java.util.Objects;
 
 import www.sanju.motiontoast.MotionToast;
 
@@ -57,8 +60,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void performLogin() {
-        String username = binding.etUsername.getText().toString().trim();
-        String password = binding.etPassword.getText().toString().trim();
+        String username = Objects.requireNonNull(binding.etUsername.getText()).toString().trim();
+        String password = Objects.requireNonNull(binding.etPassword.getText()).toString().trim();
 
         // Clear previous errors
         binding.tilUsername.setError(null);
@@ -102,15 +105,16 @@ public class LoginActivity extends AppCompatActivity {
                 clearSavedCredentials();
             }
 
-            // Show success message
-            MotionToastHelper.showSuccess(LoginActivity.this, "Login Successful", "Welcome to SendaSnap!",
-                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-
             // Navigate to MainActivity
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            finish();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                    finish();
+                }
+            }, 700);
         } else {
             // Login failed
             binding.tilPassword.setError("Invalid credentials");

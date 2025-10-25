@@ -496,6 +496,9 @@
         app:fabSize="normal"
         app:layout_anchor="@id/appBarLayout"
         app:layout_anchorGravity="bottom|end"
-        app:tint="@color/white" />
+        app:tint="@color/white"
+        app:elevation="8dp"
+        app:pressedTranslationZ="12dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.RoundedFAB" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

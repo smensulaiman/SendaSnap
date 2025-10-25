@@ -24,7 +24,7 @@ import com.sendajapan.sendasnap.activities.TaskDetailsActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
 import com.sendajapan.sendasnap.models.Task;
-import com.sendajapan.sendasnap.ui.AddTaskBottomSheet;
+import com.sendajapan.sendasnap.activities.AddTaskActivity;
 import com.sendajapan.sendasnap.ui.DrawerController;
 
 import java.text.SimpleDateFormat;
@@ -36,6 +36,7 @@ import java.util.Locale;
 
 public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClickListener {
 
+    private static final int ADD_TASK_REQUEST_CODE = 1001;
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
     private List<Task> allTasks = new ArrayList<>();
@@ -135,9 +136,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private void setupFAB() {
         binding.fabAddTask.setOnClickListener(v -> {
-            AddTaskBottomSheet bottomSheet = new AddTaskBottomSheet();
-            bottomSheet.setOnTaskSavedListener(this::onTaskSaved);
-            bottomSheet.show(getParentFragmentManager(), "AddTaskBottomSheet");
+            Intent intent = new Intent(requireContext(), AddTaskActivity.class);
+            startActivityForResult(intent, ADD_TASK_REQUEST_CODE);
         });
     }
 
@@ -214,6 +214,18 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         Intent intent = new Intent(getContext(), TaskDetailsActivity.class);
         intent.putExtra("task", task);
         startActivity(intent);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_TASK_REQUEST_CODE && resultCode == getActivity().RESULT_OK && data != null) {
+            Task task = (Task) data.getSerializableExtra("task");
+            if (task != null) {
+                onTaskSaved(task);
+            }
+        }
     }
 
     @Override

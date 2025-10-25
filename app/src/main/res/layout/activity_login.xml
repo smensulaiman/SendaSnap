@@ -49,6 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
+                android:text="shiroyama@sendajapan.com"
                 android:textColor="@color/text_primary" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -73,6 +74,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:text="shiroyama1234"
                 android:textColor="@color/text_primary" />
 
         </com.google.android.material.textfield.TextInputLayout>

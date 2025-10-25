@@ -65,12 +65,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         private TextView txtVehicleName;
         private TextView txtMakeModel;
         private TextView txtChassisNumber;
-        private TextView txtYear;
-        private TextView txtColor;
-        private TextView txtSearchDate;
         private TextView txtBuyingPrice;
-        private TextView txtSellingPrice;
-        private TextView txtProfit;
 
         public VehicleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -79,12 +74,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtVehicleName = itemView.findViewById(R.id.txtVehicleName);
             txtMakeModel = itemView.findViewById(R.id.txtMakeModel);
             txtChassisNumber = itemView.findViewById(R.id.txtChassisNumber);
-            txtYear = itemView.findViewById(R.id.txtYear);
-            txtColor = itemView.findViewById(R.id.txtColor);
-            txtSearchDate = itemView.findViewById(R.id.txtSearchDate);
             txtBuyingPrice = itemView.findViewById(R.id.txtBuyingPrice);
-            txtSellingPrice = itemView.findViewById(R.id.txtSellingPrice);
-            txtProfit = itemView.findViewById(R.id.txtProfit);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -107,25 +97,10 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             // Set chassis number
             txtChassisNumber.setText("Chassis: " + vehicle.getSerialNumber());
 
-            // Set year and color
-            txtYear.setText(vehicle.getYear());
-            txtColor.setText(vehicle.getColor());
-
-            // Set financial information
+            // Set buying price
             String buyingPriceStr = vehicle.getBuyingPrice() != null ? vehicle.getBuyingPrice() : "0";
             double buyingPrice = parsePrice(buyingPriceStr);
-            txtBuyingPrice.setText("Buy: $" + formatPrice(buyingPrice));
-
-            // Mock selling price (in real app this would come from API)
-            double sellingPrice = buyingPrice * 1.2; // 20% markup
-            txtSellingPrice.setText("Sell: $" + formatPrice(sellingPrice));
-
-            // Calculate and set profit
-            double profit = sellingPrice - buyingPrice;
-            txtProfit.setText("Profit: $" + formatPrice(profit));
-
-            // Set search date (mock - in real app this would be actual search time)
-            txtSearchDate.setText("Searched " + getTimeAgo());
+            txtBuyingPrice.setText("$" + formatPrice(buyingPrice));
         }
 
         private void loadVehicleImage(Vehicle vehicle) {
@@ -134,13 +109,13 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
                 String imageUrl = vehicle.getVehiclePhotos().get(0);
                 Glide.with(itemView.getContext())
                         .load(imageUrl)
-                        .placeholder(R.drawable.ic_car_placeholder)
-                        .error(R.drawable.ic_car_placeholder)
+                        .placeholder(R.drawable.no_image)
+                        .error(R.drawable.no_image)
                         .apply(RequestOptions.bitmapTransform(new RoundedCorners(8)))
                         .into(imgVehicle);
             } else {
                 // Use placeholder
-                imgVehicle.setImageResource(R.drawable.ic_car_placeholder);
+                imgVehicle.setImageResource(R.drawable.no_image);
             }
         }
 
@@ -158,10 +133,5 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             }
         }
 
-        private String getTimeAgo() {
-            // Mock time ago - in real app this would be calculated from actual search time
-            String[] timeOptions = { "1 hour ago", "2 hours ago", "1 day ago", "2 days ago", "1 week ago" };
-            return timeOptions[(int) (Math.random() * timeOptions.length)];
-        }
     }
 }

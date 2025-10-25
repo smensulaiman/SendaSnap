@@ -22,7 +22,7 @@
             android:background="@android:color/transparent"
             app:title="Task Details"
             app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            app:titleTextAppearance="@style/TextAppearance.Montserrat.HeadlineSmall"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="@color/text_primary"
             app:menu="@menu/task_details_menu" />
@@ -63,7 +63,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="Task Title"
-                        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                        android:textAppearance="@style/TextAppearance.Montserrat.HeadlineMedium"
                         android:textColor="@color/text_primary"
                         android:textStyle="bold" />
 
@@ -74,7 +74,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
                         android:text="Task description goes here"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                        android:textAppearance="@style/TextAppearance.Montserrat.BodyLarge"
                         android:textColor="@color/text_secondary" />
 
                     <!-- Date and Time Row -->
@@ -104,7 +104,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Dec 15, 2024"
-                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
                                 android:textColor="@color/text_primary" />
 
                         </LinearLayout>
@@ -129,7 +129,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="09:00"
-                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
                                 android:textColor="@color/text_primary" />
 
                         </LinearLayout>
@@ -148,7 +148,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="12dp"
                             android:text="Status:"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                            android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
                             android:textColor="@color/text_primary" />
 
                         <com.google.android.material.chip.Chip
