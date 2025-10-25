@@ -73,6 +73,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
             // Create a mock task for demonstration
             task = new Task("1", "Vehicle Inspection", "Complete safety inspection for Toyota Camry",
                     "2024-12-15", "09:00", Task.TaskStatus.RUNNING);
+            task.setAssignee("John Doe"); // Set mock assignee
         }
 
         displayTask();
@@ -93,6 +94,14 @@ public class TaskDetailsActivity extends AppCompatActivity {
         }
 
         binding.textTaskTime.setText(task.getWorkTime());
+
+        // Display assignee
+        String assignee = task.getAssignee();
+        if (assignee == null || assignee.isEmpty()) {
+            binding.textTaskAssignee.setText("Not assigned");
+        } else {
+            binding.textTaskAssignee.setText(assignee);
+        }
 
         // Set status chip
         setStatusChip(task.getStatus());
