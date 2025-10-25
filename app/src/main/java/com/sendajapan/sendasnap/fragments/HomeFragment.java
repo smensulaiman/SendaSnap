@@ -221,16 +221,138 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void loadRecentVehicles() {
-        List<Vehicle> recentVehicles = vehicleCache.getRecentVehicles(10);
+        // Create dummy vehicles based on the JSON response structure
+        List<Vehicle> dummyVehicles = createDummyVehicles();
 
-        if (recentVehicles.isEmpty()) {
+        if (dummyVehicles.isEmpty()) {
             binding.recyclerViewVehicles.setVisibility(View.GONE);
             binding.layoutEmptyState.setVisibility(View.VISIBLE);
         } else {
             binding.recyclerViewVehicles.setVisibility(View.VISIBLE);
             binding.layoutEmptyState.setVisibility(View.GONE);
-            vehicleAdapter.updateVehicles(recentVehicles);
+            vehicleAdapter.updateVehicles(dummyVehicles);
         }
+    }
+
+    private List<Vehicle> createDummyVehicles() {
+        List<Vehicle> vehicles = new java.util.ArrayList<>();
+
+        // Vehicle 1 - Toyota Corolla Axio (from your JSON)
+        Vehicle vehicle1 = new Vehicle();
+        vehicle1.setId("251144");
+        vehicle1.setSerialNumber("7250165");
+        vehicle1.setMake("TOYOTA");
+        vehicle1.setModel("COROLLA AXIO");
+        vehicle1.setChassisModel("NKE165");
+        vehicle1.setCc("1490");
+        vehicle1.setYear("2021");
+        vehicle1.setColor("SILVER");
+        vehicle1.setVehicleBuyDate("2025-10-09");
+        vehicle1.setAuctionShipNumber("2204");
+        vehicle1.setNetWeight("1140");
+        vehicle1.setLength("440");
+        vehicle1.setHeight("146");
+        vehicle1.setWidth("169");
+        vehicle1.setArea("名古屋");
+        vehicle1.setBuyingPrice("1292000");
+        vehicle1.setRiksoCost("5000");
+        vehicle1.setRiksoCompany("EIKO SHOUN");
+        vehicle1.setVehiclePhotos(java.util.Arrays.asList("img_01760044939.png", "img_11760044941.png"));
+        vehicles.add(vehicle1);
+
+        // Vehicle 2 - Honda Civic
+        Vehicle vehicle2 = new Vehicle();
+        vehicle2.setId("251145");
+        vehicle2.setSerialNumber("7250166");
+        vehicle2.setMake("HONDA");
+        vehicle2.setModel("CIVIC");
+        vehicle2.setChassisModel("FK7");
+        vehicle2.setCc("1500");
+        vehicle2.setYear("2020");
+        vehicle2.setColor("WHITE");
+        vehicle2.setVehicleBuyDate("2025-10-08");
+        vehicle2.setAuctionShipNumber("2205");
+        vehicle2.setNetWeight("1200");
+        vehicle2.setLength("450");
+        vehicle2.setHeight("145");
+        vehicle2.setWidth("170");
+        vehicle2.setArea("東京");
+        vehicle2.setBuyingPrice("1350000");
+        vehicle2.setRiksoCost("6000");
+        vehicle2.setRiksoCompany("TOKYO TRANSPORT");
+        vehicle2.setVehiclePhotos(java.util.Arrays.asList("img_01760044940.png", "img_11760044942.png"));
+        vehicles.add(vehicle2);
+
+        // Vehicle 3 - Nissan Skyline
+        Vehicle vehicle3 = new Vehicle();
+        vehicle3.setId("251146");
+        vehicle3.setSerialNumber("7250167");
+        vehicle3.setMake("NISSAN");
+        vehicle3.setModel("SKYLINE");
+        vehicle3.setChassisModel("V36");
+        vehicle3.setCc("3500");
+        vehicle3.setYear("2019");
+        vehicle3.setColor("BLACK");
+        vehicle3.setVehicleBuyDate("2025-10-07");
+        vehicle3.setAuctionShipNumber("2206");
+        vehicle3.setNetWeight("1600");
+        vehicle3.setLength("480");
+        vehicle3.setHeight("150");
+        vehicle3.setWidth("180");
+        vehicle3.setArea("大阪");
+        vehicle3.setBuyingPrice("2500000");
+        vehicle3.setRiksoCost("8000");
+        vehicle3.setRiksoCompany("OSAKA LOGISTICS");
+        vehicle3.setVehiclePhotos(java.util.Arrays.asList("img_01760044943.png", "img_11760044944.png"));
+        vehicles.add(vehicle3);
+
+        // Vehicle 4 - Mazda CX-5
+        Vehicle vehicle4 = new Vehicle();
+        vehicle4.setId("251147");
+        vehicle4.setSerialNumber("7250168");
+        vehicle4.setMake("MAZDA");
+        vehicle4.setModel("CX-5");
+        vehicle4.setChassisModel("KF");
+        vehicle4.setCc("2000");
+        vehicle4.setYear("2022");
+        vehicle4.setColor("RED");
+        vehicle4.setVehicleBuyDate("2025-10-06");
+        vehicle4.setAuctionShipNumber("2207");
+        vehicle4.setNetWeight("1500");
+        vehicle4.setLength("460");
+        vehicle4.setHeight("170");
+        vehicle4.setWidth("185");
+        vehicle4.setArea("横浜");
+        vehicle4.setBuyingPrice("1800000");
+        vehicle4.setRiksoCost("7000");
+        vehicle4.setRiksoCompany("YOKOHAMA SHIPPING");
+        vehicle4.setVehiclePhotos(java.util.Arrays.asList("img_01760044945.png", "img_11760044946.png"));
+        vehicles.add(vehicle4);
+
+        // Vehicle 5 - Subaru Impreza
+        Vehicle vehicle5 = new Vehicle();
+        vehicle5.setId("251148");
+        vehicle5.setSerialNumber("7250169");
+        vehicle5.setMake("SUBARU");
+        vehicle5.setModel("IMPREZA");
+        vehicle5.setChassisModel("GJ");
+        vehicle5.setCc("1600");
+        vehicle5.setYear("2021");
+        vehicle5.setColor("BLUE");
+        vehicle5.setVehicleBuyDate("2025-10-05");
+        vehicle5.setAuctionShipNumber("2208");
+        vehicle5.setNetWeight("1400");
+        vehicle5.setLength("450");
+        vehicle5.setHeight("150");
+        vehicle5.setWidth("175");
+        vehicle5.setArea("福岡");
+        vehicle5.setBuyingPrice("1400000");
+        vehicle5.setRiksoCost("5500");
+        vehicle5.setRiksoCompany("FUKUOKA TRANSPORT");
+        vehicle5.setVehiclePhotos(java.util.Arrays.asList("img_01760044947.png", "img_11760044948.png"));
+        vehicles.add(vehicle5);
+
+        return vehicles;
     }
 
     @Override

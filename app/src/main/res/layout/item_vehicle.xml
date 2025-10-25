@@ -11,7 +11,7 @@
     android:foreground="?selectableItemBackground"
     app:cardCornerRadius="0dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="@color/surface"
+    app:cardBackgroundColor="@color/white"
     app:strokeWidth="1dp"
     app:strokeColor="@color/border_light">
 
@@ -64,7 +64,7 @@
                     android:fontFamily="@font/montserrat_regular"
                     android:maxLines="1"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     tools:text="Toyota Camry" />
 
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
                 android:textColor="@color/text_secondary"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 tools:text="Toyota Camry 2020" />
@@ -109,7 +109,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textColor="@color/text_hint"
-                    android:textSize="11sp"
+                    android:textSize="10sp"
                     android:fontFamily="@font/montserrat_regular"
                     android:maxLines="1"
                     android:ellipsize="end"
@@ -120,7 +120,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/montserrat_regular"
-                    android:textColor="@color/success"
+                    android:textColor="@color/primary"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     tools:text="￥5,000" />
