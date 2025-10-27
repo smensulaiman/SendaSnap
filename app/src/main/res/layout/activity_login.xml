@@ -15,6 +15,7 @@
         android:layout_height="120dp"
         android:layout_marginBottom="40dp"
         android:src="@drawable/logo_senda_snap"
+        android:tint="@color/primary"
         app:layout_constraintBottom_toTopOf="@+id/layoutLoginForm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -42,7 +43,7 @@
             app:boxStrokeColor="@color/primary"
             app:hintTextColor="@color/primary"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/black">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etUsername"
@@ -50,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:text="shiroyama@sendajapan.com"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -67,7 +68,7 @@
             app:endIconTint="@color/primary"
             app:hintTextColor="@color/primary"
             app:startIconDrawable="@drawable/ic_lock"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/black">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
@@ -75,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:text="shiroyama1234"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -87,7 +88,7 @@
             android:layout_marginBottom="24dp"
             android:text="Remember me"
             android:textColor="@color/text_secondary"
-            app:buttonTint="@color/primary" />
+            app:buttonTint="@color/text_black" />
 
         <!-- Login Button -->
         <com.google.android.material.button.MaterialButton
@@ -110,7 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:text="© 2025 SendaSnap. All rights reserved."
-        android:textColor="@color/text_hint"
+        android:textColor="@color/primary"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

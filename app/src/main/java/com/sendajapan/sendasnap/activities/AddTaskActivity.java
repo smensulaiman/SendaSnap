@@ -245,6 +245,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private void showDatePicker() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
+                R.style.CustomDatePickerDialog,
                 (view, year, month, dayOfMonth) -> {
                     selectedDate.set(year, month, dayOfMonth);
                     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
@@ -253,12 +254,23 @@ public class AddTaskActivity extends AppCompatActivity {
                 selectedDate.get(Calendar.YEAR),
                 selectedDate.get(Calendar.MONTH),
                 selectedDate.get(Calendar.DAY_OF_MONTH));
+
+        // Apply primary color to the date picker
+        try {
+            int primaryColor = getResources().getColor(R.color.primary, null);
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(primaryColor);
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(primaryColor);
+        } catch (Exception e) {
+            android.util.Log.e("AddTaskActivity", "Could not apply primary color to date picker", e);
+        }
+
         datePickerDialog.show();
     }
 
     private void showTimePicker() {
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 this,
+                R.style.CustomTimePickerDialog,
                 (view, hourOfDay, minute) -> {
                     selectedTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     selectedTime.set(Calendar.MINUTE, minute);
@@ -268,6 +280,16 @@ public class AddTaskActivity extends AppCompatActivity {
                 selectedTime.get(Calendar.HOUR_OF_DAY),
                 selectedTime.get(Calendar.MINUTE),
                 true);
+
+        // Apply primary color to the time picker
+        try {
+            int primaryColor = getResources().getColor(R.color.primary, null);
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE).setTextColor(primaryColor);
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE).setTextColor(primaryColor);
+        } catch (Exception e) {
+            android.util.Log.e("AddTaskActivity", "Could not apply primary color to time picker", e);
+        }
+
         timePickerDialog.show();
     }
 

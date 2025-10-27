@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary colors -->
-    <color name="primary">#0F1523</color>
-    <color name="primary_dark">#000000</color>
-    <color name="primary_light">#E0F2FE</color>
-    <color name="accent">#FF6B35</color>
+    <color name="primary">#035294</color>
+    <color name="primary_light">#CBDCEC</color>
+    <color name="accent">#3FB4EB</color>
     <color name="on_primary">#FFFFFF</color>
 
+    <color name="primary_dark">#024073</color>
+
     <!-- Background colors -->
-    <color name="background">#EEEAE6</color>
+    <color name="background">#E4EEF8</color>
     <color name="surface">#CCC9C1</color>
-    <color name="surface_variant">#EEEAE6</color>
+    <color name="surface_variant">#FDFDFD</color>
     <color name="surface_container">#FAFAFA</color>
+    <color name="background_blur">#CBDCEC</color>
+    <color name="glass_effect">#80FFFFFF</color>
 
     <!-- Text colors -->
     <color name="on_background">#1A1A1A</color>
     <color name="on_surface">#1A1A1A</color>
     <color name="on_surface_variant">#6B7280</color>
-    <color name="text_primary">#1A1A1A</color>
+
+    <color name="text_primary">#035294</color>
+    <color name="text_black">#0F1523</color>
     <color name="text_secondary">#6B7280</color>
     <color name="text_hint">#9CA3AF</color>
 
@@ -25,7 +30,6 @@
     <color name="error">#EF4444</color>
     <color name="error_light">#FEE2E2</color>
     <color name="success">#10B981</color>
-    <color name="green_accent">#10B981</color>
     <color name="warning">#F59E0B</color>
 
     <!-- Task status colors -->
@@ -39,17 +43,17 @@
     <color name="status_cancelled_light">#FEE2E2</color>
     <color name="badge_new">#FF6B35</color>
 
-    <!-- Background and blur colors -->
-    <color name="background_blur">#F8F9FA</color>
-    <color name="glass_effect">#80FFFFFF</color>
-
     <!-- Border colors -->
     <color name="border">#E5E7EB</color>
     <color name="border_light">#9D9FA0</color>
 
     <!-- Basic colors -->
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="white">#FDFDFD</color>
+    <color name="ic_launcher_background">#FDFDFD</color>
+    
+    <!-- Button colors -->
+    <color name="button_secondary_bg">#CCC9C1</color>
     
     <!-- Futuristic card colors -->
     <color name="futuristic_base_1">#EEEAE6</color>
@@ -62,10 +66,7 @@
     <color name="futuristic_overlay_center">#10ffffff</color>
     <color name="futuristic_overlay_end">#00000000</color>
     
-    <!-- Button colors -->
-    <color name="button_secondary_bg">#CCC9C1</color>
-    
     <!-- Status bar and navigation colors -->
-    <color name="status_bar_color">@color/surface</color>
+    <color name="status_bar_color">@color/primary</color>
     <color name="navigation_bar_color">@color/surface</color>
 </resources>

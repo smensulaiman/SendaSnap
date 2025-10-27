@@ -13,16 +13,15 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityMainBinding;
-import com.sendajapan.sendasnap.fragments.HomeFragment;
-import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.fragments.ChatFragment;
+import com.sendajapan.sendasnap.fragments.HomeFragment;
 import com.sendajapan.sendasnap.fragments.ProfileFragment;
+import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.sendajapan.sendasnap.ui.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 
-import me.ibrahimsn.lib.SmoothBottomBar;
 import me.ibrahimsn.lib.OnItemSelectedListener;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,20 +39,19 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(true);
-            controller.setAppearanceLightNavigationBars(true);
-        }
-
         getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
         getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.navigationView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(0, 0, 0, 0);
             return insets;
         });
+
+        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
+        }
 
         initHelpers();
         setupDrawer();
@@ -114,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragmentContainer, fragment);
         transaction.commit();
 
-        // Set up drawer for the fragment
         setupFragmentDrawer(fragment);
     }
 

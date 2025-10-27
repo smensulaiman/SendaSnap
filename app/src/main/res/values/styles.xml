@@ -5,4 +5,56 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+    
+    <!-- Custom Calendar View Theme -->
+    <style name="CustomCalendarTheme" parent="Theme.AppCompat">
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="android:textColorPrimaryInverse">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorControlHighlight">@color/primary</item>
+        <item name="android:focusedMonthDateColor">@color/white</item>
+        <item name="android:selectedWeekBackgroundColor">@color/primary</item>
+        <item name="android:selectedDateVerticalBar">@color/primary</item>
+    </style>
+    
+    <!-- Custom Calendar View Style -->
+    <style name="CustomCalendarView">
+        <item name="android:selectedDateVerticalBar">@color/primary</item>
+        <item name="android:weekNumberColor">@color/text_secondary</item>
+        <item name="android:weekSeparatorLineColor">@color/border</item>
+        <item name="android:selectedWeekBackgroundColor">@color/primary</item>
+        <item name="android:focusedMonthDateColor">@color/white</item>
+        <item name="android:unfocusedMonthDateColor">@color/text_hint</item>
+        <item name="android:dateTextAppearance">@style/CustomCalendarDateText</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorControlHighlight">@color/primary</item>
+        <item name="android:colorControlActivated">@color/white</item>
+    </style>
+    
+    <!-- Custom Calendar Date Text Style -->
+    <style name="CustomCalendarDateText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHighlight">@color/white</item>
+        <item name="android:textColorLink">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+    
+    <!-- Custom Date Picker Dialog Style -->
+    <style name="CustomDatePickerDialog" parent="Theme.Material3.Light.Dialog">
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorControlHighlight">@color/primary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+    </style>
+    
+    <!-- Custom Time Picker Dialog Style -->
+    <style name="CustomTimePickerDialog" parent="Theme.Material3.Light.Dialog">
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorControlHighlight">@color/primary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+    </style>
 </resources>

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/blur_background"
     tools:context=".fragments.HomeFragment">
 
     <!-- App Bar -->
@@ -13,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:elevation="0dp">
+        app:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -22,7 +21,7 @@
             android:background="@android:color/transparent"
             app:title="SendaSnap"
             app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            app:titleTextColor="@color/text_primary" />
+            app:titleTextColor="@color/text_black" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -50,18 +49,18 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat_semi_bold"
                     android:text="Welcome back, Shiroyama!"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/text_black"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:fontFamily="@font/montserrat_regular"
                     android:text="Search for vehicles by chassis number"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -70,7 +69,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:background="@drawable/futuristic_card_background"
                 app:cardCornerRadius="16dp"
                 app:strokeWidth="0dp">
 
@@ -79,7 +77,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp"
-                    android:background="@drawable/futuristic_card_background">
+                    android:background="@color/primary">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -89,19 +87,19 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_palette"
-                            app:tint="@color/primary" />
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="8dp"
+                            android:src="@drawable/ic_flash_24"
+                            app:tint="@color/white" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_medium"
                             android:text="Quick Actions"
-                            android:textColor="@color/primary"
+                            android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -119,15 +117,15 @@
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:fontFamily="sans-serif-medium"
                             android:text="Quick Search"
+                            android:fontFamily="@font/montserrat_regular"
                             android:textColor="@color/primary"
-                            android:textSize="10sp"
+                            android:textSize="12sp"
                             app:backgroundTint="@color/white"
                             app:cornerRadius="24dp"
                             app:icon="@drawable/ic_search"
                             app:iconGravity="textStart"
-                            app:iconPadding="8dp"
+                            app:iconPadding="4dp"
                             app:iconTint="@color/primary" />
 
                         <com.google.android.material.button.MaterialButton
@@ -136,17 +134,17 @@
                             android:layout_height="48dp"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/montserrat_regular"
                             android:text="View Stats"
                             android:textColor="@color/primary"
-                            android:textSize="10sp"
-                            app:backgroundTint="@color/button_secondary_bg"
+                            android:textSize="12sp"
+                            app:backgroundTint="@color/primary_light"
                             app:strokeColor="@color/primary"
                             app:strokeWidth="2dp"
                             app:cornerRadius="24dp"
                             app:icon="@drawable/ic_stats"
                             app:iconGravity="textStart"
-                            app:iconPadding="8dp"
+                            app:iconPadding="4dp"
                             app:iconTint="@color/primary" />
 
                     </LinearLayout>
@@ -173,9 +171,9 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/montserrat_regular"
                         android:text="Recent Vehicles"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 

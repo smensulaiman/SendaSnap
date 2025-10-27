@@ -89,6 +89,9 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void setupCalendar() {
+        // Apply theme color to calendar selected date
+        applyThemeColorToCalendar();
+
         binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(year, month, dayOfMonth);
@@ -101,6 +104,37 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         Calendar today = Calendar.getInstance();
         selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(today.getTime());
         updateSelectedDateText();
+    }
+
+    private void applyThemeColorToCalendar() {
+        try {
+            // Apply theme color using CalendarView's built-in attributes
+            // The custom theme should handle most of the styling
+            binding.calendarView.setBackgroundColor(getResources().getColor(R.color.white, null));
+
+            // Try to set the accent color programmatically
+            int primaryColor = getResources().getColor(R.color.primary, null);
+
+            // Use reflection to access CalendarView's internal color settings
+            try {
+                java.lang.reflect.Field field = binding.calendarView.getClass().getDeclaredField("mDelegate");
+                field.setAccessible(true);
+                Object delegate = field.get(binding.calendarView);
+
+                if (delegate != null) {
+                    // Try to set the accent color
+                    java.lang.reflect.Method setAccentColor = delegate.getClass().getDeclaredMethod("setAccentColor",
+                            int.class);
+                    setAccentColor.setAccessible(true);
+                    setAccentColor.invoke(delegate, primaryColor);
+                }
+            } catch (Exception reflectionException) {
+                android.util.Log.d("ScheduleFragment", "Reflection approach failed, theme should handle styling");
+            }
+
+        } catch (Exception e) {
+            android.util.Log.e("ScheduleFragment", "Could not apply theme color to calendar", e);
+        }
     }
 
     private void setupFilterChips() {
