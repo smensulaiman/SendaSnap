@@ -56,8 +56,8 @@
             android:paddingEnd="16dp">
 
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_user_24"
                 app:tint="@color/text_primary" />
@@ -69,8 +69,9 @@
                 android:text="Profile"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:gravity="center_vertical" />
+                android:textSize="16sp"
+                android:gravity="bottom"
+                android:paddingTop="2dp"/>
 
             <ImageView
                 android:layout_width="24dp"
@@ -109,8 +110,9 @@
                 android:text="Settings"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:gravity="center_vertical" />
+                android:textSize="16sp"
+                android:gravity="bottom"
+                android:paddingTop="2dp"/>
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -149,8 +151,9 @@
                 android:text="History"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:gravity="center_vertical" />
+                android:textSize="16sp"
+                android:gravity="bottom"
+                android:paddingTop="2dp" />
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -182,6 +185,7 @@
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_logout_24"
                 app:tint="@color/status_cancelled"/>
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -189,8 +193,9 @@
                 android:text="Logout"
                 android:textStyle="bold"
                 android:textColor="@color/status_cancelled"
-                android:textSize="18sp"
-                android:gravity="center_vertical" />
+                android:textSize="16sp"
+                android:gravity="bottom"
+                android:paddingTop="2dp"/>
 
         </LinearLayout>
 
