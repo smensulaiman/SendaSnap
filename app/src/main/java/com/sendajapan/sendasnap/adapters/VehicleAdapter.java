@@ -1,5 +1,11 @@
 package com.sendajapan.sendasnap.adapters;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +21,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.models.Vehicle;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleViewHolder> {
 
@@ -85,22 +88,53 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         }
 
         public void bind(Vehicle vehicle) {
-            // Load vehicle image
             loadVehicleImage(vehicle);
 
-            // Set vehicle name
+            int modelLabelColor = Color.parseColor("#FFF8DC");
+            int chassisLabelColor = Color.parseColor("#E0FFFF");
+
             txtVehicleName.setText(vehicle.getDisplayName());
 
-            // Set make and model
-            txtMakeModel.setText(vehicle.getMake() + " " + vehicle.getModel() + " " + vehicle.getYear());
+            String modelLabel = "Model  ";
+            String chassisLabel = "Chassis";
+            int maxLabelLength = Math.max(modelLabel.length(), chassisLabel.length());
 
-            // Set chassis number
-            txtChassisNumber.setText("Chassis: " + vehicle.getSerialNumber());
+            String paddedModelLabel = String.format("%-" + maxLabelLength + "s", modelLabel);
+            String paddedChassisLabel = String.format("%-" + maxLabelLength + "s", chassisLabel);
 
-            // Set buying price
+            SpannableString modelSpannable = new SpannableString(paddedModelLabel + " " + vehicle.getModel());
+            modelSpannable.setSpan(
+                    new BackgroundColorSpan(modelLabelColor),
+                    0,
+                    paddedModelLabel.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            modelSpannable.setSpan(
+                    new StyleSpan(Typeface.BOLD),
+                    0,
+                    paddedModelLabel.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            txtMakeModel.setText(modelSpannable);
+
+            String chassisValue = vehicle.getChassisModel() + "-" + vehicle.getSerialNumber();
+            SpannableString chassisSpannable = new SpannableString(paddedChassisLabel + " " + chassisValue);
+            chassisSpannable.setSpan(
+                    new BackgroundColorSpan(chassisLabelColor),
+                    0,
+                    paddedChassisLabel.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            chassisSpannable.setSpan(
+                    new StyleSpan(Typeface.BOLD),
+                    0,
+                    paddedChassisLabel.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            txtChassisNumber.setText(chassisSpannable);
+
             String buyingPriceStr = vehicle.getBuyingPrice() != null ? vehicle.getBuyingPrice() : "0";
-            double buyingPrice = parsePrice(buyingPriceStr);
-            txtBuyingPrice.setText("$" + formatPrice(buyingPrice));
+            txtBuyingPrice.setText("￥" + buyingPriceStr);
         }
 
         private void loadVehicleImage(Vehicle vehicle) {
@@ -117,10 +151,6 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
                 // Use placeholder
                 imgVehicle.setImageResource(R.drawable.no_image);
             }
-        }
-
-        private String formatPrice(double price) {
-            return String.format("%,.0f", price);
         }
 
         private double parsePrice(String priceStr) {

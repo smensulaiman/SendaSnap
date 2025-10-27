@@ -298,7 +298,7 @@ public class Vehicle implements Serializable {
 
     // Helper methods
     public String getDisplayName() {
-        return make + " " + model + " (" + year + ")";
+        return make + " " + " (" + year + ")";
     }
 
     public String getDimensions() {
