@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
+    app:strokeColor="@color/warning"
+    app:strokeWidth="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+
+        <ImageView
+            android:id="@+id/imgPendingPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@drawable/vehicle_image_placeholder" />
+
+        <!-- Pending indicator -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_margin="4dp"
+            android:background="@drawable/badge_8"
+            android:backgroundTint="@color/warning"
+            android:fontFamily="@font/montserrat_semi_bold"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:text="PENDING"
+            android:textColor="@color/white"
+            android:textSize="8sp" />
+
+        <!-- Delete button -->
+        <ImageView
+            android:id="@+id/btnDeletePending"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="4dp"
+            android:background="@drawable/badge_8"
+            android:backgroundTint="@color/error"
+            android:padding="4dp"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/white" />
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>

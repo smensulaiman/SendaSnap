@@ -5,10 +5,9 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/professional_gradient"
-    android:clipToOutline="true"
     android:elevation="12dp"
     android:fitsSystemWindows="true"
+    android:background="@drawable/professional_gradient"
     tools:context=".activities.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

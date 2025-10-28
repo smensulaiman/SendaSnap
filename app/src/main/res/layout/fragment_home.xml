@@ -192,7 +192,7 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/montserrat_light"
+                        android:fontFamily="@font/montserrat_bold"
                         android:text="View All"
                         android:textSize="12sp"
                         app:backgroundTint="@android:color/transparent"
