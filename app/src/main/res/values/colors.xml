@@ -2,11 +2,16 @@
 <resources>
     <!-- Primary colors -->
     <color name="primary">#035294</color>
-    <color name="primary_light">#CBDCEC</color>
+    <color name="primary_varient">#BF035294</color>
+
+    <color name="primary_light">#E6F0FB</color>
+    <color name="primary_medium">#3F7CC7</color>
+    <color name="primary_dark">#2C5FA2</color>
+    <color name="primary_variant">#BF035294</color>
+
     <color name="accent">#3FB4EB</color>
     <color name="on_primary">#FFFFFF</color>
 
-    <color name="primary_dark">#024073</color>
 
     <!-- Background colors -->
     <color name="background">#E4EEF8</color>
@@ -26,22 +31,35 @@
     <color name="text_secondary">#6B7280</color>
     <color name="text_hint">#9CA3AF</color>
 
-    <!-- Status colors -->
-    <color name="error">#EF4444</color>
-    <color name="error_light">#FEE2E2</color>
-    <color name="success">#10B981</color>
-    <color name="warning">#F59E0B</color>
+    <color name="error">#F78A8A</color>
+    <color name="error_light">#FDE9E9</color>
+    <color name="error_medium">#F56C6C</color>
+    <color name="error_dark">#D94848</color>
+
+    <color name="success">#6FD6A4</color>
+    <color name="success_light">#E8F9F1</color>
+    <color name="success_medium">#49C58A</color>
+    <color name="success_dark">#2FA06F</color>
+
+    <color name="warning">#FFD272</color>
+    <color name="warning_light">#FFF7E1</color>
+    <color name="warning_medium">#FBC33F</color>
+    <color name="warning_dark">#D8A62A</color>
 
     <!-- Task status colors -->
-    <color name="status_running">#3B82F6</color>
-    <color name="status_running_light">#DBEAFE</color>
-    <color name="status_pending">#F59E0B</color>
-    <color name="status_pending_light">#FEF3C7</color>
-    <color name="status_completed">#10B981</color>
-    <color name="status_completed_light">#D1FAE5</color>
-    <color name="status_cancelled">#EF4444</color>
-    <color name="status_cancelled_light">#FEE2E2</color>
-    <color name="badge_new">#FF6B35</color>
+    <color name="status_running">#4A90E2</color>
+    <color name="status_running_light">#E6F0FB</color>
+
+    <color name="status_pending">#F5B93A</color>
+    <color name="status_pending_light">#FFF7E1</color>
+
+    <color name="status_completed">#34D399</color>
+    <color name="status_completed_light">#E6F8F1</color>
+
+    <color name="status_cancelled">#F87171</color>
+    <color name="status_cancelled_light">#FDECEC</color>
+
+    <color name="badge_new">#FF8650</color>
 
     <!-- Border colors -->
     <color name="border">#E5E7EB</color>

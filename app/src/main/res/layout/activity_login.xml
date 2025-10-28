@@ -8,6 +8,14 @@
     android:background="@drawable/professional_gradient"
     tools:context=".activities.auth.LoginActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/wave"
+        android:scaleType="fitEnd"
+        android:background="@color/white"
+        android:alpha="0.25"/>
+
     <!-- Logo -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imgLogo"
@@ -51,7 +59,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:text="shiroyama@sendajapan.com"
-                android:textColor="@color/text_black" />
+                android:textColor="@color/text_black"
+                android:textStyle="bold"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

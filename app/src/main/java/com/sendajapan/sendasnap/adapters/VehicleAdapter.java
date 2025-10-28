@@ -1,5 +1,6 @@
 package com.sendajapan.sendasnap.adapters;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.SpannableString;
@@ -20,6 +21,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.models.Vehicle;
+import com.sendajapan.sendasnap.utils.CurrencyFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,54 +89,16 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             });
         }
 
+        @SuppressLint("SetTextI18n")
         public void bind(Vehicle vehicle) {
+
             loadVehicleImage(vehicle);
 
-            int modelLabelColor = Color.parseColor("#FFF8DC");
-            int chassisLabelColor = Color.parseColor("#E0FFFF");
-
             txtVehicleName.setText(vehicle.getDisplayName());
+            txtMakeModel.setText(vehicle.getModel());
+            txtChassisNumber.setText(vehicle.getChassisModel() + "-" + vehicle.getSerialNumber());
 
-            String modelLabel = "Model  ";
-            String chassisLabel = "Chassis";
-            int maxLabelLength = Math.max(modelLabel.length(), chassisLabel.length());
-
-            String paddedModelLabel = String.format("%-" + maxLabelLength + "s", modelLabel);
-            String paddedChassisLabel = String.format("%-" + maxLabelLength + "s", chassisLabel);
-
-            SpannableString modelSpannable = new SpannableString(paddedModelLabel + " " + vehicle.getModel());
-            modelSpannable.setSpan(
-                    new BackgroundColorSpan(modelLabelColor),
-                    0,
-                    paddedModelLabel.length(),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-            modelSpannable.setSpan(
-                    new StyleSpan(Typeface.BOLD),
-                    0,
-                    paddedModelLabel.length(),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-            txtMakeModel.setText(modelSpannable);
-
-            String chassisValue = vehicle.getChassisModel() + "-" + vehicle.getSerialNumber();
-            SpannableString chassisSpannable = new SpannableString(paddedChassisLabel + " " + chassisValue);
-            chassisSpannable.setSpan(
-                    new BackgroundColorSpan(chassisLabelColor),
-                    0,
-                    paddedChassisLabel.length(),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-            chassisSpannable.setSpan(
-                    new StyleSpan(Typeface.BOLD),
-                    0,
-                    paddedChassisLabel.length(),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-            txtChassisNumber.setText(chassisSpannable);
-
-            String buyingPriceStr = vehicle.getBuyingPrice() != null ? vehicle.getBuyingPrice() : "0";
-            txtBuyingPrice.setText("￥" + buyingPriceStr);
+            txtBuyingPrice.setText("￥" + CurrencyFormatter.formatBuyingPrice(vehicle.getBuyingPrice()));
         }
 
         private void loadVehicleImage(Vehicle vehicle) {
@@ -143,13 +107,13 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
                 String imageUrl = vehicle.getVehiclePhotos().get(0);
                 Glide.with(itemView.getContext())
                         .load(imageUrl)
-                        .placeholder(R.drawable.no_image)
-                        .error(R.drawable.no_image)
+                        .placeholder(R.drawable.car_placeholder)
+                        .error(R.drawable.car_placeholder)
                         .apply(RequestOptions.bitmapTransform(new RoundedCorners(8)))
                         .into(imgVehicle);
             } else {
                 // Use placeholder
-                imgVehicle.setImageResource(R.drawable.no_image);
+                imgVehicle.setImageResource(R.drawable.car_placeholder);
             }
         }
 

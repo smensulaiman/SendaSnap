@@ -1,5 +1,6 @@
 package com.sendajapan.sendasnap.activities;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -41,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
         getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getWindow().setBackgroundBlurRadius(30);
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.navigationView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
