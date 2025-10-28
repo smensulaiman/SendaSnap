@@ -35,7 +35,7 @@
             android:paddingVertical="2dp"
             android:text="PENDING"
             android:textColor="@color/white"
-            android:textSize="8sp" />
+            android:textSize="@dimen/text_size_xxsmall" />
 
         <!-- Delete button -->
         <ImageView

@@ -23,7 +23,7 @@
         android:layout_weight="1"
         android:text="Item Title"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="normal" />
 
     <ImageView

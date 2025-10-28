@@ -83,7 +83,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Clear All"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_size_small"
                         app:backgroundTint="@color/error"
                         app:cornerRadius="20dp"
                         app:icon="@drawable/ic_delete"
@@ -124,7 +124,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="No search history"
                     android:textColor="@color/text_secondary"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
                 <TextView
@@ -132,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:text="Your searched vehicles will appear here"
                     android:textColor="@color/text_hint"
-                    android:textSize="14sp" />
+                    android:textSize="@dimen/text_size_medium" />
 
             </LinearLayout>
 

@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:text="Search Vehicle"
         android:textColor="@color/text_primary"
-        android:textSize="22sp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
         android:fontFamily="@font/montserrat"
         android:layout_marginBottom="8dp" />
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:text="Enter a chassis number to find vehicle details."
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_size_medium"
         android:fontFamily="sans-serif"
         android:layout_marginBottom="20dp" />
 
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_large"
             android:textColor="@color/text_primary"
             android:fontFamily="@font/montserrat_regular" />
 
@@ -62,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Search"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
         android:fontFamily="@font/montserrat"
         android:layout_marginBottom="8dp"

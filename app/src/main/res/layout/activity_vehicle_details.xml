@@ -55,7 +55,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="Basic Information"
                     android:textColor="@color/text_black"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold"
                     android:fontFamily="@font/montserrat_semi_bold"  />
 
@@ -72,7 +72,7 @@
                         android:text="Make:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtMake"
@@ -82,7 +82,7 @@
                         android:text="Toyota"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp"/>
+                        android:textSize="@dimen/text_size_small"/>
 
                 </LinearLayout>
 
@@ -99,7 +99,7 @@
                         android:text="Model:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtModel"
@@ -109,7 +109,7 @@
                         android:text="Camry"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -126,7 +126,7 @@
                         android:text="Year:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtYear"
@@ -136,7 +136,7 @@
                         android:text="2020"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -153,7 +153,7 @@
                         android:text="Color:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtColor"
@@ -163,7 +163,7 @@
                         android:text="White"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -179,7 +179,7 @@
                         android:text="Chassis:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp"/>
+                        android:textSize="@dimen/text_size_small"/>
 
                     <TextView
                         android:id="@+id/txtChassis"
@@ -189,7 +189,7 @@
                         android:text="ABC123456"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -207,7 +207,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="Purchase Information"
                     android:textColor="@color/text_black"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold"
                     android:fontFamily="@font/montserrat_semi_bold"  />
 
@@ -224,7 +224,7 @@
                         android:text="Buy Date:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtBuyDate"
@@ -234,7 +234,7 @@
                         android:text="2024-01-15"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -251,7 +251,7 @@
                         android:text="Price:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtPrice"
@@ -261,7 +261,7 @@
                         android:text="￥25,000"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -277,7 +277,7 @@
                         android:text="Auction Ship:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtAuctionShip"
@@ -287,7 +287,7 @@
                         android:text="AUC001"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -306,7 +306,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="Shipping Information"
                     android:textColor="@color/text_black"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold"
                     android:fontFamily="@font/montserrat_semi_bold" />
 
@@ -323,7 +323,7 @@
                         android:text="Expected Yard Date:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtExpectedYardDate"
@@ -333,7 +333,7 @@
                         android:text="2024-02-01"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -350,7 +350,7 @@
                         android:text="Rikso From:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtRiksoFrom"
@@ -360,7 +360,7 @@
                         android:text="Tokyo"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -377,7 +377,7 @@
                         android:text="Rikso To:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtRiksoTo"
@@ -387,7 +387,7 @@
                         android:text="Osaka"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -403,7 +403,7 @@
                         android:text="Rikso Cost:"
                         android:textColor="@color/text_black"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                     <TextView
                         android:id="@+id/txtRiksoCost"
@@ -413,7 +413,7 @@
                         android:text="￥500"
                         android:textColor="@color/text_primary"
                         android:fontFamily="@font/montserrat_semi_bold"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 
@@ -439,7 +439,7 @@
                         android:layout_marginBottom="12dp"
                         android:text="Vehicle Photos"
                         android:textColor="@color/text_black"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_semi_bold" />
 
@@ -472,7 +472,7 @@
                         android:layout_marginBottom="12dp"
                         android:text="Add More Photos"
                         android:textColor="@color/text_black"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_semi_bold" />
 

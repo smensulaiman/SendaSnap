@@ -120,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Login"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             app:backgroundTint="@color/primary"
             app:cornerRadius="28dp"
@@ -136,7 +136,7 @@
         android:layout_marginBottom="32dp"
         android:text="© 2025 SendaSnap. All rights reserved."
         android:textColor="@color/primary"
-        android:textSize="12sp"
+        android:textSize="@dimen/text_size_small"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

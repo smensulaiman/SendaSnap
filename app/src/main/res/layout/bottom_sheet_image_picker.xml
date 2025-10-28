@@ -13,7 +13,7 @@
         android:layout_marginBottom="16dp"
         android:text="Add Vehicle Photos"
         android:textColor="@color/text_black"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
         android:fontFamily="@font/montserrat_semi_bold" />
 
@@ -48,7 +48,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Camera"
                 android:textColor="@color/text_black"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_medium"
                 android:fontFamily="@font/montserrat_semi_bold" />
 
         </LinearLayout>
@@ -78,7 +78,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Gallery"
                 android:textColor="@color/text_black"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_medium"
                 android:fontFamily="@font/montserrat_semi_bold" />
 
         </LinearLayout>

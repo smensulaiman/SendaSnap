@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -50,7 +51,7 @@
                     android:fontFamily="@font/montserrat_semi_bold"
                     android:text="Welcome back, Shiroyama san!"
                     android:textColor="@color/text_black"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
                 <TextView
@@ -60,7 +61,7 @@
                     android:fontFamily="@font/montserrat_regular"
                     android:text="Search for vehicles by chassis number"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/text_size_small" />
 
             </LinearLayout>
 
@@ -110,7 +111,7 @@
                             android:fontFamily="@font/montserrat_medium"
                             android:text="Quick Actions"
                             android:textColor="@color/white"
-                            android:textSize="18sp"
+                            android:textSize="@dimen/text_size_large"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -128,15 +129,11 @@
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
                             android:text="Quick Search"
-                            android:fontFamily="@font/montserrat_regular"
-                            android:textColor="@color/primary"
-                            android:textSize="12sp"
+                            android:fontFamily="@font/montserrat_bold"
+                            android:textColor="@color/text_black"
+                            android:textSize="@dimen/text_size_small"
                             app:backgroundTint="@color/white"
-                            app:cornerRadius="24dp"
-                            app:icon="@drawable/ic_search"
-                            app:iconGravity="textStart"
-                            app:iconPadding="4dp"
-                            app:iconTint="@color/primary" />
+                            app:cornerRadius="24dp"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnViewStats"
@@ -144,18 +141,14 @@
                             android:layout_height="48dp"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_bold"
                             android:text="View Stats"
                             android:textColor="@color/primary"
-                            android:textSize="12sp"
-                            app:backgroundTint="@color/primary_light"
-                            app:strokeColor="@color/primary"
+                            android:textSize="@dimen/text_size_small"
+                            app:backgroundTint="@color/white"
+                            app:strokeColor="@color/status_running"
                             app:strokeWidth="2dp"
-                            app:cornerRadius="24dp"
-                            app:icon="@drawable/ic_stats"
-                            app:iconGravity="textStart"
-                            app:iconPadding="4dp"
-                            app:iconTint="@color/primary" />
+                            app:cornerRadius="24dp"/>
 
                     </LinearLayout>
 
@@ -184,7 +177,7 @@
                         android:fontFamily="@font/montserrat_regular"
                         android:text="Recent Vehicles"
                         android:textColor="@color/text_black"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
@@ -194,7 +187,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/montserrat_bold"
                         android:text="View All"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_size_small"
                         app:backgroundTint="@android:color/transparent"
                         app:rippleColor="@color/primary_light" />
 
@@ -234,7 +227,7 @@
                         android:fontFamily="sans-serif-medium"
                         android:text="No vehicles found"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold" />
 
                     <TextView
@@ -243,7 +236,7 @@
                         android:fontFamily="@font/montserrat_regular"
                         android:text="Search for a vehicle to get started"
                         android:textColor="@color/text_hint"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/text_size_small" />
 
                 </LinearLayout>
 

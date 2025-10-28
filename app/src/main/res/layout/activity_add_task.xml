@@ -4,30 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/surface_variant">
+    android:elevation="12dp"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/professional_gradient">
 
-    <!-- Enhanced Toolbar with Professional Styling -->
+    <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface"
-        app:elevation="8dp"
-        app:liftOnScroll="true">
+        android:background="@android:color/transparent"
+        app:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/surface"
-            app:title="Create New Schedule"
-            app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Montserrat.TitleMedium"
-            app:titleCentered="false"
+            android:background="@android:color/transparent"
+            app:title="Vehicle Details"
+            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="@color/primary"
-            app:menu="@menu/task_details_menu"
-            app:contentInsetStartWithNavigation="0dp" />
+            app:navigationIconTint="@color/black"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -72,8 +69,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="textCapSentences"
                         android:maxLines="1"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_primary"/>
+                        android:textSize="@dimen/text_size_small"
+                        android:fontFamily="@font/montserrat_regular"
+                        android:textColor="@color/text_black"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,8 +95,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="140dp"
                         android:inputType="textCapSentences|textMultiLine"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_size_small"
+                        android:fontFamily="@font/montserrat_regular"
+                        android:textColor="@color/text_black"
                         android:gravity="top"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -125,7 +124,7 @@
                         app:boxStrokeWidthFocused="2dp"
                         app:hintTextColor="@color/text_secondary"
                         app:startIconDrawable="@drawable/ic_calendar_outlined"
-                        app:startIconTint="@color/primary"
+                        app:startIconTint="@color/black"
                         app:startIconContentDescription="Select date"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -136,8 +135,9 @@
                             android:clickable="true"
                             android:focusable="false"
                             android:inputType="none"
-                            android:textSize="12sp"
-                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:fontFamily="@font/montserrat_regular"
+                            android:textColor="@color/text_black"
                             android:padding="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -151,7 +151,7 @@
                         app:boxStrokeWidthFocused="2dp"
                         app:hintTextColor="@color/text_secondary"
                         app:startIconDrawable="@drawable/ic_time"
-                        app:startIconTint="@color/primary"
+                        app:startIconTint="@color/black"
                         app:startIconContentDescription="Select time"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -162,8 +162,9 @@
                             android:clickable="true"
                             android:focusable="false"
                             android:inputType="none"
-                            android:textSize="12sp"
-                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:fontFamily="@font/montserrat_regular"
+                            android:textColor="@color/text_black"
                             android:padding="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -176,7 +177,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="@dimen/dimen_16"
-                android:background="@color/primary_light" />
+                android:background="@color/black" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -195,10 +196,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:text="Task Assignee"
-                        android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.01" />
+                        android:fontFamily="@font/montserrat_semi_bold"
+                        android:textColor="@color/text_black"
+                        android:textStyle="bold"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -211,7 +211,7 @@
                         app:endIconTint="@color/primary"
                         app:hintTextColor="@color/text_secondary"
                         app:startIconDrawable="@drawable/ic_profile_outlined"
-                        app:startIconTint="@color/primary"
+                        app:startIconTint="@color/black"
                         app:startIconContentDescription="Select assignee"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -222,8 +222,9 @@
                             android:clickable="true"
                             android:focusable="false"
                             android:inputType="none"
-                            android:textSize="12sp"
-                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:fontFamily="@font/montserrat_regular"
+                            android:textColor="@color/text_black"
                             android:padding="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -234,17 +235,18 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:background="@drawable/badge_12"
+                    android:padding="@dimen/dimen_12"
+                    android:backgroundTint="@color/white">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="Task Status"
-                        android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.01" />
+                        android:fontFamily="@font/montserrat_semi_bold"
+                        android:textColor="@color/text_black"/>
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/chipGroupStatus"
@@ -262,7 +264,7 @@
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="In Progress"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"
                             android:minHeight="48dp"
                             app:chipBackgroundColor="@color/status_running_light"
@@ -276,7 +278,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Pending"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"
                             android:minHeight="48dp"
                             app:chipBackgroundColor="@color/status_pending_light"
@@ -290,7 +292,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Completed"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"
                             android:minHeight="48dp"
                             app:chipBackgroundColor="@color/status_completed_light"
@@ -304,7 +306,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Cancelled"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"
                             android:minHeight="48dp"
                             app:chipBackgroundColor="@color/status_cancelled_light"
@@ -322,28 +324,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="@dimen/dimen_16"
-                android:background="@color/primary_light" />
+                android:background="@color/black" />
 
             <!-- File Attachments Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@drawable/badge_12"
+                android:padding="16dp"
+                android:backgroundTint="@color/success_light">
 
                 <!-- Section Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_attach_file"
-                        app:tint="@color/primary" />
+                        app:tint="@color/success_dark" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -355,18 +359,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="File Attachments"
-                            android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
-                            android:textColor="@color/text_primary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/success_dark"
+                            android:textSize="@dimen/text_size_small" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Add files, images, or documents to this task"
-                            android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
+                            android:fontFamily="@font/montserrat_regular"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </LinearLayout>
 
@@ -376,7 +379,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Add File"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_size_small"
                         android:textColor="@color/primary"
                         android:textStyle="bold"
                         app:icon="@drawable/ic_add"
@@ -424,7 +427,7 @@
                                 android:text="document.pdf"
                                 android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
                                 android:textColor="@color/text_primary"
-                                android:textSize="12sp"
+                                android:textSize="@dimen/text_size_small"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -434,7 +437,7 @@
                                 android:text="2.4 MB"
                                 android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="10sp" />
+                                android:textSize="@dimen/text_size_xsmall" />
 
                         </LinearLayout>
 
@@ -444,7 +447,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Remove"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_size_xsmall"
                             android:textColor="@color/error"
                             app:icon="@drawable/ic_delete"
                             app:iconSize="14dp"
@@ -459,12 +462,11 @@
                     android:id="@+id/textNoFiles"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_8"
-                    android:padding="16dp"
+                    android:layout_marginTop="@dimen/dimen_12"
                     android:text="No files attached yet"
-                    android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textColor="@color/error_dark"
+                            android:textSize="@dimen/text_size_small"
                     android:gravity="center"/>
 
             </LinearLayout>

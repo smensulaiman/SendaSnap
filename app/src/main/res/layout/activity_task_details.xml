@@ -66,7 +66,7 @@
                     android:textAppearance="@style/TextAppearance.Montserrat.HeadlineMedium"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/text_size_large" />
 
                 <!-- Task Description -->
                 <TextView
@@ -77,7 +77,7 @@
                     android:text="Task description goes here"
                     android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/text_size_small" />
 
             </LinearLayout>
 
@@ -115,7 +115,7 @@
                             android:text="Due Date"
                             android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_xsmall" />
 
                         <TextView
                             android:id="@+id/textTaskDate"
@@ -124,7 +124,7 @@
                             android:text="Dec 15, 2024"
                             android:textAppearance="@style/TextAppearance.Montserrat.BodyLarge"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -159,7 +159,7 @@
                             android:text="Due Time"
                             android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_xsmall" />
 
                         <TextView
                             android:id="@+id/textTaskTime"
@@ -168,7 +168,7 @@
                             android:text="09:00"
                             android:textAppearance="@style/TextAppearance.Montserrat.BodyLarge"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -216,7 +216,7 @@
                             android:text="Assignee"
                             android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_xsmall" />
 
                         <TextView
                             android:id="@+id/textTaskAssignee"
@@ -225,7 +225,7 @@
                             android:text="John Doe"
                             android:textAppearance="@style/TextAppearance.Montserrat.BodyLarge"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -260,7 +260,7 @@
                             android:text="Status"
                             android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_xsmall" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipTaskStatus"
@@ -268,7 +268,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Running"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:textStyle="bold"
                             android:minHeight="32dp"
                             app:chipBackgroundColor="@color/status_running_light"
@@ -284,7 +284,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Change"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_size_small"
                         android:textColor="@color/primary" />
 
                 </LinearLayout>
@@ -334,7 +334,7 @@
                             android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
                             android:textColor="@color/text_primary"
                             android:textStyle="bold"
-                            android:textSize="12sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                         <TextView
                             android:id="@+id/textAttachmentCount"
@@ -343,7 +343,7 @@
                             android:text="2 files attached"
                             android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
                             android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_xsmall" />
 
                     </LinearLayout>
 
@@ -385,7 +385,7 @@
                     android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                     android:textStyle="bold"
                     android:textColor="@color/primary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_size_small"
                     android:minWidth="100dp"
                     app:strokeColor="@color/primary"
                     app:strokeWidth="1dp"
@@ -400,7 +400,7 @@
                     android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                     android:textStyle="bold"
                     android:textColor="@color/error"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_size_small"
                     android:minWidth="100dp"
                     app:strokeColor="@color/error"
                     app:strokeWidth="1dp"

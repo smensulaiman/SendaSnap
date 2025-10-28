@@ -38,6 +38,7 @@
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,36 +50,42 @@
         <activity
             android:name=".activities.auth.LoginActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
         <!-- Main Activity -->
         <activity
             android:name=".activities.MainActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
         <!-- Vehicle Details Activity -->
         <activity
             android:name=".activities.VehicleDetailsActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
         <!-- History Activity -->
         <activity
             android:name=".activities.HistoryActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
         <!-- Task Details Activity -->
         <activity
             android:name=".activities.TaskDetailsActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
         <!-- Add Task Activity -->
         <activity
             android:name=".activities.AddTaskActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap"
             android:windowSoftInputMode="adjustResize" />
 

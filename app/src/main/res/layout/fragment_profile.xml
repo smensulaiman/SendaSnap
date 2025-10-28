@@ -76,7 +76,7 @@
                         android:layout_marginBottom="4dp"
                         android:text="Shiroyama"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-medium" />
 
@@ -87,7 +87,7 @@
                         android:layout_height="wrap_content"
                         android:text="shiroyama@sendasnap.com"
                         android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
+                        android:textSize="@dimen/text_size_xsmall" />
 
                 </LinearLayout>
 
@@ -108,7 +108,7 @@
                 android:layout_marginBottom="12dp"
                 android:text="Settings"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_large"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium" />
 
@@ -138,14 +138,14 @@
                         android:layout_height="wrap_content"
                         android:text="Notifications"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/text_size_medium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Push notifications"
                         android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
+                        android:textSize="@dimen/text_size_xsmall" />
 
                 </LinearLayout>
 
@@ -184,14 +184,14 @@
                         android:layout_height="wrap_content"
                         android:text="Haptic Feedback"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/text_size_medium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Vibration on interactions"
                         android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
+                        android:textSize="@dimen/text_size_xsmall" />
 
                 </LinearLayout>
 
@@ -231,14 +231,14 @@
                         android:layout_height="wrap_content"
                         android:text="Search History"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/text_size_medium" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="View vehicle search history"
                         android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
+                        android:textSize="@dimen/text_size_xsmall" />
 
                 </LinearLayout>
 

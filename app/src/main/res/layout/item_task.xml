@@ -2,174 +2,179 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="140dp"
     android:layout_marginBottom="8dp"
-    app:cardBackgroundColor="@color/white"
     android:clickable="true"
     android:focusable="true"
-    app:cardCornerRadius="0dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
         android:padding="16dp">
 
         <!-- Status Indicator Bar -->
         <View
             android:id="@+id/statusIndicator"
             android:layout_width="4dp"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_marginEnd="12dp"
-            android:background="@color/status_pending" />
+            android:background="@color/status_pending"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Task Content -->
-        <LinearLayout
+        <!-- Task Title -->
+        <TextView
+            android:id="@+id/textTaskTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:text="Task Title"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_medium"
+            android:textStyle="bold"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/statusIndicator"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/dimen_8"/>
 
-            <!-- Task Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+        <!-- NEW Badge -->
+        <TextView
+            android:id="@+id/badgeNew"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/badge_8"
+            android:backgroundTint="@color/primary"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="NEW"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_xxsmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="invisible"/>
 
-                <TextView
-                    android:id="@+id/textTaskTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Task Title"
-                    android:textAppearance="@style/TextAppearance.Montserrat.TitleMedium"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+        <!-- Task Description -->
+        <TextView
+            android:id="@+id/textTaskDescription"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="Task description goes here\ndfjhdfjhdsjkhf\nhdsafkjdshfkdj\nkjdhfjksdhfkhds"
+            android:textColor="@color/text_black"
+            android:textSize="@dimen/text_size_small"
+            android:fontFamily="@font/montserrat_semi_bold"
+            app:layout_constraintBottom_toTopOf="@+id/layoutTime"
+            app:layout_constraintEnd_toStartOf="@id/imgRightArrow"
+            app:layout_constraintStart_toStartOf="@+id/textTaskTitle"
+            app:layout_constraintTop_toBottomOf="@id/textTaskTitle" />
 
-                <!-- NEW Badge -->
-                <TextView
-                    android:id="@+id/badgeNew"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/badge_new_background"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:text="NEW"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
+        <!-- Time LinearLayout -->
+        <LinearLayout
+            android:id="@+id/layoutTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
 
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/imgTimeIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/ic_time"
+                app:tint="@color/text_hint" />
 
-            <!-- Task Description -->
             <TextView
-                android:id="@+id/textTaskDescription"
-                android:layout_width="match_parent"
+                android:id="@+id/textTaskTime"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Task description goes here"
-                android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
-                android:textColor="@color/text_secondary"
-                android:maxLines="2"
-                android:ellipsize="end" />
-
-            <!-- Task Footer -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <!-- Time -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="4dp"
-                        android:src="@drawable/ic_time"
-                        app:tint="@color/text_hint" />
-
-                    <TextView
-                        android:id="@+id/textTaskTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="09:00"
-                        android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                        android:textColor="@color/text_hint" />
-
-                </LinearLayout>
-
-                <!-- Assignee -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="4dp"
-                        android:src="@drawable/ic_person"
-                        app:tint="@color/text_hint" />
-
-                    <TextView
-                        android:id="@+id/textTaskAssignee"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="John Doe"
-                        android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                        android:textColor="@color/text_hint" />
-
-                </LinearLayout>
-
-                <!-- File Attachment Icon -->
-                <ImageView
-                    android:id="@+id/imgAttachment"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginStart="8dp"
-                    android:src="@drawable/ic_attach_file"
-                    android:visibility="gone"
-                    app:tint="@color/primary" />
-
-                <!-- Status Chip -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipTaskStatus"
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Pending"
-                    app:chipBackgroundColor="@color/status_pending_light"
-                    app:chipStrokeColor="@color/status_pending"
-                    app:chipStrokeWidth="1dp" />
-
-            </LinearLayout>
+                android:text="09:00"
+                android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
+                android:textColor="@color/text_hint" />
 
         </LinearLayout>
+
+        <!-- Assignee LinearLayout -->
+        <LinearLayout
+            android:id="@+id/layoutAssignee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toTopOf="@id/layoutTime"
+            app:layout_constraintBottom_toBottomOf="@id/layoutTime"
+            app:layout_constraintStart_toEndOf="@id/layoutTime">
+
+            <ImageView
+                android:id="@+id/imgAssigneeIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/ic_person"
+                app:tint="@color/text_hint" />
+
+            <TextView
+                android:id="@+id/textTaskAssignee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="John Doe"
+                android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
+                android:textColor="@color/text_hint" />
+
+        </LinearLayout>
+
+        <!-- File Attachment Icon -->
+        <ImageView
+            android:id="@+id/imgAttachment"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_attach_file"
+            android:visibility="gone"
+            app:tint="@color/primary"
+            app:layout_constraintTop_toTopOf="@id/layoutTime"
+            app:layout_constraintBottom_toBottomOf="@id/layoutTime"
+            app:layout_constraintStart_toEndOf="@id/layoutAssignee" />
+
+        <!-- Status Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTaskStatus"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending"
+            android:textSize="@dimen/text_size_small"
+            app:chipCornerRadius="@dimen/dimen_12"
+            android:fontFamily="@font/montserrat_bold"
+            app:chipBackgroundColor="@color/status_pending_light"
+            app:chipStrokeColor="@color/status_pending"
+            app:chipStrokeWidth="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/imgRightArrow"
+            app:layout_constraintTop_toBottomOf="@+id/imgRightArrow" />
 
         <!-- Chevron -->
         <ImageView
             android:id="@+id/imgRightArrow"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="8dp"
             android:src="@drawable/ic_chevron_right"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/text_hint" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>
