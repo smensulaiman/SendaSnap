@@ -19,7 +19,6 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityTaskDetailsBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
-import com.sendajapan.sendasnap.activities.AddTaskActivity;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 

@@ -8,8 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,10 +20,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.PendingImageAdapter;
 import com.sendajapan.sendasnap.adapters.VehicleImageGridAdapter;
@@ -40,10 +36,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.MultipartBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import www.sanju.motiontoast.MotionToast;
 
 public class VehicleDetailsActivity extends AppCompatActivity {
@@ -53,7 +45,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private VehicleImageGridAdapter vehicleImageAdapter;
     private PendingImageAdapter pendingImageAdapter;
     private HapticFeedbackHelper hapticHelper;
-    private List<String> pendingImagePaths = new ArrayList<>();
+    private final List<String> pendingImagePaths = new ArrayList<>();
     private ApiService apiService;
     private ActivityResultLauncher<Uri> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;

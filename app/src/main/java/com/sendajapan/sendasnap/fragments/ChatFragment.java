@@ -9,9 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.FragmentChatBinding;
-import com.sendajapan.sendasnap.ui.DrawerController;
 
 public class ChatFragment extends Fragment {
 

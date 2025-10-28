@@ -3,6 +3,7 @@ package com.sendajapan.sendasnap.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +19,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
-import com.sendajapan.sendasnap.activities.MainActivity;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
+@SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
 
     private static final int SPLASH_DELAY = 2000; // 2 seconds

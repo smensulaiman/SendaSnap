@@ -11,9 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHistoryBinding;
@@ -22,9 +20,9 @@ import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.VehicleCache;
 
-import www.sanju.motiontoast.MotionToast;
-
 import java.util.List;
+
+import www.sanju.motiontoast.MotionToast;
 
 public class HistoryFragment extends Fragment implements VehicleAdapter.OnVehicleClickListener {
 

@@ -25,8 +25,8 @@ public class SharedPrefsManager {
     private static final String KEY_REMEMBER_ME = "remember_me";
 
     private static SharedPrefsManager instance;
-    private SharedPreferences sharedPreferences;
-    private Gson gson;
+    private final SharedPreferences sharedPreferences;
+    private final Gson gson;
 
     private SharedPrefsManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

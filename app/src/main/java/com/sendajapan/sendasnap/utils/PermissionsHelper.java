@@ -5,11 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class PermissionsHelper {
     public static final int PERMISSION_REQUEST_CODE = 1001;
 
@@ -26,13 +29,8 @@ public class PermissionsHelper {
     }
 
     public static boolean hasStoragePermission(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(context,
-                    READ_MEDIA_IMAGES_PERMISSION) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            return ContextCompat.checkSelfPermission(context,
-                    READ_EXTERNAL_STORAGE_PERMISSION) == PackageManager.PERMISSION_GRANTED;
-        }
+        return ContextCompat.checkSelfPermission(context,
+                READ_MEDIA_IMAGES_PERMISSION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean hasInternetPermission(Context context) {
@@ -44,23 +42,13 @@ public class PermissionsHelper {
     }
 
     public static String[] getRequiredPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return new String[] {
-                    CAMERA_PERMISSION,
-                    READ_MEDIA_IMAGES_PERMISSION,
-                    INTERNET_PERMISSION,
-                    ACCESS_NETWORK_STATE_PERMISSION,
-                    VIBRATE_PERMISSION
-            };
-        } else {
-            return new String[] {
-                    CAMERA_PERMISSION,
-                    READ_EXTERNAL_STORAGE_PERMISSION,
-                    INTERNET_PERMISSION,
-                    ACCESS_NETWORK_STATE_PERMISSION,
-                    VIBRATE_PERMISSION
-            };
-        }
+        return new String[]{
+                CAMERA_PERMISSION,
+                READ_MEDIA_IMAGES_PERMISSION,
+                INTERNET_PERMISSION,
+                ACCESS_NETWORK_STATE_PERMISSION,
+                VIBRATE_PERMISSION
+        };
     }
 
     public static String[] getMissingPermissions(Context context) {

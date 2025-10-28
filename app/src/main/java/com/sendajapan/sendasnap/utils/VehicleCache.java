@@ -7,7 +7,7 @@ import java.util.List;
 
 public class VehicleCache {
     private static VehicleCache instance;
-    private SharedPrefsManager prefsManager;
+    private final SharedPrefsManager prefsManager;
     private static final int MAX_CACHE_SIZE = 50;
 
     private VehicleCache(Context context) {
