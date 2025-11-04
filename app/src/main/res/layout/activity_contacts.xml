@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/blur_background"
-    tools:context=".fragments.ChatFragment">
+    android:background="@drawable/blur_background">
 
     <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -20,21 +19,59 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:title="Chat"
+            app:title="Select Contact"
             app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+            app:navigationIcon="@drawable/ic_chevron_right"
+            app:navigationIconTint="@color/text_primary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Content -->
+    <!-- Search Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_12"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Search users..."
+            app:boxBackgroundMode="none"
+            app:hintTextColor="@color/text_hint"
+            app:startIconDrawable="@drawable/ic_search"
+            app:startIconTint="@color/text_secondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dimen_12"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:textSize="@dimen/text_size_medium" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Contacts RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewRecentChats"
+        android:id="@+id/recyclerViewContacts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/dimen_8"
         android:paddingBottom="@dimen/dimen_8"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_recent_chat" />
+        tools:listitem="@layout/item_contact" />
 
     <!-- Empty State -->
     <LinearLayout
@@ -47,18 +84,10 @@
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginBottom="@dimen/dimen_24"
-            android:src="@drawable/ic_chat_outlined"
-            app:tint="@color/text_hint" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/dimen_8"
-            android:text="No Chats Yet"
+            android:text="No users found"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
             android:textColor="@color/text_primary"
             android:textStyle="bold" />
@@ -66,22 +95,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start a conversation by selecting a contact"
+            android:layout_marginTop="@dimen/dimen_8"
+            android:text="Try searching with a different keyword"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:textColor="@color/text_secondary"
-            android:gravity="center" />
+            android:textColor="@color/text_secondary" />
 
     </LinearLayout>
 
-    <!-- FAB to add new chat -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNewChat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/dimen_16"
-        android:src="@drawable/ic_add"
-        app:tint="@color/white"
-        app:backgroundTint="@color/primary" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

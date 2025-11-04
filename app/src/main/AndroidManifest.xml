@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
@@ -88,6 +89,21 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap"
             android:windowSoftInputMode="adjustResize" />
+        
+        <!-- Chat Activity -->
+        <activity
+            android:name=".activities.ChatActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.SendaSnap"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <!-- Contacts Activity -->
+        <activity
+            android:name=".activities.ContactsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.SendaSnap" />
 
         <!-- FileProvider for camera images -->
         <provider

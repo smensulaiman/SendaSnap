@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269840510869",
+    "project_id": "sendasnap-6c824",
+    "storage_bucket": "sendasnap-6c824.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269840510869:android:edfb2dd3d658fec8aa509c",
+        "android_client_info": {
+          "package_name": "com.sendajapan.sendasnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbv3WBKSZNh1WzssEaLQKSKgi8E0J6Nr8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

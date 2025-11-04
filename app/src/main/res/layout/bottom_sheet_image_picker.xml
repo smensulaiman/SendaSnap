@@ -83,6 +83,36 @@
 
         </LinearLayout>
 
+        <!-- File Option -->
+        <LinearLayout
+            android:id="@+id/layoutFile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_file"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="File"
+                android:textColor="@color/text_black"
+                android:textSize="@dimen/text_size_medium"
+                android:fontFamily="@font/montserrat_semi_bold" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

@@ -6,6 +6,12 @@
         <item name="cornerSize">50%</item>
     </style>
     
+    <!-- Circular Image Shape -->
+    <style name="ShapeAppearanceOverlay.App.CornerSize50Percent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    
     <!-- Custom Calendar View Theme -->
     <style name="CustomCalendarTheme" parent="Theme.AppCompat">
         <item name="colorControlActivated">@color/primary</item>

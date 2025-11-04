@@ -17,6 +17,10 @@ viewpager2 = "1.0.0"
 recyclerview = "1.3.2"
 fragment = "1.6.2"
 smoothbottombar = "1.7.9"
+googleGmsGoogleServices = "4.4.4"
+firebaseDatabase = "22.0.1"
+firebaseMessaging = "25.0.1"
+firebaseStorage = "22.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -41,7 +45,11 @@ viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref =
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 smoothbottombar = { group = "com.github.ibrahimsn98", name = "SmoothBottomBar", version.ref = "smoothbottombar" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

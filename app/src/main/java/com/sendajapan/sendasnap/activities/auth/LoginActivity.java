@@ -98,6 +98,9 @@ public class LoginActivity extends AppCompatActivity {
             User user = new User(username, username.contains("@") ? username : username + "@sendasnap.com");
             prefsManager.saveUser(user);
 
+            // Initialize user in Firebase
+            com.sendajapan.sendasnap.services.ChatService.getInstance().initializeUser(LoginActivity.this);
+
             // Handle "Remember Me" functionality
             if (binding.cbRememberMe.isChecked()) {
                 saveCredentials(username, password);
