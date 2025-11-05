@@ -21,15 +21,16 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:title="Vehicle Details"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            app:title="Create Work Schedule"
+            app:titleTextColor="@color/text_primary"
+            app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="@color/black"/>
+            app:navigationIconTint="@color/text_primary"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Enhanced ScrollView with Professional Styling -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -61,6 +62,7 @@
                     app:boxStrokeWidthFocused="2dp"
                     app:startIconTint="@color/primary"
                     app:startIconContentDescription="Task title"
+                    app:boxStrokeErrorColor="@color/text_black"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -134,7 +136,7 @@
                             android:layout_height="wrap_content"
                             android:clickable="true"
                             android:focusable="false"
-                            android:inputType="none"
+                            android:inputType="date"
                             android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_regular"
                             android:textColor="@color/text_black"
@@ -161,7 +163,7 @@
                             android:layout_height="wrap_content"
                             android:clickable="true"
                             android:focusable="false"
-                            android:inputType="none"
+                            android:inputType="time"
                             android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_regular"
                             android:textColor="@color/text_black"
@@ -252,37 +254,36 @@
                         android:id="@+id/chipGroupStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacing="12dp"
-                        app:chipSpacingHorizontal="12dp"
-                        app:chipSpacingVertical="4dp"
+                        app:chipSpacingHorizontal="16dp"
+                        app:chipSpacingVertical="0dp"
                         app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRunning"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="In Progress"
-                            android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"
-                            android:minHeight="48dp"
-                            app:chipBackgroundColor="@color/status_running_light"
-                            app:chipStrokeColor="@color/status_running"
-                            app:chipStrokeWidth="2dp"
-                            app:chipCornerRadius="24dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipPending"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:checked="true"
                             android:text="Pending"
                             android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"
                             android:minHeight="48dp"
                             app:chipBackgroundColor="@color/status_pending_light"
                             app:chipStrokeColor="@color/status_pending"
+                            app:chipStrokeWidth="2dp"
+                            app:chipCornerRadius="24dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRunning"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="In Progress"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold"
+                            android:minHeight="48dp"
+                            app:chipBackgroundColor="@color/status_running_light"
+                            app:chipStrokeColor="@color/status_running"
                             app:chipStrokeWidth="2dp"
                             app:chipCornerRadius="24dp" />
 
@@ -359,7 +360,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="File Attachments"
-                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:fontFamily="@font/montserrat_bold"
                             android:textColor="@color/success_dark"
                             android:textSize="@dimen/text_size_small" />
 
@@ -504,17 +505,17 @@
                     android:id="@+id/buttonSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Create Task"
+                    android:text="Create New Task"
                     android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
                     android:minWidth="160dp"
                     android:letterSpacing="0.01"
                     app:backgroundTint="@color/primary"
-                    app:cornerRadius="16dp"
+                    app:cornerRadius="4dp"
                     app:icon="@drawable/ic_add"
                     app:iconGravity="textStart"
-                    app:iconPadding="12dp"
+                    app:iconPadding="8dp"
                     app:iconTint="@android:color/white"
                     app:rippleColor="@color/primary_dark"/>
 
@@ -522,6 +523,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

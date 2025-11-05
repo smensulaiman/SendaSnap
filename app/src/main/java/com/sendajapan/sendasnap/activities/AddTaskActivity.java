@@ -2,6 +2,7 @@ package com.sendajapan.sendasnap.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -32,24 +34,28 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class AddTaskActivity extends AppCompatActivity {
 
+    private static final int FILE_PICKER_REQUEST_CODE = 1001;
+
     private ActivityAddTaskBinding binding;
     private HapticFeedbackHelper hapticHelper;
-    private Calendar selectedDate = Calendar.getInstance();
-    private Calendar selectedTime = Calendar.getInstance();
-    private String[] assigneeOptions = { "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown",
-            "Lisa Davis" };
-    private Task editingTask; // Task being edited
+
+    private final String[] assigneeOptions = {"John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown", "Lisa Davis"};
+    private final List<TaskAttachment> attachments = new ArrayList<>();
+    private final Calendar selectedDate = Calendar.getInstance();
+    private final Calendar selectedTime = Calendar.getInstance();
+
+    private Task editingTask;
     private boolean isEditMode = false;
-    private List<TaskAttachment> attachments = new ArrayList<>();
-    private static final int FILE_PICKER_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -67,7 +73,7 @@ public class AddTaskActivity extends AppCompatActivity {
         // Set status bar appearance
         WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
         if (controller != null) {
-            controller.setAppearanceLightStatusBars(false); // Dark icons on light background
+            controller.setAppearanceLightStatusBars(false);
         }
 
         initHelpers();
@@ -127,19 +133,15 @@ public class AddTaskActivity extends AppCompatActivity {
 
     private void setupInitialValues() {
         if (isEditMode && editingTask != null) {
-            // Populate fields with existing task data
             populateFieldsForEdit();
         } else {
-            // Set default values for new task
             setDefaultValues();
         }
 
-        // Set up assignee AutoCompleteTextView
         ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, assigneeOptions);
         binding.editTextAssignee.setAdapter(assigneeAdapter);
 
-        // Add haptic feedback to form interactions
         binding.editTextTitle.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
                 hapticHelper.vibrateClick();
@@ -152,39 +154,32 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void populateFieldsForEdit() {
-        // Populate title and description
         binding.editTextTitle.setText(editingTask.getTitle());
         binding.editTextDescription.setText(editingTask.getDescription());
         binding.editTextAssignee.setText(editingTask.getAssignee());
 
-        // Parse and set date
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             selectedDate.setTime(inputFormat.parse(editingTask.getWorkDate()));
             binding.editTextDate.setText(displayFormat.format(selectedDate.getTime()));
         } catch (Exception e) {
-            // Fallback to default date
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             binding.editTextDate.setText(dateFormat.format(selectedDate.getTime()));
         }
 
-        // Parse and set time
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             selectedTime.setTime(inputFormat.parse(editingTask.getWorkTime()));
             binding.editTextTime.setText(displayFormat.format(selectedTime.getTime()));
         } catch (Exception e) {
-            // Fallback to default time
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
         }
 
-        // Set status chip
         setStatusChip(editingTask.getStatus());
 
-        // Load existing attachments
         if (editingTask.getAttachments() != null) {
             attachments.clear();
             attachments.addAll(editingTask.getAttachments());
@@ -251,14 +246,13 @@ public class AddTaskActivity extends AppCompatActivity {
                 selectedDate.get(Calendar.MONTH),
                 selectedDate.get(Calendar.DAY_OF_MONTH));
 
-        // Apply primary color to the date picker
-        try {
-            int primaryColor = getResources().getColor(R.color.primary, null);
-            datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(primaryColor);
-            datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(primaryColor);
-        } catch (Exception e) {
-            android.util.Log.e("AddTaskActivity", "Could not apply primary color to date picker", e);
-        }
+        datePickerDialog.setOnShowListener(dialog -> {
+            datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setTextColor(ContextCompat.getColor(this, R.color.primary));
+
+            datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+                    .setTextColor(ContextCompat.getColor(this, R.color.error_dark));
+        });
 
         datePickerDialog.show();
     }
@@ -270,28 +264,27 @@ public class AddTaskActivity extends AppCompatActivity {
                 (view, hourOfDay, minute) -> {
                     selectedTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     selectedTime.set(Calendar.MINUTE, minute);
-                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm", Locale.getDefault());
                     binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
                 },
                 selectedTime.get(Calendar.HOUR_OF_DAY),
                 selectedTime.get(Calendar.MINUTE),
-                true);
+                false);
 
-        // Apply primary color to the time picker
-        try {
-            int primaryColor = getResources().getColor(R.color.primary, null);
-            timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE).setTextColor(primaryColor);
-            timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE).setTextColor(primaryColor);
-        } catch (Exception e) {
-            android.util.Log.e("AddTaskActivity", "Could not apply primary color to time picker", e);
-        }
+        timePickerDialog.setOnShowListener(dialog -> {
+            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setTextColor(ContextCompat.getColor(this, R.color.primary));
+
+            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+                    .setTextColor(ContextCompat.getColor(this, R.color.error_dark));
+        });
 
         timePickerDialog.show();
     }
 
     private void saveTask() {
-        String title = binding.editTextTitle.getText().toString().trim();
-        String description = binding.editTextDescription.getText().toString().trim();
+        String title = Objects.requireNonNull(binding.editTextTitle.getText()).toString().trim();
+        String description = Objects.requireNonNull(binding.editTextDescription.getText()).toString().trim();
         String assignee = binding.editTextAssignee.getText().toString().trim();
 
         if (title.isEmpty()) {
@@ -321,7 +314,7 @@ public class AddTaskActivity extends AppCompatActivity {
         } else {
             // Create new task
             task = new Task(
-                    String.valueOf(System.currentTimeMillis()), // Simple ID generation
+                    String.valueOf(System.currentTimeMillis()),
                     title,
                     description,
                     workDate,
@@ -351,7 +344,7 @@ public class AddTaskActivity extends AppCompatActivity {
             return Task.TaskStatus.CANCELLED;
         }
 
-        return Task.TaskStatus.RUNNING; // Default
+        return Task.TaskStatus.RUNNING;
     }
 
     private void showFilePicker() {
@@ -359,29 +352,6 @@ public class AddTaskActivity extends AppCompatActivity {
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Select File"), FILE_PICKER_REQUEST_CODE);
-    }
-
-    private void addMockFile() {
-        // Create a mock file attachment
-        String[] mockFiles = {
-                "document.pdf", "image.jpg", "spreadsheet.xlsx", "presentation.pptx", "text.txt"
-        };
-        String[] mockSizes = { "2.4 MB", "1.2 MB", "856 KB", "3.1 MB", "45 KB" };
-
-        int randomIndex = (int) (Math.random() * mockFiles.length);
-        String fileName = mockFiles[randomIndex];
-        String fileSize = mockSizes[randomIndex];
-
-        TaskAttachment attachment = new TaskAttachment(
-                String.valueOf(System.currentTimeMillis()),
-                fileName,
-                "/mock/path/" + fileName,
-                getFileExtension(fileName),
-                parseFileSize(fileSize),
-                getMimeType(fileName));
-
-        attachments.add(attachment);
-        updateFileDisplay();
     }
 
     private String getFileExtension(String fileName) {
@@ -549,7 +519,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private String getFileName(Uri uri) {
         String fileName = null;
         try {
-            String[] projection = { android.provider.MediaStore.MediaColumns.DISPLAY_NAME };
+            String[] projection = {android.provider.MediaStore.MediaColumns.DISPLAY_NAME};
             android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int nameIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);

@@ -20,9 +20,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:title="Schedule"
+            app:title="Work Schedule"
             app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+            app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,7 +30,10 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="90dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -58,9 +61,10 @@
                 android:id="@+id/chipGroupStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:chipSpacing="8dp"
-                app:singleSelection="true">
+                android:layout_marginBottom="8dp"
+                app:singleSelection="true"
+                app:chipSpacingHorizontal="16dp"
+                app:chipSpacingVertical="0dp">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAll"
@@ -68,7 +72,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="All" />
+                    android:text="Pending"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:minHeight="48dp"
+                    app:chipStrokeWidth="2dp"
+                    app:chipCornerRadius="24dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipRunning"
@@ -76,17 +86,31 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Running"
-                    app:chipBackgroundColor="@color/status_running_light"
-                    app:chipStrokeColor="@color/status_running" />
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:minHeight="48dp"
+                    app:chipStrokeWidth="2dp"
+                    app:chipCornerRadius="24dp"
+                    android:textColor="@color/primary"
+                    app:chipBackgroundColor="@color/primary_light"
+                    app:chipStrokeColor="@color/primary" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPending"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pending"
-                    app:chipBackgroundColor="@color/status_pending_light"
-                    app:chipStrokeColor="@color/status_pending" />
+                    android:text="In Progress"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:minHeight="48dp"
+                    app:chipStrokeWidth="2dp"
+                    app:chipCornerRadius="24dp"
+                    android:textColor="@color/warning_dark"
+                    app:chipBackgroundColor="@color/warning_light"
+                    app:chipStrokeColor="@color/warning_dark" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipCompleted"
@@ -94,8 +118,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Completed"
-                    app:chipBackgroundColor="@color/status_completed_light"
-                    app:chipStrokeColor="@color/status_completed" />
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:minHeight="48dp"
+                    app:chipStrokeWidth="2dp"
+                    app:chipCornerRadius="24dp"
+                    android:textColor="@color/success_dark"
+                    app:chipBackgroundColor="@color/success_light"
+                    app:chipStrokeColor="@color/success_dark" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipCancelled"
@@ -103,8 +134,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cancelled"
-                    app:chipBackgroundColor="@color/status_cancelled_light"
-                    app:chipStrokeColor="@color/status_cancelled" />
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:minHeight="48dp"
+                    app:chipStrokeWidth="2dp"
+                    app:chipCornerRadius="24dp"
+                    android:textColor="@color/error_dark"
+                    app:chipBackgroundColor="@color/error_light"
+                    app:chipStrokeColor="@color/error_dark" />
 
             </com.google.android.material.chip.ChipGroup>
 

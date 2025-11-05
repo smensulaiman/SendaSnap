@@ -47,7 +47,7 @@
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
     </style>
-    
+
     <!-- Custom Date Picker Dialog Style -->
     <style name="CustomDatePickerDialog" parent="Theme.Material3.Light.Dialog">
         <item name="android:colorAccent">@color/primary</item>
@@ -55,7 +55,7 @@
         <item name="android:colorControlHighlight">@color/primary</item>
         <item name="android:colorControlActivated">@color/primary</item>
     </style>
-    
+
     <!-- Custom Time Picker Dialog Style -->
     <style name="CustomTimePickerDialog" parent="Theme.Material3.Light.Dialog">
         <item name="android:colorAccent">@color/primary</item>
@@ -63,4 +63,5 @@
         <item name="android:colorControlHighlight">@color/primary</item>
         <item name="android:colorControlActivated">@color/primary</item>
     </style>
+
 </resources>

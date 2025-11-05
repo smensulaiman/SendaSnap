@@ -30,10 +30,13 @@ import java.util.Locale;
 public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClickListener {
 
     private static final int ADD_TASK_REQUEST_CODE = 1001;
+
+    private final List<Task> allTasks = new ArrayList<>();
+    private final List<Task> filteredTasks = new ArrayList<>();
+
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
-    private List<Task> allTasks = new ArrayList<>();
-    private List<Task> filteredTasks = new ArrayList<>();
+
     private String selectedDate;
     private Task.TaskStatus currentFilter = null;
 
