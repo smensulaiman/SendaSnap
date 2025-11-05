@@ -30,7 +30,10 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="90dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,10 +45,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="16dp"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtWelcome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat_semi_bold"
@@ -57,7 +61,6 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
                     android:fontFamily="@font/montserrat_regular"
                     android:text="Search for vehicles by chassis number"
                     android:textColor="@color/text_secondary"
@@ -69,7 +72,6 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="125dp"
-                android:layout_marginBottom="20dp"
                 app:cardCornerRadius="16dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/primary">
@@ -161,7 +163,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginTop="@dimen/dimen_8">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -180,16 +183,14 @@
                         android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <TextView
                         android:id="@+id/btnViewAll"
-                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/montserrat_bold"
+                        android:fontFamily="@font/montserrat_semi_bold"
                         android:text="View All"
                         android:textSize="@dimen/text_size_small"
-                        app:backgroundTint="@android:color/transparent"
-                        app:rippleColor="@color/primary_light" />
+                        android:textColor="@color/primary"/>
 
                 </LinearLayout>
 

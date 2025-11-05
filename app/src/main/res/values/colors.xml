@@ -12,7 +12,6 @@
     <color name="accent">#3FB4EB</color>
     <color name="on_primary">#FFFFFF</color>
 
-
     <!-- Background colors -->
     <color name="background">#E4EEF8</color>
     <color name="surface">#CCC9C1</color>
@@ -32,12 +31,12 @@
     <color name="text_hint">#9CA3AF</color>
 
     <color name="error">#F78A8A</color>
-    <color name="error_light">#FDE9E9</color>
+    <color name="error_light">#FAD1D1</color>
     <color name="error_medium">#F56C6C</color>
-    <color name="error_dark">#D94848</color>
+    <color name="error_dark">#F5474F</color>
 
     <color name="success">#6FD6A4</color>
-    <color name="success_light">#E8F9F1</color>
+    <color name="success_light">#D6FAE9</color>
     <color name="success_medium">#49C58A</color>
     <color name="success_dark">#2FA06F</color>
 

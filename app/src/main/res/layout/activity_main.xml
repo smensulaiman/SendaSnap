@@ -27,7 +27,8 @@
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="90dp" />
+            android:name="com.sendajapan.sendasnap.fragments.HomeFragment"
+            android:layout_marginBottom="90dp"/>
 
         <!-- Smooth Bottom Bar -->
         <me.ibrahimsn.lib.SmoothBottomBar

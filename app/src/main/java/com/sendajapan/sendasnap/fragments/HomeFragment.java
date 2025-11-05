@@ -1,5 +1,6 @@
 package com.sendajapan.sendasnap.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
 
 import java.util.List;
@@ -42,12 +44,16 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         return binding.getRoot();
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
         setupToolbar();
+
+        binding.txtWelcome.setText("Welcome, " + SharedPrefsManager.getInstance(getContext()).getUsername() + " san!");
+
         setupRecyclerView();
         setupClickListeners();
         setupFAB();
@@ -83,8 +89,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void setupClickListeners() {
         binding.btnViewAll.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            // Navigate to history fragment
-            // This will be handled by MainActivity
+
         });
 
         binding.btnQuickSearch.setOnClickListener(v -> {
@@ -111,7 +116,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.dialog_vehicle_search);
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
         // Get views from dialog

@@ -1,8 +1,12 @@
 package com.sendajapan.sendasnap.networking;
 
+import com.sendajapan.sendasnap.models.ChangePasswordRequest;
+import com.sendajapan.sendasnap.models.LoginRequest;
+import com.sendajapan.sendasnap.models.LoginResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -12,6 +16,18 @@ import java.util.List;
 import okhttp3.MultipartBody;
 
 public interface ApiService {
+
+    // Login
+    @POST("api/v1/auth/login")
+    Call<LoginResponse> login(@Body LoginRequest loginRequest);
+
+    // Refresh token
+    @POST("api/v1/auth/refresh")
+    Call<LoginResponse> refreshToken();
+
+    // Change password
+    @POST("api/v1/auth/change-password")
+    Call<ResponseBody> changePassword(@Body ChangePasswordRequest changePasswordRequest);
 
     // Search vehicle by chassis number
     @GET("vehicle/{chassisNumber}")
@@ -24,11 +40,8 @@ public interface ApiService {
             @Path("id") String vehicleId,
             @Part List<MultipartBody.Part> images);
 
-    // Get recent vehicles (placeholder for future implementation)
+    // Get recent vehicles
     @GET("vehicles/recent")
     Call<List<Vehicle>> getRecentVehicles();
 
-    // Login endpoint (placeholder for future implementation)
-    @POST("auth/login")
-    Call<ResponseBody> login(@Part("username") String username, @Part("password") String password);
 }

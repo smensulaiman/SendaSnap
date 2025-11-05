@@ -1,7 +1,9 @@
 package com.sendajapan.sendasnap.utils;
 
 import android.content.Context;
-import com.sendajapan.sendasnap.models.User;
+
+import com.sendajapan.sendasnap.models.UserData;
+
 import java.util.Arrays;
 
 public class FirebaseUtils {
@@ -31,7 +33,7 @@ public class FirebaseUtils {
      */
     public static String getCurrentUserId(Context context) {
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(context);
-        User user = prefsManager.getUser();
+        UserData user = prefsManager.getUser();
         if (user != null && user.getEmail() != null) {
             return sanitizeEmailForKey(user.getEmail());
         }
@@ -43,7 +45,7 @@ public class FirebaseUtils {
      */
     public static String getCurrentUserEmail(Context context) {
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(context);
-        User user = prefsManager.getUser();
+        UserData user = prefsManager.getUser();
         if (user != null && user.getEmail() != null) {
             return user.getEmail();
         }
@@ -55,9 +57,9 @@ public class FirebaseUtils {
      */
     public static String getCurrentUsername(Context context) {
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(context);
-        User user = prefsManager.getUser();
-        if (user != null && user.getUsername() != null) {
-            return user.getUsername();
+        UserData user = prefsManager.getUser();
+        if (user != null && user.getName() != null) {
+            return user.getName();
         }
         return "";
     }

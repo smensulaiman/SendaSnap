@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.sendajapan.sendasnap.activities.HistoryActivity;
 import com.sendajapan.sendasnap.databinding.FragmentProfileBinding;
+import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -96,15 +97,35 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
-        String username = prefsManager.getUsername();
-        String email = prefsManager.getEmail();
+        UserData user = prefsManager.getUser();
 
-        if (!username.isEmpty()) {
-            //binding.txtUserName.setText(username);
-        }
+        if (user != null) {
+            // Display user name
+            if (user.getName() != null && !user.getName().isEmpty()) {
+                binding.txtUserName.setText(user.getName());
+            } else if (user.getName() != null && !user.getName().isEmpty()) {
+                binding.txtUserName.setText(user.getName());
+            }
 
-        if (!email.isEmpty()) {
-            binding.txtUserEmail.setText(email);
+            // Display user email
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                binding.txtUserEmail.setText(user.getEmail());
+            }
+
+            // Display phone and role if available (can be added to layout later if needed)
+            // For now, we just display name and email as per the existing layout
+        } else {
+            // Fallback to old method if user object is not available
+            String username = prefsManager.getUsername();
+            String email = prefsManager.getEmail();
+
+            if (username != null && !username.isEmpty()) {
+                binding.txtUserName.setText(username);
+            }
+
+            if (email != null && !email.isEmpty()) {
+                binding.txtUserEmail.setText(email);
+            }
         }
 
         // Load settings

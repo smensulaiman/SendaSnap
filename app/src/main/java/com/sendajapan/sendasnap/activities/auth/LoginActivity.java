@@ -3,24 +3,41 @@ package com.sendajapan.sendasnap.activities.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Patterns;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.MainActivity;
 import com.sendajapan.sendasnap.databinding.ActivityLoginBinding;
-import com.sendajapan.sendasnap.models.User;
+import com.sendajapan.sendasnap.models.ErrorResponse;
+import com.sendajapan.sendasnap.models.LoginRequest;
+import com.sendajapan.sendasnap.models.LoginResponse;
+import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.networking.ApiService;
+import com.sendajapan.sendasnap.networking.RetrofitClient;
+import com.sendajapan.sendasnap.services.ChatService;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.util.Objects;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import www.sanju.motiontoast.MotionToast;
 
 public class LoginActivity extends AppCompatActivity {
@@ -28,11 +45,14 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private SharedPrefsManager prefsManager;
     private HapticFeedbackHelper hapticHelper;
+    private ApiService apiService;
+    private CookieBarToastHelper cookieBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -47,8 +67,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initHelpers() {
-        prefsManager = SharedPrefsManager.getInstance(this);
-        hapticHelper = HapticFeedbackHelper.getInstance(this);
+        prefsManager = SharedPrefsManager.getInstance(LoginActivity.this);
+        hapticHelper = HapticFeedbackHelper.getInstance(LoginActivity.this);
+        apiService = RetrofitClient.getInstance().getApiService();
+
+        cookieBar = new CookieBarToastHelper(LoginActivity.this);
+
         loadSavedCredentials();
     }
 
@@ -60,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void performLogin() {
-        String username = Objects.requireNonNull(binding.etUsername.getText()).toString().trim();
+        String email = Objects.requireNonNull(binding.etUsername.getText()).toString().trim();
         String password = Objects.requireNonNull(binding.etPassword.getText()).toString().trim();
 
         // Clear previous errors
@@ -68,8 +92,15 @@ public class LoginActivity extends AppCompatActivity {
         binding.tilPassword.setError(null);
 
         // Validate inputs
-        if (TextUtils.isEmpty(username)) {
-            binding.tilUsername.setError("Username is required");
+        if (TextUtils.isEmpty(email)) {
+            binding.tilUsername.setError("Email is required");
+            binding.etUsername.requestFocus();
+            hapticHelper.vibrateError();
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilUsername.setError("Please enter a valid email address");
             binding.etUsername.requestFocus();
             hapticHelper.vibrateError();
             return;
@@ -82,66 +113,136 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (password.length() < 3) {
-            binding.tilPassword.setError("Password must be at least 3 characters");
-            binding.etPassword.requestFocus();
-            hapticHelper.vibrateError();
-            return;
-        }
+        // Show loading state
+        setLoadingState(true);
 
-        // Simple local validation (as per plan - no backend)
-        if (isValidCredentials(username, password)) {
-            // Login successful
-            hapticHelper.vibrateSuccess();
+        // Make API call
+        Call<LoginResponse> call = apiService.login(new LoginRequest(email, password));
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
+                setLoadingState(false);
 
-            // Save user data
-            User user = new User(username, username.contains("@") ? username : username + "@sendasnap.com");
-            prefsManager.saveUser(user);
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
 
-            // Initialize user in Firebase
-            com.sendajapan.sendasnap.services.ChatService.getInstance().initializeUser(LoginActivity.this);
+                    if (loginResponse.getSuccess() != null && loginResponse.getSuccess()) {
+                        hapticHelper.vibrateSuccess();
 
-            // Handle "Remember Me" functionality
-            if (binding.cbRememberMe.isChecked()) {
-                saveCredentials(username, password);
-            } else {
-                clearSavedCredentials();
+                        // Extract user data and token
+                        if (loginResponse.getData() != null) {
+                            // Save token
+                            String token = loginResponse.getData().getToken();
+                            if (token != null) {
+                                prefsManager.saveToken(token);
+                            }
+
+                            // Create User from API response
+                            UserData user = loginResponse.getData().getUser();
+                            prefsManager.saveUser(user);
+
+                            // Initialize user in Firebase
+                            ChatService.getInstance().initializeUser(LoginActivity.this);
+
+                            // Handle "Remember Me" functionality
+                            if (binding.cbRememberMe.isChecked()) {
+                                saveCredentials(email, password);
+                            } else {
+                                clearSavedCredentials();
+                            }
+
+                            cookieBar.setCookieBarDismissListener(i -> new Handler(Looper.getMainLooper()).post(() -> {
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                finish();
+                            }));
+
+                            cookieBar.showSuccessToast("Login Successful", loginResponse.getMessage(),
+                                    Gravity.TOP, CookieBarToastHelper.DURATION_SHORT);
+                        }
+
+                    } else {
+                        // Login failed with success: false
+                        handleLoginError(loginResponse.getMessage());
+                    }
+                } else {
+                    // Handle error response
+                    handleErrorResponse(response);
+                }
             }
 
-            // Navigate to MainActivity
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                    finish();
-                }
-            }, 700);
-        } else {
-            // Login failed
-            binding.tilPassword.setError("Invalid credentials");
-            binding.etPassword.requestFocus();
-            MotionToastHelper.showError(this, "Login Failed", "Invalid username or password",
-                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-        }
+            @Override
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
+                setLoadingState(false);
+                hapticHelper.vibrateError();
+                MotionToastHelper.showError(LoginActivity.this, "Login Failed",
+                        "Network error. Please check your connection and try again.",
+                        MotionToast.GRAVITY_TOP, MotionToast.LONG_DURATION);
+            }
+        });
     }
 
-    private boolean isValidCredentials(String username, String password) {
-        // Simple validation - accept any username with password length >= 3
-        // In a real app, this would be validated against a backend
-        return !TextUtils.isEmpty(username) && password.length() >= 3;
+    private void handleLoginError(String errorMessage) {
+        hapticHelper.vibrateError();
+        binding.tilPassword.setError(errorMessage != null ? errorMessage : "Invalid credentials");
+        binding.etPassword.requestFocus();
+        cookieBar.showErrorToast("Login Failed", errorMessage,
+                Gravity.TOP, CookieBarToastHelper.DURATION_LONG);
+    }
+
+    private void handleErrorResponse(Response<LoginResponse> response) {
+        hapticHelper.vibrateError();
+        String errorMessage = "Invalid credentials";
+
+        if (response.errorBody() != null) {
+            try {
+                Gson gson = new Gson();
+                ErrorResponse errorResponse = gson.fromJson(response.errorBody().string(), ErrorResponse.class);
+                if (errorResponse != null && errorResponse.getMessage() != null) {
+                    errorMessage = errorResponse.getMessage();
+                }
+            } catch (Exception e) {
+                Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        binding.tilPassword.setError(errorMessage);
+        binding.etPassword.requestFocus();
+
+        cookieBar.showErrorToast("Login Failed", errorMessage,
+                Gravity.TOP, CookieBarToastHelper.DURATION_LONG);
+    }
+
+    private void setLoadingState(boolean isLoading) {
+        binding.btnLogin.setEnabled(!isLoading);
+        binding.btnLogin.setText(isLoading ? "Logging in..." : "Login");
+        binding.etUsername.setEnabled(!isLoading);
+        binding.etPassword.setEnabled(!isLoading);
+        binding.cbRememberMe.setEnabled(!isLoading);
+
+        // Show/hide progress bar
+        if (isLoading) {
+            binding.progressBar.setVisibility(android.view.View.VISIBLE);
+            binding.btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.transparent));
+        } else {
+            binding.progressBar.setVisibility(android.view.View.GONE);
+            binding.btnLogin.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
     }
 
     private void loadSavedCredentials() {
-        String savedUsername = prefsManager.getSavedUsername();
+        String savedEmail = prefsManager.getEmail();
         String savedPassword = prefsManager.getSavedPassword();
         boolean rememberMe = prefsManager.isRememberMeEnabled();
 
-        if (rememberMe && !TextUtils.isEmpty(savedUsername) && !TextUtils.isEmpty(savedPassword)) {
-            binding.etUsername.setText(savedUsername);
+        if (rememberMe && !TextUtils.isEmpty(savedEmail) && !TextUtils.isEmpty(savedPassword)) {
+            binding.etUsername.setText(savedEmail);
             binding.etPassword.setText(savedPassword);
             binding.cbRememberMe.setChecked(true);
+        } else {
+            binding.etUsername.setText("sulaiman@sendasnap.com");
+            binding.etPassword.setText("password");
         }
     }
 

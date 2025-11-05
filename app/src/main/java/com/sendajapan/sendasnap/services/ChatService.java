@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ChatService {
+
     private static final String TAG = "ChatService";
     private static ChatService instance;
     private final FirebaseDatabase database;
     
     private ChatService() {
         database = FirebaseDatabase.getInstance();
-        // Enable offline persistence
         database.setPersistenceEnabled(true);
     }
     

@@ -4,13 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sendajapan.sendasnap.models.User;
+import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.models.Vehicle;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SharedPrefsManager {
+
     private static final String PREFS_NAME = "SendaSnapPrefs";
     private static final String KEY_USER = "user";
     private static final String KEY_RECENT_VEHICLES = "recent_vehicles";
@@ -23,6 +24,7 @@ public class SharedPrefsManager {
     private static final String KEY_SAVED_USERNAME = "saved_username";
     private static final String KEY_SAVED_PASSWORD = "saved_password";
     private static final String KEY_REMEMBER_ME = "remember_me";
+    private static final String KEY_TOKEN = "auth_token";
 
     private static SharedPrefsManager instance;
     private final SharedPreferences sharedPreferences;
@@ -41,20 +43,20 @@ public class SharedPrefsManager {
     }
 
     // User management
-    public void saveUser(User user) {
+    public void saveUser(UserData user) {
         String userJson = gson.toJson(user);
         sharedPreferences.edit()
                 .putString(KEY_USER, userJson)
                 .putBoolean(KEY_IS_LOGGED_IN, user.isLoggedIn())
-                .putString(KEY_USERNAME, user.getUsername())
+                .putString(KEY_USERNAME, user.getName())
                 .putString(KEY_EMAIL, user.getEmail())
                 .apply();
     }
 
-    public User getUser() {
+    public UserData getUser() {
         String userJson = sharedPreferences.getString(KEY_USER, null);
         if (userJson != null) {
-            return gson.fromJson(userJson, User.class);
+            return gson.fromJson(userJson, UserData.class);
         }
         return null;
     }
@@ -69,6 +71,7 @@ public class SharedPrefsManager {
                 .putBoolean(KEY_IS_LOGGED_IN, false)
                 .remove(KEY_USERNAME)
                 .remove(KEY_EMAIL)
+                .remove(KEY_TOKEN)
                 .apply();
     }
 
@@ -101,11 +104,7 @@ public class SharedPrefsManager {
 
     public void addVehicleToCache(Vehicle vehicle) {
         List<Vehicle> vehicles = getRecentVehicles();
-
-        // Remove if already exists (to move to top)
         vehicles.removeIf(v -> v.getId() != null && v.getId().equals(vehicle.getId()));
-
-        // Add to beginning
         vehicles.add(0, vehicle);
 
         // Limit cache size to 50 vehicles
@@ -173,5 +172,22 @@ public class SharedPrefsManager {
 
     public boolean isRememberMeEnabled() {
         return sharedPreferences.getBoolean(KEY_REMEMBER_ME, false);
+    }
+
+    // Token management
+    public void saveToken(String token) {
+        sharedPreferences.edit()
+                .putString(KEY_TOKEN, token)
+                .apply();
+    }
+
+    public String getToken() {
+        return sharedPreferences.getString(KEY_TOKEN, null);
+    }
+
+    public void clearToken() {
+        sharedPreferences.edit()
+                .remove(KEY_TOKEN)
+                .apply();
     }
 }
