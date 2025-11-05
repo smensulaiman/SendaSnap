@@ -42,21 +42,8 @@
 
     <color name="warning">#FFD272</color>
     <color name="warning_light">#FFF7E1</color>
-    <color name="warning_medium">#FBC33F</color>
-    <color name="warning_dark">#D8A62A</color>
-
-    <!-- Task status colors -->
-    <color name="status_running">#4A90E2</color>
-    <color name="status_running_light">#E6F0FB</color>
-
-    <color name="status_pending">#F5B93A</color>
-    <color name="status_pending_light">#FFF7E1</color>
-
-    <color name="status_completed">#34D399</color>
-    <color name="status_completed_light">#E6F8F1</color>
-
-    <color name="status_cancelled">#F87171</color>
-    <color name="status_cancelled_light">#FDECEC</color>
+    <color name="warning_medium">#F5B93A</color>
+    <color name="warning_dark">#F4B42B</color>
 
     <color name="badge_new">#FF8650</color>
 

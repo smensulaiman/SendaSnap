@@ -264,56 +264,133 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
+                            android:minHeight="48dp"
                             android:text="Pending"
                             android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"
-                            android:minHeight="48dp"
-                            app:chipBackgroundColor="@color/status_pending_light"
-                            app:chipStrokeColor="@color/status_pending"
-                            app:chipStrokeWidth="2dp"
-                            app:chipCornerRadius="24dp" />
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/warning_dark"
+                            app:chipBackgroundColor="@color/white"
+                            app:chipStrokeColor="@color/warning_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipRunning"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minHeight="48dp"
                             android:text="In Progress"
                             android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"
-                            android:minHeight="48dp"
-                            app:chipBackgroundColor="@color/status_running_light"
-                            app:chipStrokeColor="@color/status_running"
-                            app:chipStrokeWidth="2dp"
-                            app:chipCornerRadius="24dp" />
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/primary"
+                            app:chipBackgroundColor="@color/primary_light"
+                            app:chipStrokeColor="@color/primary"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipCompleted"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minHeight="48dp"
                             android:text="Completed"
                             android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"
-                            android:minHeight="48dp"
-                            app:chipBackgroundColor="@color/status_completed_light"
-                            app:chipStrokeColor="@color/status_completed"
-                            app:chipStrokeWidth="2dp"
-                            app:chipCornerRadius="24dp" />
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/success_dark"
+                            app:chipBackgroundColor="@color/success_light"
+                            app:chipStrokeColor="@color/success_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipCancelled"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minHeight="48dp"
                             android:text="Cancelled"
                             android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"
-                            android:minHeight="48dp"
-                            app:chipBackgroundColor="@color/status_cancelled_light"
-                            app:chipStrokeColor="@color/status_cancelled"
-                            app:chipStrokeWidth="2dp"
-                            app:chipCornerRadius="24dp" />
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/error_dark"
+                            app:chipBackgroundColor="@color/error_light"
+                            app:chipStrokeColor="@color/error_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
+
+                    </com.google.android.material.chip.ChipGroup>
+
+                </LinearLayout>
+
+                <!-- Enhanced Priority Selection -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen_8"
+                    android:orientation="vertical"
+                    android:background="@drawable/badge_12"
+                    android:padding="@dimen/dimen_12"
+                    android:backgroundTint="@color/white">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Task Priority"
+                        android:fontFamily="@font/montserrat_semi_bold"
+                        android:textColor="@color/text_black"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupPriority"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:chipSpacingHorizontal="16dp"
+                        app:chipSpacingVertical="0dp"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipPriorityLow"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Low"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/black"
+                            app:chipBackgroundColor="@color/warning_medium"
+                            app:chipStrokeColor="@color/warning_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp"/>
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipPriorityNormal"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="Normal"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/black"
+                            app:chipBackgroundColor="@color/success_medium"
+                            app:chipStrokeColor="@color/success_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipPriorityHigh"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="High"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textColor="@color/black"
+                            app:chipBackgroundColor="@color/error_medium"
+                            app:chipStrokeColor="@color/error_dark"
+                            app:chipCornerRadius="24dp"
+                            app:chipStrokeWidth="2dp" />
 
                     </com.google.android.material.chip.ChipGroup>
 

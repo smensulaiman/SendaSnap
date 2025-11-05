@@ -32,7 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <!-- User Info Card -->
@@ -41,8 +40,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="0dp"
-            app:cardBackgroundColor="@color/background_blur">
+            app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="@color/white"
+            app:strokeColor="@color/white"
+            app:cardElevation="@dimen/dimen_4"
+            android:layout_marginHorizontal="@dimen/dimen_16">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,10 +58,15 @@
                     android:id="@+id/imgProfile"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:layout_marginEnd="16dp"
                     android:background="@drawable/profile_picture_background"
                     android:src="@drawable/ic_profile"
                     android:scaleType="centerInside" />
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/primary_varient"
+                    android:layout_marginHorizontal="@dimen/dimen_16"/>
 
                 <!-- User Info -->
                 <LinearLayout
@@ -75,10 +82,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="4dp"
                         android:text="Shiroyama"
+                        android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_primary"
                         android:textSize="@dimen/text_size_medium"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textStyle="bold"/>
 
                     <!-- User Email -->
                     <TextView
@@ -86,7 +93,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="shiroyama@sendasnap.com"
+                        android:fontFamily="@font/montserrat_regular"
                         android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_small" />
+
+                    <TextView
+                        android:id="@+id/txtRole"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Manager"
+                        android:fontFamily="@font/montserrat_semi_bold"
+                        android:textColor="@color/text_primary"
                         android:textSize="@dimen/text_size_xsmall" />
 
                 </LinearLayout>
@@ -100,14 +117,15 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginHorizontal="@dimen/dimen_16">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:text="Settings"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/text_black"
                 android:textSize="@dimen/text_size_large"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium" />
@@ -154,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:thumbTint="@color/primary"
-                    app:trackTint="@color/primary_light" />
+                    app:trackTint="@color/text_hint" />
 
             </LinearLayout>
 
@@ -200,7 +218,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:thumbTint="@color/primary"
-                    app:trackTint="@color/primary_light" />
+                    app:trackTint="@color/text_hint" />
 
             </LinearLayout>
 

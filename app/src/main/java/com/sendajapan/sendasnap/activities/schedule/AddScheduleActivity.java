@@ -1,4 +1,4 @@
-package com.sendajapan.sendasnap.activities;
+package com.sendajapan.sendasnap.activities.schedule;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -27,7 +27,10 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
+import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,20 +39,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class AddTaskActivity extends AppCompatActivity {
+public class AddScheduleActivity extends AppCompatActivity {
 
     private static final int FILE_PICKER_REQUEST_CODE = 1001;
 
     private ActivityAddTaskBinding binding;
     private HapticFeedbackHelper hapticHelper;
+    private SharedPrefsManager prefsManager;
+    private UserData currentUser;
 
-    private final String[] assigneeOptions = {"John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown", "Lisa Davis"};
+    private final String[] assigneeOptions = { "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown",
+            "Lisa Davis" };
     private final List<TaskAttachment> attachments = new ArrayList<>();
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
 
     private Task editingTask;
     private boolean isEditMode = false;
+    private boolean isRestrictedEditMode = false; // For non-admin/manager users
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,12 +86,27 @@ public class AddTaskActivity extends AppCompatActivity {
         initHelpers();
         setupToolbar();
         checkEditMode();
+        checkUserRole();
         setupListeners();
         setupInitialValues();
     }
 
     private void initHelpers() {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
+        prefsManager = SharedPrefsManager.getInstance(this);
+        currentUser = prefsManager.getUser();
+    }
+
+    private void checkUserRole() {
+        if (currentUser != null && isEditMode) {
+            String role = currentUser.getRole();
+            // Check if user is not admin or manager
+            if (role == null || (!role.equalsIgnoreCase("admin") && !role.equalsIgnoreCase("manager"))) {
+                isRestrictedEditMode = true;
+                // Disable all fields except status
+                disableFieldsExceptStatus();
+            }
+        }
     }
 
     private void checkEditMode() {
@@ -180,6 +202,13 @@ public class AddTaskActivity extends AppCompatActivity {
 
         setStatusChip(editingTask.getStatus());
 
+        // Set priority chip
+        if (editingTask.getPriority() != null) {
+            setPriorityChip(editingTask.getPriority());
+        } else {
+            setPriorityChip(Task.TaskPriority.NORMAL);
+        }
+
         if (editingTask.getAttachments() != null) {
             attachments.clear();
             attachments.addAll(editingTask.getAttachments());
@@ -198,6 +227,9 @@ public class AddTaskActivity extends AppCompatActivity {
 
         // Set default status to Running
         setStatusChip(Task.TaskStatus.RUNNING);
+
+        // Set default priority to Medium
+        setPriorityChip(Task.TaskPriority.NORMAL);
     }
 
     private void setStatusChip(Task.TaskStatus status) {
@@ -231,6 +263,53 @@ public class AddTaskActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    private void setPriorityChip(Task.TaskPriority priority) {
+        // Clear all chips first
+        binding.chipGroupPriority.clearCheck();
+
+        // Set the appropriate chip based on priority
+        switch (priority) {
+            case LOW:
+                Chip lowChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityLow);
+                if (lowChip != null) {
+                    lowChip.setChecked(true);
+                }
+                break;
+            case NORMAL:
+                Chip mediumChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityNormal);
+                if (mediumChip != null) {
+                    mediumChip.setChecked(true);
+                }
+                break;
+            case HIGH:
+                Chip highChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityHigh);
+                if (highChip != null) {
+                    highChip.setChecked(true);
+                }
+                break;
+        }
+    }
+
+    private void disableFieldsExceptStatus() {
+        binding.editTextTitle.setEnabled(false);
+        binding.editTextDescription.setEnabled(false);
+        binding.editTextAssignee.setEnabled(false);
+        binding.editTextDate.setEnabled(false);
+        binding.editTextTime.setEnabled(false);
+        binding.buttonAddFile.setVisibility(View.GONE);
+
+        // Disable priority chips
+        for (int i = 0; i < binding.chipGroupPriority.getChildCount(); i++) {
+            View child = binding.chipGroupPriority.getChildAt(i);
+            if (child instanceof Chip) {
+                ((Chip) child).setClickable(false);
+                ((Chip) child).setEnabled(false);
+            }
+        }
+
+        // Keep status chips enabled
     }
 
     private void showDatePicker() {
@@ -295,6 +374,9 @@ public class AddTaskActivity extends AppCompatActivity {
         // Get selected status
         Task.TaskStatus status = getSelectedStatus();
 
+        // Get selected priority
+        Task.TaskPriority priority = getSelectedPriority();
+
         // Format date and time
         String workDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.getTime());
         String workTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(selectedTime.getTime());
@@ -303,13 +385,18 @@ public class AddTaskActivity extends AppCompatActivity {
         if (isEditMode && editingTask != null) {
             // Update existing task
             task = editingTask;
-            task.setTitle(title);
-            task.setDescription(description);
-            task.setWorkDate(workDate);
-            task.setWorkTime(workTime);
+            if (!isRestrictedEditMode) {
+                // Only update fields if user has permission
+                task.setTitle(title);
+                task.setDescription(description);
+                task.setWorkDate(workDate);
+                task.setWorkTime(workTime);
+                task.setAssignee(assignee);
+                task.setAttachments(attachments);
+                task.setPriority(priority);
+            }
+            // Always allow status update
             task.setStatus(status);
-            task.setAssignee(assignee);
-            task.setAttachments(attachments);
             task.setUpdatedAt(System.currentTimeMillis());
         } else {
             // Create new task
@@ -321,8 +408,12 @@ public class AddTaskActivity extends AppCompatActivity {
                     workTime,
                     status);
             task.setAssignee(assignee);
+            task.setPriority(priority);
             task.setAttachments(attachments);
         }
+
+        // Set alarm for the task
+        AlarmHelper.setTaskAlarm(this, task);
 
         // Return result to calling activity
         Intent resultIntent = new Intent();
@@ -345,6 +436,20 @@ public class AddTaskActivity extends AppCompatActivity {
         }
 
         return Task.TaskStatus.RUNNING;
+    }
+
+    private Task.TaskPriority getSelectedPriority() {
+        int checkedId = binding.chipGroupPriority.getCheckedChipId();
+
+        if (checkedId == R.id.chipPriorityLow) {
+            return Task.TaskPriority.LOW;
+        } else if (checkedId == R.id.chipPriorityNormal) {
+            return Task.TaskPriority.NORMAL;
+        } else if (checkedId == R.id.chipPriorityHigh) {
+            return Task.TaskPriority.HIGH;
+        }
+
+        return Task.TaskPriority.NORMAL;
     }
 
     private void showFilePicker() {
@@ -519,7 +624,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private String getFileName(Uri uri) {
         String fileName = null;
         try {
-            String[] projection = {android.provider.MediaStore.MediaColumns.DISPLAY_NAME};
+            String[] projection = { android.provider.MediaStore.MediaColumns.DISPLAY_NAME };
             android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int nameIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);

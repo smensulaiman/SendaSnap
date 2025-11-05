@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <!-- Camera features -->
     <uses-feature
@@ -84,11 +87,24 @@
         
         <!-- Add Task Activity -->
         <activity
-            android:name=".activities.AddTaskActivity"
+            android:name=".activities.schedule.AddScheduleActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap"
             android:windowSoftInputMode="adjustResize" />
+        
+        <!-- Schedule Detail Activity -->
+        <activity
+            android:name=".activities.schedule.ScheduleDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.SendaSnap" />
+        
+        <!-- Task Alarm Receiver -->
+        <receiver
+            android:name=".receivers.TaskAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
         
         <!-- Chat Activity -->
         <activity

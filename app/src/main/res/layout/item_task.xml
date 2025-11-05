@@ -1,45 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="140dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="@dimen/dimen_8"
     android:clickable="true"
     android:focusable="true"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
         <!-- Status Indicator Bar -->
         <View
             android:id="@+id/statusIndicator"
             android:layout_width="4dp"
             android:layout_height="0dp"
-            android:layout_marginEnd="12dp"
-            android:background="@color/status_pending"
+            android:background="@color/primary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="@dimen/dimen_16"
+            android:layout_marginVertical="@dimen/dimen_16"/>
 
         <!-- Task Title -->
         <TextView
             android:id="@+id/textTaskTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8"
+            android:fontFamily="@font/montserrat_medium"
             android:text="Task Title"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/text_black"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toEndOf="@id/statusIndicator"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="@dimen/dimen_8"/>
+            app:layout_constraintTop_toTopOf="@+id/statusIndicator" />
 
         <!-- NEW Badge -->
         <TextView
@@ -47,16 +49,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/badge_8"
-            android:backgroundTint="@color/primary"
-            android:fontFamily="@font/montserrat_bold"
+            android:backgroundTint="@color/text_black"
+            android:fontFamily="@font/montserrat_regular"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="NEW"
             android:textColor="@color/white"
             android:textSize="@dimen/text_size_xxsmall"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible"/>
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/imgRightArrow"
+            app:layout_constraintEnd_toStartOf="@+id/imgRightArrow"
+            app:layout_constraintTop_toTopOf="@+id/imgRightArrow" />
 
         <!-- Task Description -->
         <TextView
@@ -65,13 +68,13 @@
             android:layout_height="0dp"
             android:layout_marginTop="4dp"
             android:ellipsize="end"
+            android:fontFamily="@font/montserrat_semi_bold"
             android:maxLines="3"
             android:text="Task description goes here\ndfjhdfjhdsjkhf\nhdsafkjdshfkdj\nkjdhfjksdhfkhds"
-            android:textColor="@color/text_black"
-            android:textSize="@dimen/text_size_small"
-            android:fontFamily="@font/montserrat_semi_bold"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_xsmall"
             app:layout_constraintBottom_toTopOf="@+id/layoutTime"
-            app:layout_constraintEnd_toStartOf="@id/imgRightArrow"
+            app:layout_constraintEnd_toStartOf="@+id/badgeNew"
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle"
             app:layout_constraintTop_toBottomOf="@id/textTaskTitle" />
 
@@ -80,10 +83,9 @@
             android:id="@+id/layoutTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/statusIndicator"
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
 
             <ImageView
@@ -92,7 +94,7 @@
                 android:layout_height="16dp"
                 android:layout_marginEnd="4dp"
                 android:src="@drawable/ic_time"
-                app:tint="@color/text_hint" />
+                app:tint="@color/text_secondary" />
 
             <TextView
                 android:id="@+id/textTaskTime"
@@ -100,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:text="09:00"
                 android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                android:textColor="@color/text_hint" />
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 
@@ -122,15 +124,15 @@
                 android:layout_height="16dp"
                 android:layout_marginEnd="4dp"
                 android:src="@drawable/ic_person"
-                app:tint="@color/text_hint" />
+                app:tint="@color/text_secondary" />
 
             <TextView
                 android:id="@+id/textTaskAssignee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="John Doe"
+                android:text="Mohammad Sulaiman"
                 android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                android:textColor="@color/text_hint" />
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 
@@ -147,22 +149,23 @@
             app:layout_constraintBottom_toBottomOf="@id/layoutTime"
             app:layout_constraintStart_toEndOf="@id/layoutAssignee" />
 
-        <!-- Status Chip -->
         <com.google.android.material.chip.Chip
             android:id="@+id/chipTaskStatus"
-            style="@style/Widget.Material3.Chip.Assist"
+            style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="43dp"
+            android:minHeight="43dp"
             android:text="Pending"
+            android:fontFamily="@font/montserrat_semi_bold"
+            android:textColor="@color/black"
             android:textSize="@dimen/text_size_small"
-            app:chipCornerRadius="@dimen/dimen_12"
-            android:fontFamily="@font/montserrat_bold"
-            app:chipBackgroundColor="@color/status_pending_light"
-            app:chipStrokeColor="@color/status_pending"
+            app:chipBackgroundColor="@color/white"
+            app:chipCornerRadius="8dp"
+            app:chipStrokeColor="@color/warning_dark"
             app:chipStrokeWidth="1dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/imgRightArrow"
-            app:layout_constraintTop_toBottomOf="@+id/imgRightArrow" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="@dimen/dimen_8"/>
 
         <!-- Chevron -->
         <ImageView
@@ -173,7 +176,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/text_hint" />
+            app:tint="@color/black"
+            android:layout_marginEnd="@dimen/dimen_16"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -8,7 +8,7 @@
     
     <item
         android:id="@+id/nav_schedule"
-        android:title="Schedule"
+        android:title="Task"
         android:icon="@drawable/ic_calendar_24" />
     
     <item

@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
 import com.sendajapan.sendasnap.R;
-import com.sendajapan.sendasnap.activities.AddTaskActivity;
-import com.sendajapan.sendasnap.activities.TaskDetailsActivity;
+import com.sendajapan.sendasnap.activities.schedule.AddScheduleActivity;
+import com.sendajapan.sendasnap.activities.schedule.ScheduleDetailActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
 import com.sendajapan.sendasnap.models.Task;
+import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
+    private SharedPrefsManager prefsManager;
 
     private String selectedDate;
     private Task.TaskStatus currentFilter = null;
@@ -52,6 +55,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        prefsManager = SharedPrefsManager.getInstance(requireContext());
+        
         setupToolbar();
         setupRecyclerView();
         setupCalendar();
@@ -165,10 +170,26 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void setupFAB() {
-        binding.fabAddTask.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), AddTaskActivity.class);
-            startActivityForResult(intent, ADD_TASK_REQUEST_CODE);
-        });
+        // Check user role to show/hide FAB
+        UserData currentUser = prefsManager.getUser();
+        boolean canCreateTask = false;
+        
+        if (currentUser != null) {
+            String role = currentUser.getRole();
+            if (role != null && (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("manager"))) {
+                canCreateTask = true;
+            }
+        }
+        
+        if (canCreateTask) {
+            binding.fabAddTask.setVisibility(View.VISIBLE);
+            binding.fabAddTask.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), AddScheduleActivity.class);
+                startActivityForResult(intent, ADD_TASK_REQUEST_CODE);
+            });
+        } else {
+            binding.fabAddTask.setVisibility(View.GONE);
+        }
     }
 
     private void setupSelectedDate() {
@@ -241,7 +262,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     @Override
     public void onTaskClick(Task task) {
-        Intent intent = new Intent(getContext(), TaskDetailsActivity.class);
+        Intent intent = new Intent(getContext(), ScheduleDetailActivity.class);
         intent.putExtra("task", task);
         startActivity(intent);
     }

@@ -3,6 +3,7 @@ package com.sendajapan.sendasnap.models;
 import java.io.Serializable;
 
 public class TaskAttachment implements Serializable {
+
     private String id;
     private String fileName;
     private String filePath;

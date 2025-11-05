@@ -148,7 +148,7 @@
                             android:textColor="@color/primary"
                             android:textSize="@dimen/text_size_small"
                             app:backgroundTint="@color/white"
-                            app:strokeColor="@color/status_running"
+                            app:strokeColor="@color/warning_light"
                             app:strokeWidth="2dp"
                             app:cornerRadius="24dp"/>
 

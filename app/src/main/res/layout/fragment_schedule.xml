@@ -22,7 +22,7 @@
             android:background="@android:color/transparent"
             app:title="Work Schedule"
             app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title" />
+            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -37,22 +37,25 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <!-- Calendar View -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:strokeWidth="0dp">
+                app:strokeWidth="0dp"
+                app:cardCornerRadius="@dimen/dimen_8"
+                app:cardElevation="2dp"
+                android:background="@color/white"
+                android:layout_marginHorizontal="@dimen/dimen_16">
 
                 <CalendarView
                     android:id="@+id/calendarView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/white" />
+                    android:background="@color/white"/>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -64,7 +67,8 @@
                 android:layout_marginBottom="8dp"
                 app:singleSelection="true"
                 app:chipSpacingHorizontal="16dp"
-                app:chipSpacingVertical="0dp">
+                app:chipSpacingVertical="0dp"
+                android:layout_marginHorizontal="@dimen/dimen_16">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAll"
@@ -154,15 +158,17 @@
                 android:layout_marginBottom="8dp"
                 android:text="Today's Tasks"
                 android:textAppearance="@style/TextAppearance.Montserrat.TitleMedium"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:layout_marginStart="@dimen/dimen_16"/>
 
             <!-- Tasks RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewTasks"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_task" />
+                tools:listitem="@layout/item_task"
+                tools:itemCount="2"/>
 
             <!-- Empty State -->
             <LinearLayout
@@ -172,11 +178,11 @@
                 android:layout_marginTop="32dp"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="invisible">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:src="@drawable/ic_calendar_outlined"
                     app:tint="@color/text_hint" />
 

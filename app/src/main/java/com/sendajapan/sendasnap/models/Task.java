@@ -5,17 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Task implements Serializable {
+
     private String id;
     private String title;
     private String description;
-    private String workDate; // ISO 8601 format
+    private String workDate;
     private String workTime;
     private TaskStatus status;
-    private String assignee; // Task assignee
-    private List<TaskAttachment> attachments; // File attachments
+    private String assignee;
+    private TaskPriority priority;
+    private List<TaskAttachment> attachments;
     private long createdAt;
     private long updatedAt;
-    private boolean isNew; // For NEW badge
+    private boolean isNew;
 
     public Task() {
     }
@@ -27,8 +29,9 @@ public class Task implements Serializable {
         this.workDate = workDate;
         this.workTime = workTime;
         this.status = status;
-        this.assignee = ""; // Default empty assignee
-        this.attachments = new ArrayList<>(); // Initialize empty attachments list
+        this.assignee = "";
+        this.priority = TaskPriority.NORMAL;
+        this.attachments = new ArrayList<>();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.isNew = true;
@@ -93,6 +96,15 @@ public class Task implements Serializable {
         this.updatedAt = System.currentTimeMillis();
     }
 
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
     public long getCreatedAt() {
         return createdAt;
     }
@@ -143,5 +155,9 @@ public class Task implements Serializable {
 
     public enum TaskStatus {
         RUNNING, PENDING, COMPLETED, CANCELLED
+    }
+
+    public enum TaskPriority {
+        LOW, NORMAL, HIGH
     }
 }
