@@ -16,62 +16,63 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.sendajapan.sendasnap.R;
 
 public class VehicleSearchDialog {
-    
+
     public interface OnSearchListener {
         void onSearch(String searchType, String searchQuery);
     }
-    
+
     public static class Builder {
         private final Context context;
         private OnSearchListener searchListener;
         private boolean cancelable = true;
         private final HapticFeedbackHelper hapticHelper;
-        
+
         public Builder(@NonNull Context context) {
             this.context = context;
             this.hapticHelper = HapticFeedbackHelper.getInstance(context);
         }
-        
+
         public Builder setOnSearchListener(OnSearchListener listener) {
             this.searchListener = listener;
             return this;
         }
-        
+
         public Builder setCancelable(boolean cancelable) {
             this.cancelable = cancelable;
             return this;
         }
-        
+
         public Dialog create() {
             Dialog dialog = new Dialog(context);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
             dialog.setContentView(R.layout.dialog_vehicle_search);
             dialog.setCancelable(cancelable);
-            
+
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                 );
-                dialog.getWindow().setBackgroundDrawableResource(R.drawable.outline_box_shape_16dp);
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.outline_box_shape);
             }
-            
+
             Spinner spinnerSearchType = dialog.findViewById(R.id.spinnerSearchType);
             ImageView imgSpinnerArrow = dialog.findViewById(R.id.imgSpinnerArrow);
             TextInputLayout tilSearchQuery = dialog.findViewById(R.id.tilSearchQuery);
             TextInputEditText etSearchQuery = dialog.findViewById(R.id.etSearchQuery);
             MaterialButton btnCancel = dialog.findViewById(R.id.btnCancel);
             MaterialButton btnSearch = dialog.findViewById(R.id.btnSearch);
-            
+
             String[] searchTypes = {"Vehicle ID", "Chassis Number"};
             String[] searchTypeValues = {"vehicle_id", "veh_chassis_number"};
-            
+
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                R.layout.spinner_item_search_type, searchTypes);
+                    R.layout.spinner_item_search_type, searchTypes);
             adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_bordered);
             spinnerSearchType.setAdapter(adapter);
             spinnerSearchType.setSelection(0);
-            
+
             // Store selected value
             final int[] selectedIndex = {0};
             spinnerSearchType.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
@@ -80,59 +81,54 @@ public class VehicleSearchDialog {
                     selectedIndex[0] = position;
                     hapticHelper.vibrateClick();
                 }
-                
+
                 @Override
                 public void onNothingSelected(android.widget.AdapterView<?> parent) {
                     // Do nothing
                 }
             });
-            
-            // Make ImageView functional - click to open spinner
+
             imgSpinnerArrow.setOnClickListener(v -> {
                 spinnerSearchType.performClick();
                 hapticHelper.vibrateClick();
             });
-            
-            // Setup click listeners
+
             btnCancel.setOnClickListener(v -> {
                 hapticHelper.vibrateClick();
                 dialog.dismiss();
             });
-            
+
             btnSearch.setOnClickListener(v -> {
                 String searchQuery = etSearchQuery.getText().toString().trim();
-                
-                // Clear previous errors
+
                 tilSearchQuery.setError(null);
-                
-                // Validate input
+
                 if (searchQuery.isEmpty()) {
                     tilSearchQuery.setError("Search query is required");
                     etSearchQuery.requestFocus();
                     hapticHelper.vibrateError();
                     return;
                 }
-                
+
                 if (searchQuery.length() < 3) {
                     tilSearchQuery.setError("Search query must be at least 3 characters");
                     etSearchQuery.requestFocus();
                     hapticHelper.vibrateError();
                     return;
                 }
-                
-                // Close dialog and trigger search
+
                 hapticHelper.vibrateClick();
                 dialog.dismiss();
-                
+
                 if (searchListener != null) {
                     String searchType = searchTypeValues[selectedIndex[0]];
                     searchListener.onSearch(searchType, searchQuery);
                 }
             });
-            
+
             return dialog;
         }
-        
+
         public void show() {
             create().show();
         }

@@ -22,7 +22,7 @@ import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.sendajapan.sendasnap.ui.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
 
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNoInternetToast() {
-        MotionToastHelper.showNoInternet(this);
+        CookieBarToastHelper.showNoInternet(this);
     }
 
     @Override

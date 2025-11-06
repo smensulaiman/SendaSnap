@@ -2,13 +2,14 @@ package com.sendajapan.sendasnap.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Patterns;
-import android.view.Gravity;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -32,15 +33,15 @@ import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+
+import org.aviran.cookiebar2.CookieBar;
 
 import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import www.sanju.motiontoast.MotionToast;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -48,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPrefsManager prefsManager;
     private HapticFeedbackHelper hapticHelper;
     private ApiService apiService;
-    private CookieBarToastHelper cookieBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,33 +66,12 @@ public class LoginActivity extends AppCompatActivity {
 
         initHelpers();
         setupClickListeners();
-
-        // Confirm app exit on back press from login screen
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (hapticHelper != null)
-                    hapticHelper.vibrateClick();
-                new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Exit App")
-                        .setMessage("Are you sure you want to exit?")
-                        .setPositiveButton("Exit", (dialog, which) -> {
-                            dialog.dismiss();
-                            finishAffinity();
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .setCancelable(true)
-                        .show();
-            }
-        });
     }
 
     private void initHelpers() {
         prefsManager = SharedPrefsManager.getInstance(LoginActivity.this);
         hapticHelper = HapticFeedbackHelper.getInstance(LoginActivity.this);
         apiService = RetrofitClient.getInstance().getApiService();
-
-        cookieBar = new CookieBarToastHelper(LoginActivity.this);
 
         loadSavedCredentials();
     }
@@ -172,15 +151,23 @@ public class LoginActivity extends AppCompatActivity {
                                 clearSavedCredentials();
                             }
 
-                            cookieBar.setCookieBarDismissListener(i -> new Handler(Looper.getMainLooper()).post(() -> {
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                                finish();
-                            }));
-
-                            cookieBar.showSuccessToast("Login Successful", loginResponse.getMessage(),
-                                    Gravity.TOP, CookieBarToastHelper.DURATION_SHORT);
+                            CookieBar.build(LoginActivity.this)
+                                    .setTitle("Login Successful")
+                                    .setMessage(loginResponse.getMessage())
+                                    .setDuration(CookieBarToastHelper.SHORT_DURATION)
+                                    .setIcon(R.drawable.toast_success_green_24)
+                                    .setIconAnimation(R.animator.iconspin)
+                                    .setBackgroundColor(R.color.success_light)
+                                    .setTitleColor(R.color.success_dark)
+                                    .setMessageColor(R.color.success_dark)
+                                    .setCookiePosition(CookieBarToastHelper.GRAVITY_TOP)
+                                    .setCookieListener(i -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                        finish();
+                                    }, 200))
+                                    .show();
                         }
 
                     } else {
@@ -197,9 +184,9 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 setLoadingState(false);
                 hapticHelper.vibrateError();
-                MotionToastHelper.showError(LoginActivity.this, "Login Failed",
+                CookieBarToastHelper.showError(LoginActivity.this, "Login Failed",
                         "Network error. Please check your connection and try again.",
-                        MotionToast.GRAVITY_TOP, MotionToast.LONG_DURATION);
+                        CookieBarToastHelper.GRAVITY_TOP, CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
@@ -208,8 +195,8 @@ public class LoginActivity extends AppCompatActivity {
         hapticHelper.vibrateError();
         binding.tilPassword.setError(errorMessage != null ? errorMessage : "Invalid credentials");
         binding.etPassword.requestFocus();
-        cookieBar.showErrorToast("Login Failed", errorMessage,
-                Gravity.TOP, CookieBarToastHelper.DURATION_LONG);
+
+        showErrorToast(errorMessage);
     }
 
     private void handleErrorResponse(Response<LoginResponse> response) {
@@ -231,8 +218,21 @@ public class LoginActivity extends AppCompatActivity {
         binding.tilPassword.setError(errorMessage);
         binding.etPassword.requestFocus();
 
-        cookieBar.showErrorToast("Login Failed", errorMessage,
-                Gravity.TOP, CookieBarToastHelper.DURATION_LONG);
+        showErrorToast(errorMessage);
+    }
+
+    private void showErrorToast(String errorMessage) {
+        CookieBar.build(LoginActivity.this)
+                .setTitle("Login Failed")
+                .setMessage(errorMessage)
+                .setIcon(R.drawable.toast_cancel_red_24)
+                .setIconAnimation(R.animator.iconspin)
+                .setBackgroundColor(R.color.error_light)
+                .setTitleColor(R.color.error_dark)
+                .setMessageColor(R.color.error_dark)
+                .setCookiePosition(CookieBarToastHelper.GRAVITY_TOP)
+                .setDuration(CookieBarToastHelper.LONG_DURATION)
+                .show();
     }
 
     private void setLoadingState(boolean isLoading) {

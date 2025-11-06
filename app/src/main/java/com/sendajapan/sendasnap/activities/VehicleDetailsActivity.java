@@ -30,13 +30,12 @@ import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import www.sanju.motiontoast.MotionToast;
 
 public class VehicleDetailsActivity extends AppCompatActivity {
 
@@ -89,8 +88,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private void getVehicleData() {
         vehicle = (Vehicle) getIntent().getSerializableExtra("vehicle");
         if (vehicle == null) {
-            MotionToastHelper.showError(this, "Error", "Vehicle data not found", MotionToast.GRAVITY_BOTTOM,
-                    MotionToast.LONG_DURATION);
+            CookieBarToastHelper.showError(this, "Error", "Vehicle data not found", CookieBarToastHelper.GRAVITY_BOTTOM,
+                    CookieBarToastHelper.LONG_DURATION);
             finish();
         }
     }
@@ -176,15 +175,15 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                             pendingImagePaths.add(cameraImagePath);
                             pendingImageAdapter.notifyItemInserted(pendingImagePaths.size() - 1);
                             updatePendingImagesVisibility();
-                            MotionToastHelper.showSuccess(this, "Success", "Photo added successfully",
-                                    MotionToast.GRAVITY_BOTTOM, MotionToast.SHORT_DURATION);
+                            CookieBarToastHelper.showSuccess(this, "Success", "Photo added successfully",
+                                    CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
                         } else {
-                            MotionToastHelper.showError(this, "Error", "Failed to save photo",
-                                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                            CookieBarToastHelper.showError(this, "Error", "Failed to save photo",
+                                    CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                         }
                     } else if (!result) {
-                        MotionToastHelper.showInfo(this, "Cancelled", "Photo capture cancelled",
-                                MotionToast.GRAVITY_BOTTOM, MotionToast.SHORT_DURATION);
+                        CookieBarToastHelper.showInfo(this, "Cancelled", "Photo capture cancelled",
+                                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
                     }
                 });
 
@@ -246,9 +245,9 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                    MotionToastHelper.showInfo(this, "Permission Required",
-                            "Camera permission is needed to take photos", MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION);
+                    CookieBarToastHelper.showInfo(this, "Permission Required",
+                            "Camera permission is needed to take photos", CookieBarToastHelper.GRAVITY_BOTTOM,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION_REQUEST);
                 return;
@@ -263,9 +262,9 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) ||
                         ActivityCompat.shouldShowRequestPermissionRationale(this,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    MotionToastHelper.showInfo(this, "Permission Required",
-                            "Camera and storage permissions are needed to take photos", MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION);
+                    CookieBarToastHelper.showInfo(this, "Permission Required",
+                            "Camera and storage permissions are needed to take photos", CookieBarToastHelper.GRAVITY_BOTTOM,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION_REQUEST);
                 return;
@@ -280,18 +279,18 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                     cameraLauncher.launch(cameraImageUri);
                 } else {
-                    MotionToastHelper.showError(this, "Error", "No camera app available on this device",
-                            MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION);
+                    CookieBarToastHelper.showError(this, "Error", "No camera app available on this device",
+                            CookieBarToastHelper.GRAVITY_BOTTOM,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
             } else {
-                MotionToastHelper.showError(this, "Error", "Failed to create image file", MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(this, "Error", "Failed to create image file", CookieBarToastHelper.GRAVITY_BOTTOM,
+                        CookieBarToastHelper.LONG_DURATION);
             }
         } catch (Exception e) {
-            MotionToastHelper.showError(this, "Error", "Failed to open camera: " + e.getMessage(),
-                    MotionToast.GRAVITY_BOTTOM,
-                    MotionToast.LONG_DURATION);
+            CookieBarToastHelper.showError(this, "Error", "Failed to open camera: " + e.getMessage(),
+                    CookieBarToastHelper.GRAVITY_BOTTOM,
+                    CookieBarToastHelper.LONG_DURATION);
         }
     }
 
@@ -303,9 +302,9 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES)) {
-                    MotionToastHelper.showInfo(this, "Permission Required",
-                            "Storage permission is needed to access photos", MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION);
+                    CookieBarToastHelper.showInfo(this, "Permission Required",
+                            "Storage permission is needed to access photos", CookieBarToastHelper.GRAVITY_BOTTOM,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION_REQUEST);
                 return;
@@ -317,9 +316,9 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                     Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    MotionToastHelper.showInfo(this, "Permission Required",
-                            "Storage permission is needed to access photos", MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION);
+                    CookieBarToastHelper.showInfo(this, "Permission Required",
+                            "Storage permission is needed to access photos", CookieBarToastHelper.GRAVITY_BOTTOM,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION_REQUEST);
                 return;
@@ -354,8 +353,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             return FileProvider.getUriForFile(this,
                     getPackageName() + ".fileprovider", image);
         } catch (Exception e) {
-            MotionToastHelper.showError(this, "Error", "Failed to create image file: " + e.getMessage(),
-                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+            CookieBarToastHelper.showError(this, "Error", "Failed to create image file: " + e.getMessage(),
+                    CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             return null;
         }
     }
@@ -397,8 +396,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (allPermissionsGranted) {
                 openCamera();
             } else {
-                MotionToastHelper.showError(this, "Permission Denied", "Camera permission is required",
-                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(this, "Permission Denied", "Camera permission is required",
+                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             }
         } else if (requestCode == STORAGE_PERMISSION_REQUEST) {
             boolean allPermissionsGranted = true;
@@ -411,16 +410,16 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (allPermissionsGranted) {
                 openGallery();
             } else {
-                MotionToastHelper.showError(this, "Permission Denied", "Storage permission is required",
-                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(this, "Permission Denied", "Storage permission is required",
+                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             }
         }
     }
 
     private void uploadPendingImages() {
         if (pendingImagePaths.isEmpty()) {
-            MotionToastHelper.showInfo(this, "No Photos", "No photos to upload", MotionToast.GRAVITY_BOTTOM,
-                    MotionToast.SHORT_DURATION);
+            CookieBarToastHelper.showInfo(this, "No Photos", "No photos to upload", CookieBarToastHelper.GRAVITY_BOTTOM,
+                    CookieBarToastHelper.SHORT_DURATION);
             return;
         }
 
@@ -452,8 +451,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             pendingImageAdapter.notifyDataSetChanged();
             updatePendingImagesVisibility();
 
-            MotionToastHelper.showSuccess(this, "Success", "Photos uploaded successfully!", MotionToast.GRAVITY_BOTTOM,
-                    MotionToast.LONG_DURATION);
+            CookieBarToastHelper.showSuccess(this, "Success", "Photos uploaded successfully!", CookieBarToastHelper.GRAVITY_BOTTOM,
+                    CookieBarToastHelper.LONG_DURATION);
         }, 2000); // 2 second delay to simulate upload
     }
 

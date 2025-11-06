@@ -25,8 +25,8 @@ import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
 import com.sendajapan.sendasnap.utils.LoadingDialog;
@@ -37,7 +37,6 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import www.sanju.motiontoast.MotionToast;
 
 public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleClickListener {
 
@@ -139,7 +138,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void performSearchFromDialog(String searchType, String searchQuery) {
         // Check internet connection
         if (!networkUtils.isNetworkAvailable()) {
-            MotionToastHelper.showNoInternet(requireContext());
+            CookieBarToastHelper.showNoInternet(requireContext());
             hapticHelper.vibrateError();
             return;
         }
@@ -163,9 +162,9 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                             List<Vehicle> vehicles = data.getVehicles();
                             
                             if (vehicles.isEmpty()) {
-                                MotionToastHelper.showInfo(requireContext(), "No Results", 
+                                CookieBarToastHelper.showInfo(requireContext(), "No Results", 
                                         "No vehicles found matching your search criteria",
-                                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                             } else if (vehicles.size() == 1) {
                                 // Single vehicle - navigate directly to detail page
                                 Vehicle vehicle = vehicles.get(0);
@@ -175,37 +174,37 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                                 intent.putExtra("vehicle", vehicle);
                                 startActivity(intent);
                                 
-                                MotionToastHelper.showSuccess(requireContext(), "Vehicle Found", 
+                                CookieBarToastHelper.showSuccess(requireContext(), "Vehicle Found", 
                                         "Vehicle details loaded successfully!",
-                                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                             } else {
                                 // Multiple vehicles - show results dialog
                                 showSearchResultsDialog(vehicles);
                             }
                         } else {
-                            MotionToastHelper.showError(requireContext(), "Error", 
+                            CookieBarToastHelper.showError(requireContext(), "Error", 
                                     "No vehicle data received",
-                                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                                    CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                         }
                     } else {
                         String message = searchResponse.getMessage() != null ? 
                                 searchResponse.getMessage() : "Search failed";
-                        MotionToastHelper.showError(requireContext(), "Error", message,
-                                MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                        CookieBarToastHelper.showError(requireContext(), "Error", message,
+                                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                     }
                 } else {
-                    MotionToastHelper.showError(requireContext(), "Error", 
+                    CookieBarToastHelper.showError(requireContext(), "Error", 
                             "Failed to search vehicles. Please try again.",
-                            MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                            CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                 }
             }
 
             @Override
             public void onFailure(Call<VehicleSearchResponse> call, Throwable t) {
                 hideLoadingDialog();
-                MotionToastHelper.showError(requireContext(), "Error", 
+                CookieBarToastHelper.showError(requireContext(), "Error", 
                         "Failed to connect to server. Please check your internet connection.",
-                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                 hapticHelper.vibrateError();
             }
         });

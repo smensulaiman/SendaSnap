@@ -14,13 +14,12 @@ import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityHistoryBinding;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.VehicleCache;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import www.sanju.motiontoast.MotionToast;
 
 public class HistoryActivity extends AppCompatActivity implements VehicleAdapter.OnVehicleClickListener {
 
@@ -156,9 +155,9 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
                     vehicleAdapter.updateVehicles(filteredVehicles);
                     updateEmptyState();
 
-                    MotionToastHelper.showSuccess(this, "History Cleared",
+                    CookieBarToastHelper.showSuccess(this, "History Cleared",
                             "All search history has been removed",
-                            MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                            CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

@@ -30,10 +30,9 @@ import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.services.FirebaseStorageService;
 import com.sendajapan.sendasnap.utils.FirebaseUtils;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.MotionToastHelper;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import java.io.File;
 import java.util.List;
-import www.sanju.motiontoast.MotionToast;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -208,8 +207,8 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception e) {
-                MotionToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to send message", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                        "Failed to send message", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
@@ -271,8 +270,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void uploadImage(Uri imageUri) {
-        MotionToastHelper.showInfo(this, "Uploading", "Uploading image...", 
-                MotionToast.GRAVITY_BOTTOM, MotionToast.SHORT_DURATION);
+        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading image...", 
+                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
         
         storageService.uploadImage(imageUri, chatId, new FirebaseStorageService.StorageCallback() {
             @Override
@@ -286,24 +285,24 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Exception e) {
-                                MotionToastHelper.showError(ChatActivity.this, "Error", 
-                                        "Failed to send image", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                                        "Failed to send image", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                             }
                         });
             }
 
             @Override
             public void onFailure(Exception exception) {
-                MotionToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to upload image", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                        "Failed to upload image", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
 
     private void uploadFile(Uri fileUri) {
         String fileName = getFileName(fileUri);
-        MotionToastHelper.showInfo(this, "Uploading", "Uploading file...", 
-                MotionToast.GRAVITY_BOTTOM, MotionToast.SHORT_DURATION);
+        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading file...", 
+                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
         
         storageService.uploadFile(fileUri, chatId, fileName, new FirebaseStorageService.StorageCallback() {
             @Override
@@ -317,16 +316,16 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Exception e) {
-                                MotionToastHelper.showError(ChatActivity.this, "Error", 
-                                        "Failed to send file", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                                        "Failed to send file", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
                             }
                         });
             }
 
             @Override
             public void onFailure(Exception exception) {
-                MotionToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to upload file", MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                        "Failed to upload file", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
