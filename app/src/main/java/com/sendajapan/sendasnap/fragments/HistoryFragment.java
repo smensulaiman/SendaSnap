@@ -119,7 +119,7 @@ public class HistoryFragment extends Fragment implements VehicleAdapter.OnVehicl
                     vehicleCache.clearCache();
                     loadHistory();
                     CookieBarToastHelper.showWarning(requireContext(), "History Cleared",
-                            "All search history has been removed", CookieBarToastHelper.GRAVITY_BOTTOM,
+                            "All search history has been removed",
                             CookieBarToastHelper.LONG_DURATION);
                 })
                 .setNegativeButton("Cancel", null)

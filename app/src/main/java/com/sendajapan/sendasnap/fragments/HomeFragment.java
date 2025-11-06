@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +14,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.widget.LinearLayout;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
+import com.sendajapan.sendasnap.models.ErrorResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import com.sendajapan.sendasnap.networking.ApiService;
@@ -74,7 +79,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void initHelpers() {
         vehicleCache = VehicleCache.getInstance(requireContext());
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
-        apiService = RetrofitClient.getInstance().getApiService();
+        apiService = RetrofitClient.getInstance(requireContext()).getApiService();
         networkUtils = NetworkUtils.getInstance(requireContext());
     }
 
@@ -119,7 +124,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
 
     private void showLoadingDialog(String message) {
         hideLoadingDialog();
-        
+
         loadingDialog = new LoadingDialog.Builder(requireContext())
                 .setMessage(message)
                 .setSubtitle("Please wait while we fetch the data")
@@ -150,61 +155,76 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         Call<VehicleSearchResponse> call = apiService.searchVehicles(searchType, searchQuery);
         call.enqueue(new Callback<VehicleSearchResponse>() {
             @Override
-            public void onResponse(Call<VehicleSearchResponse> call, Response<VehicleSearchResponse> response) {
+            public void onResponse(@NonNull Call<VehicleSearchResponse> call,
+                    @NonNull Response<VehicleSearchResponse> response) {
                 hideLoadingDialog();
-                
+
                 if (response.isSuccessful() && response.body() != null) {
                     VehicleSearchResponse searchResponse = response.body();
-                    
+
                     if (searchResponse.getSuccess() != null && searchResponse.getSuccess()) {
                         VehicleSearchResponse.VehicleSearchData data = searchResponse.getData();
                         if (data != null && data.getVehicles() != null) {
                             List<Vehicle> vehicles = data.getVehicles();
-                            
+
                             if (vehicles.isEmpty()) {
-                                CookieBarToastHelper.showInfo(requireContext(), "No Results", 
+                                CookieBarToastHelper.showInfo(requireContext(), "No Results",
                                         "No vehicles found matching your search criteria",
-                                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                        CookieBarToastHelper.LONG_DURATION);
                             } else if (vehicles.size() == 1) {
                                 // Single vehicle - navigate directly to detail page
                                 Vehicle vehicle = vehicles.get(0);
                                 vehicleCache.addVehicle(vehicle);
-                                
+
                                 Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
                                 intent.putExtra("vehicle", vehicle);
                                 startActivity(intent);
-                                
-                                CookieBarToastHelper.showSuccess(requireContext(), "Vehicle Found", 
+
+                                CookieBarToastHelper.showSuccess(requireContext(), "Vehicle Found",
                                         "Vehicle details loaded successfully!",
-                                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                        CookieBarToastHelper.LONG_DURATION);
                             } else {
                                 // Multiple vehicles - show results dialog
                                 showSearchResultsDialog(vehicles);
                             }
                         } else {
-                            CookieBarToastHelper.showError(requireContext(), "Error", 
+                            CookieBarToastHelper.showError(requireContext(), "Error",
                                     "No vehicle data received",
-                                    CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                    CookieBarToastHelper.LONG_DURATION);
                         }
                     } else {
-                        String message = searchResponse.getMessage() != null ? 
-                                searchResponse.getMessage() : "Search failed";
+                        String message = searchResponse.getMessage() != null ? searchResponse.getMessage()
+                                : "Search failed";
                         CookieBarToastHelper.showError(requireContext(), "Error", message,
-                                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                CookieBarToastHelper.LONG_DURATION);
                     }
                 } else {
-                    CookieBarToastHelper.showError(requireContext(), "Error", 
-                            "Failed to search vehicles. Please try again.",
-                            CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                    String errorMessage = "Failed to search vehicles. Please try again.";
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBodyStr = response.errorBody().string();
+                            Gson gson = new com.google.gson.Gson();
+                            ErrorResponse errorResponse = gson.fromJson(errorBodyStr,
+                                    com.sendajapan.sendasnap.models.ErrorResponse.class);
+                            if (errorResponse != null && errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        } catch (Exception e) {
+                            // Optionally log or handle parsing exception
+                        }
+                    }
+                    CookieBarToastHelper.showError(requireContext(), "Error",
+                            errorMessage,
+                            CookieBarToastHelper.LONG_DURATION);
                 }
             }
 
             @Override
-            public void onFailure(Call<VehicleSearchResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<VehicleSearchResponse> call, @NonNull Throwable t) {
                 hideLoadingDialog();
-                CookieBarToastHelper.showError(requireContext(), "Error", 
+                CookieBarToastHelper.showError(requireContext(), "Error",
                         "Failed to connect to server. Please check your internet connection.",
-                        CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                        CookieBarToastHelper.LONG_DURATION);
                 hapticHelper.vibrateError();
             }
         });
@@ -214,24 +234,23 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         Dialog resultsDialog = new Dialog(requireContext());
         resultsDialog.setContentView(R.layout.dialog_vehicle_search_results);
         if (resultsDialog.getWindow() != null) {
-            resultsDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            resultsDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
         // Get views
-        androidx.recyclerview.widget.RecyclerView recyclerViewResults = 
-                resultsDialog.findViewById(R.id.recyclerViewResults);
+        RecyclerView recyclerViewResults = resultsDialog.findViewById(R.id.recyclerViewResults);
         LinearLayout emptyState = resultsDialog.findViewById(R.id.layoutEmptyState);
-        com.google.android.material.button.MaterialButton btnClose = 
-                resultsDialog.findViewById(R.id.btnClose);
+        MaterialButton btnClose = resultsDialog.findViewById(R.id.btnClose);
 
         // Setup RecyclerView
         VehicleAdapter resultsAdapter = new VehicleAdapter(vehicle -> {
             hapticHelper.vibrateClick();
             resultsDialog.dismiss();
-            
+
             // Add to cache
             vehicleCache.addVehicle(vehicle);
-            
+
             // Navigate to detail page
             Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
             intent.putExtra("vehicle", vehicle);
@@ -259,21 +278,20 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         resultsDialog.show();
     }
 
-
     private void loadRecentVehicles() {
         // Show shimmer
         showShimmer();
-        
+
         // Simulate loading delay for shimmer effect
         new android.os.Handler().postDelayed(() -> {
             // Check if fragment is still attached and binding is not null
             if (!isAdded() || binding == null) {
                 return;
             }
-            
+
             // Create dummy vehicles based on the JSON response structure
             List<Vehicle> dummyVehicles = createDummyVehicles();
-            
+
             // Hide shimmer
             hideShimmer();
 
@@ -287,17 +305,19 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
             }
         }, 1500); // Simulated loading time
     }
-    
+
     private void showShimmer() {
-        if (binding == null) return;
+        if (binding == null)
+            return;
         binding.shimmerVehicles.setVisibility(View.VISIBLE);
         binding.shimmerVehicles.startShimmer();
         binding.recyclerViewVehicles.setVisibility(View.GONE);
         binding.layoutEmptyState.setVisibility(View.GONE);
     }
-    
+
     private void hideShimmer() {
-        if (binding == null) return;
+        if (binding == null)
+            return;
         binding.shimmerVehicles.stopShimmer();
         binding.shimmerVehicles.setVisibility(View.GONE);
     }

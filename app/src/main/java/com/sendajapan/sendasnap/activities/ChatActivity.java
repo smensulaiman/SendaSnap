@@ -208,7 +208,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onFailure(Exception e) {
                 CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to send message", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                        "Failed to send message", CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
@@ -271,7 +271,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void uploadImage(Uri imageUri) {
         CookieBarToastHelper.showInfo(this, "Uploading", "Uploading image...", 
-                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
+                CookieBarToastHelper.SHORT_DURATION);
         
         storageService.uploadImage(imageUri, chatId, new FirebaseStorageService.StorageCallback() {
             @Override
@@ -286,7 +286,7 @@ public class ChatActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(Exception e) {
                                 CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                                        "Failed to send image", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                        "Failed to send image", CookieBarToastHelper.LONG_DURATION);
                             }
                         });
             }
@@ -294,7 +294,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onFailure(Exception exception) {
                 CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to upload image", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                        "Failed to upload image", CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
@@ -302,7 +302,7 @@ public class ChatActivity extends AppCompatActivity {
     private void uploadFile(Uri fileUri) {
         String fileName = getFileName(fileUri);
         CookieBarToastHelper.showInfo(this, "Uploading", "Uploading file...", 
-                CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.SHORT_DURATION);
+                CookieBarToastHelper.SHORT_DURATION);
         
         storageService.uploadFile(fileUri, chatId, fileName, new FirebaseStorageService.StorageCallback() {
             @Override
@@ -317,7 +317,7 @@ public class ChatActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(Exception e) {
                                 CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                                        "Failed to send file", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                                        "Failed to send file", CookieBarToastHelper.LONG_DURATION);
                             }
                         });
             }
@@ -325,7 +325,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onFailure(Exception exception) {
                 CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to upload file", CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                        "Failed to upload file", CookieBarToastHelper.LONG_DURATION);
             }
         });
     }

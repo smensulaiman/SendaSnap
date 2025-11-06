@@ -157,7 +157,7 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
 
                     CookieBarToastHelper.showSuccess(this, "History Cleared",
                             "All search history has been removed",
-                            CookieBarToastHelper.GRAVITY_BOTTOM, CookieBarToastHelper.LONG_DURATION);
+                            CookieBarToastHelper.LONG_DURATION);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

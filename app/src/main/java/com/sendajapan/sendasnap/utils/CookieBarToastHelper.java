@@ -2,10 +2,11 @@ package com.sendajapan.sendasnap.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.view.Gravity;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 
 import com.sendajapan.sendasnap.R;
 
@@ -15,207 +16,185 @@ import org.aviran.cookiebar2.CookieBar;
 public class CookieBarToastHelper {
 
     // Duration constants
-    public static final int SHORT_DURATION = 2000;
-    public static final int LONG_DURATION = 3500;
-    public static final int EXTRA_LONG_DURATION = 5000;
-
-    // Position constants
-    public static final int GRAVITY_TOP = Gravity.TOP;
-    public static final int GRAVITY_BOTTOM = Gravity.BOTTOM;
+    public static final long SHORT_DURATION = 2000L;
+    public static final long LONG_DURATION = 3500L;
+    public static final long EXTRA_LONG_DURATION = 5000L;
 
     /**
-     * Show success message with modern green style
+     * Get Activity from Context
+     */
+    private static Activity getActivity(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
+
+    /**
+     * Helper method to build CookieBar
+     */
+    private static CookieBar.Builder buildCookie(@NonNull Context context, String title, String message,
+                                                  @ColorRes int backgroundColorRes, int iconRes,
+                                                  long duration) {
+        Activity activity = getActivity(context);
+        if (activity == null) {
+            throw new IllegalArgumentException("Context must be an Activity or contain an Activity");
+        }
+        
+        return CookieBar.build(activity)
+                .setTitle(title)
+                .setMessage(message)
+                .setDuration(duration)
+                .setBackgroundColor(backgroundColorRes)
+                .setIcon(iconRes)
+                .setIconAnimation(R.animator.fade_in)
+                .setCookiePosition(Gravity.TOP)
+                .setSwipeToDismiss(true)
+                .setEnableAutoDismiss(true);
+    }
+
+    /**
+     * Show success message
      */
     public static void showSuccess(@NonNull Context context, String title, String message) {
-        showSuccess(context, title, message, GRAVITY_TOP, SHORT_DURATION);
+        showSuccess(context, title, message, SHORT_DURATION);
     }
 
-    public static void showSuccess(@NonNull Context context, String title, String message, int gravity, int duration) {
-        if (!(context instanceof Activity)) return;
-        
-        CookieBar.build((Activity) context)
-                .setTitle(title)
-                .setMessage(message)
-                .setDuration(duration)
-                .setBackgroundColor(R.color.success_dark)
-                .setIcon(R.drawable.ic_check_circle)
-                .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(gravity == GRAVITY_TOP ? CookieBar.TOP : CookieBar.BOTTOM)
-                .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true)
-                .show();
+    public static void showSuccess(@NonNull Context context, String title, String message, long duration) {
+        buildCookie(context, title, message, R.color.success_dark, R.drawable.ic_check_circle, duration).show();
     }
 
     /**
-     * Show error message with modern red style
+     * Show error message
      */
     public static void showError(@NonNull Context context, String title, String message) {
-        showError(context, title, message, GRAVITY_TOP, SHORT_DURATION);
+        showError(context, title, message, SHORT_DURATION);
     }
 
-    public static void showError(@NonNull Context context, String title, String message, int gravity, int duration) {
-        if (!(context instanceof Activity)) return;
-        
-        CookieBar.build((Activity) context)
-                .setTitle(title)
-                .setMessage(message)
-                .setDuration(duration)
-                .setBackgroundColor(R.color.error_dark)
-                .setIcon(R.drawable.ic_error)
-                .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(gravity == GRAVITY_TOP ? CookieBar.TOP : CookieBar.BOTTOM)
-                .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true)
-                .show();
+    public static void showError(@NonNull Context context, String title, String message, long duration) {
+        buildCookie(context, title, message, R.color.error_dark, R.drawable.ic_error, duration).show();
     }
 
     /**
-     * Show info message with modern blue style
+     * Show info message
      */
     public static void showInfo(@NonNull Context context, String title, String message) {
-        showInfo(context, title, message, GRAVITY_TOP, SHORT_DURATION);
+        showInfo(context, title, message, SHORT_DURATION);
     }
 
-    public static void showInfo(@NonNull Context context, String title, String message, int gravity, int duration) {
-        if (!(context instanceof Activity)) return;
-        
-        CookieBar.build((Activity) context)
-                .setTitle(title)
-                .setMessage(message)
-                .setDuration(duration)
-                .setBackgroundColor(R.color.primary)
-                .setIcon(R.drawable.ic_info)
-                .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(gravity == GRAVITY_TOP ? CookieBar.TOP : CookieBar.BOTTOM)
-                .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true)
-                .show();
+    public static void showInfo(@NonNull Context context, String title, String message, long duration) {
+        buildCookie(context, title, message, R.color.primary, R.drawable.ic_info, duration).show();
     }
 
     /**
-     * Show warning message with modern orange style
+     * Show warning message
      */
     public static void showWarning(@NonNull Context context, String title, String message) {
-        showWarning(context, title, message, GRAVITY_TOP, SHORT_DURATION);
+        showWarning(context, title, message, SHORT_DURATION);
     }
 
-    public static void showWarning(@NonNull Context context, String title, String message, int gravity, int duration) {
-        if (!(context instanceof Activity)) return;
-        
-        CookieBar.build((Activity) context)
-                .setTitle(title)
-                .setMessage(message)
-                .setDuration(duration)
-                .setBackgroundColor(R.color.warning_dark)
-                .setIcon(R.drawable.ic_warning)
-                .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(gravity == GRAVITY_TOP ? CookieBar.TOP : CookieBar.BOTTOM)
-                .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true)
-                .show();
+    public static void showWarning(@NonNull Context context, String title, String message, long duration) {
+        buildCookie(context, title, message, R.color.warning_dark, R.drawable.ic_warning, duration).show();
     }
 
     /**
      * Show no internet connection message
      */
     public static void showNoInternet(@NonNull Context context) {
-        if (!(context instanceof Activity)) return;
-        
-        CookieBar.build((Activity) context)
-                .setTitle("No Internet Connection")
-                .setMessage("Please check your network settings and try again")
-                .setDuration(LONG_DURATION)
-                .setBackgroundColor(R.color.error_dark)
-                .setIcon(R.drawable.ic_wifi_off)
-                .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(CookieBar.TOP)
-                .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true)
-                .show();
+        buildCookie(context, "No Internet Connection", 
+                "Please check your network settings and try again",
+                R.color.error_dark, R.drawable.ic_wifi_off, LONG_DURATION).show();
     }
 
     /**
-     * Modern variant: Show with custom action button
+     * Show with custom action button
      */
-    public static void showWithAction(@NonNull Context context, String title, String message, 
+    public static void showWithAction(@NonNull Context context, String title, String message,
                                       String actionText, Runnable action, int type) {
-        if (!(context instanceof Activity)) return;
+        Activity activity = getActivity(context);
+        if (activity == null) return;
         
-        int backgroundColor = getColorForType(context, type);
+        int backgroundColorRes = getColorResForType(type);
         int icon = getIconForType(type);
         
-        CookieBar.build((Activity) context)
+        CookieBar.build(activity)
                 .setTitle(title)
                 .setMessage(message)
                 .setDuration(EXTRA_LONG_DURATION)
-                .setBackgroundColor(backgroundColor)
+                .setBackgroundColor(backgroundColorRes)
                 .setActionColor(R.color.white)
                 .setIcon(icon)
                 .setIconAnimation(R.animator.fade_in)
                 .setAction(actionText, action::run)
-                .setCookiePosition(CookieBar.TOP)
+                .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(true)
                 .show();
     }
 
     /**
-     * Modern variant: Show persistent message (must be dismissed manually)
+     * Show persistent message (must be dismissed manually)
      */
-    public static void showPersistent(@NonNull Context context, String title, String message, 
+    public static void showPersistent(@NonNull Context context, String title, String message,
                                       String dismissText, int type) {
-        if (!(context instanceof Activity)) return;
+        Activity activity = getActivity(context);
+        if (activity == null) return;
         
-        int backgroundColor = getColorForType(context, type);
+        int backgroundColorRes = getColorResForType(type);
         int icon = getIconForType(type);
         
-        CookieBar.build((Activity) context)
+        CookieBar.build(activity)
                 .setTitle(title)
                 .setMessage(message)
-                .setBackgroundColor(backgroundColor)
+                .setBackgroundColor(backgroundColorRes)
                 .setActionColor(R.color.white)
                 .setIcon(icon)
                 .setIconAnimation(R.animator.fade_in)
                 .setAction(dismissText, () -> {})
-                .setCookiePosition(CookieBar.TOP)
+                .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(false)
                 .show();
     }
 
     /**
-     * Modern variant: Minimal style (no icon, compact)
+     * Show minimal style (no icon, compact)
      */
     public static void showMinimal(@NonNull Context context, String message, int type) {
-        if (!(context instanceof Activity)) return;
+        Activity activity = getActivity(context);
+        if (activity == null) return;
         
-        int backgroundColor = getColorForType(context, type);
+        int backgroundColorRes = getColorResForType(type);
         
-        CookieBar.build((Activity) context)
+        CookieBar.build(activity)
                 .setMessage(message)
                 .setDuration(SHORT_DURATION)
-                .setBackgroundColor(backgroundColor)
-                .setCookiePosition(CookieBar.BOTTOM)
+                .setBackgroundColor(backgroundColorRes)
+                .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(true)
                 .show();
     }
 
     /**
-     * Modern variant: Custom styled message
+     * Show custom styled message
      */
     public static void showCustom(@NonNull Context context, String title, String message, 
-                                   int backgroundColor, int iconRes, int duration, int gravity) {
-        if (!(context instanceof Activity)) return;
+                                   int backgroundColor, int iconRes, long duration) {
+        Activity activity = getActivity(context);
+        if (activity == null) return;
         
-        CookieBar.build((Activity) context)
+        CookieBar.build(activity)
                 .setTitle(title)
                 .setMessage(message)
                 .setDuration(duration)
                 .setBackgroundColor(backgroundColor)
                 .setIcon(iconRes)
                 .setIconAnimation(R.animator.fade_in)
-                .setCookiePosition(gravity == GRAVITY_TOP ? CookieBar.TOP : CookieBar.BOTTOM)
+                .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(true)
                 .show();
@@ -227,17 +206,18 @@ public class CookieBarToastHelper {
     public static final int TYPE_INFO = 2;
     public static final int TYPE_WARNING = 3;
 
-    private static int getColorForType(Context context, int type) {
+    @ColorRes
+    private static int getColorResForType(int type) {
         switch (type) {
             case TYPE_SUCCESS:
-                return ContextCompat.getColor(context, R.color.success_dark);
+                return R.color.success_dark;
             case TYPE_ERROR:
-                return ContextCompat.getColor(context, R.color.error_dark);
+                return R.color.error_dark;
             case TYPE_WARNING:
-                return ContextCompat.getColor(context, R.color.warning_dark);
+                return R.color.warning_dark;
             case TYPE_INFO:
             default:
-                return ContextCompat.getColor(context, R.color.primary);
+                return R.color.primary;
         }
     }
 

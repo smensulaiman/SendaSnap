@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -71,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
     private void initHelpers() {
         prefsManager = SharedPrefsManager.getInstance(LoginActivity.this);
         hapticHelper = HapticFeedbackHelper.getInstance(LoginActivity.this);
-        apiService = RetrofitClient.getInstance().getApiService();
+        apiService = RetrofitClient.getInstance(LoginActivity.this).getApiService();
 
         loadSavedCredentials();
     }
@@ -160,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
                                     .setBackgroundColor(R.color.success_light)
                                     .setTitleColor(R.color.success_dark)
                                     .setMessageColor(R.color.success_dark)
-                                    .setCookiePosition(CookieBarToastHelper.GRAVITY_TOP)
+                                    .setCookiePosition(Gravity.TOP)
                                     .setCookieListener(i -> new Handler(Looper.getMainLooper()).postDelayed(() -> {
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                         startActivity(intent);
@@ -186,7 +187,7 @@ public class LoginActivity extends AppCompatActivity {
                 hapticHelper.vibrateError();
                 CookieBarToastHelper.showError(LoginActivity.this, "Login Failed",
                         "Network error. Please check your connection and try again.",
-                        CookieBarToastHelper.GRAVITY_TOP, CookieBarToastHelper.LONG_DURATION);
+                        CookieBarToastHelper.LONG_DURATION);
             }
         });
     }
@@ -230,7 +231,7 @@ public class LoginActivity extends AppCompatActivity {
                 .setBackgroundColor(R.color.error_light)
                 .setTitleColor(R.color.error_dark)
                 .setMessageColor(R.color.error_dark)
-                .setCookiePosition(CookieBarToastHelper.GRAVITY_TOP)
+                .setCookiePosition(Gravity.TOP)
                 .setDuration(CookieBarToastHelper.LONG_DURATION)
                 .show();
     }
