@@ -72,7 +72,7 @@
                         android:inputType="textCapSentences"
                         android:maxLines="1"
                         android:textSize="@dimen/text_size_small"
-                        android:fontFamily="@font/montserrat_regular"
+                        android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -98,7 +98,7 @@
                         android:layout_height="140dp"
                         android:inputType="textCapSentences|textMultiLine"
                         android:textSize="@dimen/text_size_small"
-                        android:fontFamily="@font/montserrat_regular"
+                        android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"
                         android:gravity="top"/>
 
@@ -138,7 +138,7 @@
                             android:focusable="false"
                             android:inputType="date"
                             android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/text_black"
                             android:padding="16dp" />
 
@@ -165,7 +165,7 @@
                             android:focusable="false"
                             android:inputType="time"
                             android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/text_black"
                             android:padding="16dp" />
 
@@ -225,7 +225,7 @@
                             android:focusable="false"
                             android:inputType="none"
                             android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/text_black"
                             android:padding="16dp" />
 
@@ -398,12 +398,6 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="@dimen/dimen_16"
-                android:background="@color/black" />
-
             <!-- File Attachments Section -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -411,6 +405,7 @@
                 android:orientation="vertical"
                 android:background="@drawable/badge_12"
                 android:padding="16dp"
+                android:layout_marginTop="@dimen/dimen_16"
                 android:backgroundTint="@color/success_light">
 
                 <!-- Section Header -->
@@ -445,7 +440,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Add files, images, or documents to this task"
-                            android:fontFamily="@font/montserrat_regular"
+                            android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_small" />
 
@@ -456,7 +451,7 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Add File"
+                        android:text="Attach File"
                         android:textSize="@dimen/text_size_small"
                         android:textColor="@color/primary"
                         android:textStyle="bold"
@@ -540,11 +535,12 @@
                     android:id="@+id/textNoFiles"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_12"
+                    android:layout_marginTop="@dimen/dimen_16"
+                    android:padding="@dimen/dimen_16"
                     android:text="No files attached yet"
                     android:fontFamily="@font/montserrat_semi_bold"
                     android:textColor="@color/error_dark"
-                            android:textSize="@dimen/text_size_small"
+                    android:textSize="@dimen/text_size_small"
                     android:gravity="center"/>
 
             </LinearLayout>

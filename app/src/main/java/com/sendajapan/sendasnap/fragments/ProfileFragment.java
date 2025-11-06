@@ -35,7 +35,6 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
-        setupToolbar();
         setupClickListeners();
         loadUserData();
     }
@@ -43,18 +42,6 @@ public class ProfileFragment extends Fragment {
     private void initHelpers() {
         prefsManager = SharedPrefsManager.getInstance(requireContext());
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
-    }
-
-    private void setupToolbar() {
-        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
-            com.sendajapan.sendasnap.activities.MainActivity mainActivity = (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
-
-            binding.toolbar.setTitle("Profile");
-
-            if (mainActivity.drawerController != null) {
-                mainActivity.drawerController.updateToolbar(binding.toolbar);
-            }
-        }
     }
 
     private void setupClickListeners() {

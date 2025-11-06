@@ -2,6 +2,8 @@ package com.sendajapan.sendasnap.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -64,6 +66,25 @@ public class LoginActivity extends AppCompatActivity {
 
         initHelpers();
         setupClickListeners();
+
+        // Confirm app exit on back press from login screen
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (hapticHelper != null)
+                    hapticHelper.vibrateClick();
+                new AlertDialog.Builder(LoginActivity.this)
+                        .setTitle("Exit App")
+                        .setMessage("Are you sure you want to exit?")
+                        .setPositiveButton("Exit", (dialog, which) -> {
+                            dialog.dismiss();
+                            finishAffinity();
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setCancelable(true)
+                        .show();
+            }
+        });
     }
 
     private void initHelpers() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,39 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".fragments.HomeFragment">
 
-    <!-- App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="4dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
-            app:title="SendaSnap"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            app:titleTextColor="@color/text_black" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="90dp">
+        android:paddingBottom="100dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp">
+            android:padding="16dp">
 
             <!-- Welcome Section -->
             <LinearLayout
@@ -76,85 +55,101 @@
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/primary">
 
-                <ImageView
-                    android:id="@+id/imgWave"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="WAVE"
-                    android:src="@drawable/wave"
-                    android:scaleType="fitXY"
-                    android:alpha="0.5"/>
+                    android:layout_height="match_parent">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_gravity="center_vertical"
-                    android:padding="20dp">
+                    <ImageView
+                        android:id="@+id/imgLogo"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/logo_senda_snap"
+                        app:tint="@color/white"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:padding="@dimen/dimen_8"/>
+
+                    <ImageView
+                        android:id="@+id/imgWave"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="WAVE"
+                        android:src="@drawable/wave"
+                        android:scaleType="fitXY"
+                        android:alpha="0.5"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_gravity="center_vertical"
+                        android:padding="20dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="8dp"
-                            android:src="@drawable/ic_flash_24"
-                            app:tint="@color/white" />
-
-                        <TextView
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:fontFamily="@font/montserrat_medium"
-                            android:text="Quick Actions"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/text_size_large"
-                            android:textStyle="bold" />
+                            android:layout_marginBottom="16dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginEnd="8dp"
+                                android:src="@drawable/ic_flash_24"
+                                app:tint="@color/white" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/montserrat_medium"
+                                android:text="Quick Actions"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnQuickSearch"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:text="Quick Search"
+                                android:fontFamily="@font/montserrat_bold"
+                                android:textColor="@color/text_black"
+                                android:textSize="@dimen/text_size_small"
+                                app:backgroundTint="@color/white"
+                                app:cornerRadius="24dp"/>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnViewStats"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="8dp"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/montserrat_bold"
+                                android:text="View Stats"
+                                android:textColor="@color/primary"
+                                android:textSize="@dimen/text_size_small"
+                                app:backgroundTint="@color/white"
+                                app:strokeColor="@color/warning_light"
+                                app:strokeWidth="2dp"
+                                app:cornerRadius="24dp"/>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnQuickSearch"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:text="Quick Search"
-                            android:fontFamily="@font/montserrat_bold"
-                            android:textColor="@color/text_black"
-                            android:textSize="@dimen/text_size_small"
-                            app:backgroundTint="@color/white"
-                            app:cornerRadius="24dp"/>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnViewStats"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:fontFamily="@font/montserrat_bold"
-                            android:text="View Stats"
-                            android:textColor="@color/primary"
-                            android:textSize="@dimen/text_size_small"
-                            app:backgroundTint="@color/white"
-                            app:strokeColor="@color/warning_light"
-                            app:strokeWidth="2dp"
-                            app:cornerRadius="24dp"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                </RelativeLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -193,6 +188,32 @@
                         android:textColor="@color/primary"/>
 
                 </LinearLayout>
+
+                <!-- Shimmer Loading -->
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/shimmerVehicles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:shimmer_duration="1000"
+                    app:shimmer_auto_start="true"
+                    app:shimmer_base_alpha="0.7"
+                    app:shimmer_highlight_alpha="0.9">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/shimmer_item_vehicle" />
+                        <include layout="@layout/shimmer_item_vehicle" />
+                        <include layout="@layout/shimmer_item_vehicle" />
+                        <include layout="@layout/shimmer_item_vehicle" />
+                        <include layout="@layout/shimmer_item_vehicle" />
+
+                    </LinearLayout>
+
+                </com.facebook.shimmer.ShimmerFrameLayout>
 
                 <!-- RecyclerView for Recent Vehicles -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -247,14 +268,14 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Search Button -->
+    <!-- Search FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="TODO"
+        android:layout_marginBottom="106dp"
         android:src="@drawable/ic_search"
         app:backgroundTint="@color/primary"
         app:elevation="8dp"
@@ -263,4 +284,4 @@
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.RoundedFAB"
         app:tint="@color/white" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

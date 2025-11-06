@@ -5,10 +5,10 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Vehicle implements Serializable {
-    @SerializedName("id")
+    @SerializedName(value = "id", alternate = {"vehicle_id"})
     private String id;
 
-    @SerializedName("serialNumber")
+    @SerializedName(value = "serialNumber", alternate = {"chassis_number"})
     private String serialNumber;
 
     @SerializedName("make")
@@ -20,55 +20,55 @@ public class Vehicle implements Serializable {
     @SerializedName("chassisModel")
     private String chassisModel;
 
-    @SerializedName("cc")
+    @SerializedName(value = "cc", alternate = {"veh_cc"})
     private String cc;
 
-    @SerializedName("year")
+    @SerializedName(value = "year", alternate = {"veh_year"})
     private String year;
 
-    @SerializedName("color")
+    @SerializedName(value = "color", alternate = {"veh_color"})
     private String color;
 
-    @SerializedName("vehicleBuyDate")
+    @SerializedName(value = "vehicleBuyDate", alternate = {"veh_buy_date"})
     private String vehicleBuyDate;
 
-    @SerializedName("auctionShipNumber")
+    @SerializedName(value = "auctionShipNumber", alternate = {"veh_auc_ship_number"})
     private String auctionShipNumber;
 
-    @SerializedName("netWeight")
+    @SerializedName(value = "netWeight", alternate = {"veh_net_weight"})
     private String netWeight;
 
     @SerializedName("area")
     private String area;
 
-    @SerializedName("length")
+    @SerializedName(value = "length", alternate = {"veh_l"})
     private String length;
 
-    @SerializedName("width")
+    @SerializedName(value = "width", alternate = {"veh_w"})
     private String width;
 
-    @SerializedName("height")
+    @SerializedName(value = "height", alternate = {"veh_h"})
     private String height;
 
     @SerializedName("plateNumber")
     private String plateNumber;
 
-    @SerializedName("buyingPrice")
+    @SerializedName(value = "buyingPrice", alternate = {"veh_buy_price"})
     private String buyingPrice;
 
-    @SerializedName("expectedYardDate")
+    @SerializedName(value = "expectedYardDate", alternate = {"yard_date_in"})
     private String expectedYardDate;
 
-    @SerializedName("riksoFrom")
+    @SerializedName(value = "riksoFrom", alternate = {"rikso_from_place_id"})
     private String riksoFrom;
 
-    @SerializedName("riksoTo")
+    @SerializedName(value = "riksoTo", alternate = {"rikso_to_place_id"})
     private String riksoTo;
 
-    @SerializedName("riksoCost")
+    @SerializedName(value = "riksoCost", alternate = {"rikso_cost"})
     private String riksoCost;
 
-    @SerializedName("riksoCompany")
+    @SerializedName(value = "riksoCompany", alternate = {"rikso_company"})
     private String riksoCompany;
 
     @SerializedName("vehiclePhotos")
@@ -94,6 +94,13 @@ public class Vehicle implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    // Custom setter to handle vehicle_id as integer from API
+    public void setVehicleId(Object vehicleId) {
+        if (vehicleId != null) {
+            this.id = String.valueOf(vehicleId);
+        }
     }
 
     public String getSerialNumber() {

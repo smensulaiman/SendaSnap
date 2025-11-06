@@ -23,6 +23,7 @@ firebaseDatabase = "22.0.1"
 firebaseMessaging = "25.0.1"
 firebaseStorage = "22.0.1"
 lottie = "6.1.0"
+shimmer = "0.5.0"
 
 [libraries]
 cookiebar2 = { module = "org.aviran.cookiebar2:cookiebar2", version.ref = "cookiebar2" }
@@ -52,6 +53,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
+shimmer = { group = "com.facebook.shimmer", name = "shimmer", version.ref = "shimmer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

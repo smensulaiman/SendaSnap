@@ -39,7 +39,6 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
-        setupToolbar();
         setupRecyclerView();
         setupClickListeners();
         loadRecentChats();
@@ -48,22 +47,6 @@ public class ChatFragment extends Fragment {
     private void initHelpers() {
         chatService = ChatService.getInstance();
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
-    }
-
-    private void setupToolbar() {
-        // Set up toolbar with drawer
-        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
-            com.sendajapan.sendasnap.activities.MainActivity mainActivity = 
-                    (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
-
-            // Set title only
-            binding.toolbar.setTitle("Chat");
-
-            // Update drawer controller with this fragment's toolbar
-            if (mainActivity.drawerController != null) {
-                mainActivity.drawerController.updateToolbar(binding.toolbar);
-            }
-        }
     }
 
     private void setupRecyclerView() {
@@ -84,30 +67,62 @@ public class ChatFragment extends Fragment {
     }
 
     private void loadRecentChats() {
+        // Show shimmer
+        showShimmer();
+        
         chatService.getRecentChats(requireContext(), new ChatService.RecentChatsCallback() {
             @Override
             public void onSuccess(List<Chat> chats) {
-                if (chats.isEmpty()) {
-                    showEmptyState();
-                } else {
-                    hideEmptyState();
-                    chatAdapter.updateChats(chats);
-                }
+                // Hide shimmer with delay for smooth animation
+                new android.os.Handler().postDelayed(() -> {
+                    // Check if fragment is still attached and binding is not null
+                    if (!isAdded() || binding == null) {
+                        return;
+                    }
+                    
+                    hideShimmer();
+                    if (chats.isEmpty()) {
+                        showEmptyState();
+                    } else {
+                        hideEmptyState();
+                        chatAdapter.updateChats(chats);
+                    }
+                }, 1200); // Simulated loading time
             }
 
             @Override
             public void onFailure(Exception e) {
+                if (!isAdded() || binding == null) {
+                    return;
+                }
+                hideShimmer();
                 showEmptyState();
             }
         });
     }
+    
+    private void showShimmer() {
+        if (binding == null) return;
+        binding.shimmerChats.setVisibility(View.VISIBLE);
+        binding.shimmerChats.startShimmer();
+        binding.recyclerViewRecentChats.setVisibility(View.GONE);
+        binding.layoutEmptyState.setVisibility(View.GONE);
+    }
+    
+    private void hideShimmer() {
+        if (binding == null) return;
+        binding.shimmerChats.stopShimmer();
+        binding.shimmerChats.setVisibility(View.GONE);
+    }
 
     private void showEmptyState() {
+        if (binding == null) return;
         binding.recyclerViewRecentChats.setVisibility(View.GONE);
         binding.layoutEmptyState.setVisibility(View.VISIBLE);
     }
 
     private void hideEmptyState() {
+        if (binding == null) return;
         binding.recyclerViewRecentChats.setVisibility(View.VISIBLE);
         binding.layoutEmptyState.setVisibility(View.GONE);
     }

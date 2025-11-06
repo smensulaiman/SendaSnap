@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,18 +14,29 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.widget.LinearLayout;
+
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
 import com.sendajapan.sendasnap.models.Vehicle;
+import com.sendajapan.sendasnap.models.VehicleSearchResponse;
+import com.sendajapan.sendasnap.networking.ApiService;
+import com.sendajapan.sendasnap.networking.NetworkUtils;
+import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.MotionToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
+import com.sendajapan.sendasnap.utils.LoadingDialog;
+import com.sendajapan.sendasnap.utils.VehicleSearchDialog;
 
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import www.sanju.motiontoast.MotionToast;
 
 public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleClickListener {
@@ -35,6 +45,9 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private VehicleAdapter vehicleAdapter;
     private VehicleCache vehicleCache;
     private HapticFeedbackHelper hapticHelper;
+    private ApiService apiService;
+    private NetworkUtils networkUtils;
+    private LoadingDialog loadingDialog;
 
     @Nullable
     @Override
@@ -50,7 +63,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
-        setupToolbar();
 
         binding.txtWelcome.setText("Welcome, " + SharedPrefsManager.getInstance(getContext()).getUsername() + " san!");
 
@@ -63,21 +75,8 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void initHelpers() {
         vehicleCache = VehicleCache.getInstance(requireContext());
         hapticHelper = HapticFeedbackHelper.getInstance(requireContext());
-    }
-
-    private void setupToolbar() {
-        // Set up toolbar with drawer
-        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
-            com.sendajapan.sendasnap.activities.MainActivity mainActivity = (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
-
-            // Set title only
-            binding.toolbar.setTitle("Home");
-
-            // Update drawer controller with this fragment's toolbar
-            if (mainActivity.drawerController != null) {
-                mainActivity.drawerController.updateToolbar(binding.toolbar);
-            }
-        }
+        apiService = RetrofitClient.getInstance().getApiService();
+        networkUtils = NetworkUtils.getInstance(requireContext());
     }
 
     private void setupRecyclerView() {
@@ -113,127 +112,195 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void showSearchDialog() {
-        Dialog dialog = new Dialog(requireContext());
-        dialog.setContentView(R.layout.dialog_vehicle_search);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        new VehicleSearchDialog.Builder(requireContext())
+                .setOnSearchListener(this::performSearchFromDialog)
+                .setCancelable(true)
+                .show();
+    }
+
+    private void showLoadingDialog(String message) {
+        hideLoadingDialog();
+        
+        loadingDialog = new LoadingDialog.Builder(requireContext())
+                .setMessage(message)
+                .setSubtitle("Please wait while we fetch the data")
+                .setCancelable(false)
+                .setShowProgressIndicator(false)
+                .show();
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+            loadingDialog = null;
+        }
+    }
+
+    private void performSearchFromDialog(String searchType, String searchQuery) {
+        // Check internet connection
+        if (!networkUtils.isNetworkAvailable()) {
+            MotionToastHelper.showNoInternet(requireContext());
+            hapticHelper.vibrateError();
+            return;
         }
 
-        // Get views from dialog
-        com.google.android.material.textfield.TextInputLayout tilChassisNumber = dialog
-                .findViewById(R.id.tilChassisNumber);
-        com.google.android.material.textfield.TextInputEditText etChassisNumber = dialog
-                .findViewById(R.id.etChassisNumber);
-        com.google.android.material.button.MaterialButton btnCancel = dialog.findViewById(R.id.btnCancel);
-        com.google.android.material.button.MaterialButton btnSearch = dialog.findViewById(R.id.btnSearch);
+        // Show progress dialog
+        showLoadingDialog("Searching vehicles...");
 
-        // Setup click listeners
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnSearch.setOnClickListener(v -> {
-            String chassisNumber = etChassisNumber.getText().toString().trim();
-
-            // Clear previous errors
-            tilChassisNumber.setError(null);
-
-            // Validate input
-            if (TextUtils.isEmpty(chassisNumber)) {
-                tilChassisNumber.setError("Chassis number is required");
-                etChassisNumber.requestFocus();
-                hapticHelper.vibrateError();
-                return;
+        // Perform API call
+        Call<VehicleSearchResponse> call = apiService.searchVehicles(searchType, searchQuery);
+        call.enqueue(new Callback<VehicleSearchResponse>() {
+            @Override
+            public void onResponse(Call<VehicleSearchResponse> call, Response<VehicleSearchResponse> response) {
+                hideLoadingDialog();
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    VehicleSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getSuccess() != null && searchResponse.getSuccess()) {
+                        VehicleSearchResponse.VehicleSearchData data = searchResponse.getData();
+                        if (data != null && data.getVehicles() != null) {
+                            List<Vehicle> vehicles = data.getVehicles();
+                            
+                            if (vehicles.isEmpty()) {
+                                MotionToastHelper.showInfo(requireContext(), "No Results", 
+                                        "No vehicles found matching your search criteria",
+                                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                            } else if (vehicles.size() == 1) {
+                                // Single vehicle - navigate directly to detail page
+                                Vehicle vehicle = vehicles.get(0);
+                                vehicleCache.addVehicle(vehicle);
+                                
+                                Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
+                                intent.putExtra("vehicle", vehicle);
+                                startActivity(intent);
+                                
+                                MotionToastHelper.showSuccess(requireContext(), "Vehicle Found", 
+                                        "Vehicle details loaded successfully!",
+                                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                            } else {
+                                // Multiple vehicles - show results dialog
+                                showSearchResultsDialog(vehicles);
+                            }
+                        } else {
+                            MotionToastHelper.showError(requireContext(), "Error", 
+                                    "No vehicle data received",
+                                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                        }
+                    } else {
+                        String message = searchResponse.getMessage() != null ? 
+                                searchResponse.getMessage() : "Search failed";
+                        MotionToastHelper.showError(requireContext(), "Error", message,
+                                MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                    }
+                } else {
+                    MotionToastHelper.showError(requireContext(), "Error", 
+                            "Failed to search vehicles. Please try again.",
+                            MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
+                }
             }
 
-            if (chassisNumber.length() < 3) {
-                tilChassisNumber.setError("Chassis number must be at least 3 characters");
-                etChassisNumber.requestFocus();
+            @Override
+            public void onFailure(Call<VehicleSearchResponse> call, Throwable t) {
+                hideLoadingDialog();
+                MotionToastHelper.showError(requireContext(), "Error", 
+                        "Failed to connect to server. Please check your internet connection.",
+                        MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
                 hapticHelper.vibrateError();
-                return;
             }
+        });
+    }
 
-            // Close dialog and perform search
-            dialog.dismiss();
-            performSearchFromDialog(chassisNumber);
+    private void showSearchResultsDialog(List<Vehicle> vehicles) {
+        Dialog resultsDialog = new Dialog(requireContext());
+        resultsDialog.setContentView(R.layout.dialog_vehicle_search_results);
+        if (resultsDialog.getWindow() != null) {
+            resultsDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        // Get views
+        androidx.recyclerview.widget.RecyclerView recyclerViewResults = 
+                resultsDialog.findViewById(R.id.recyclerViewResults);
+        LinearLayout emptyState = resultsDialog.findViewById(R.id.layoutEmptyState);
+        com.google.android.material.button.MaterialButton btnClose = 
+                resultsDialog.findViewById(R.id.btnClose);
+
+        // Setup RecyclerView
+        VehicleAdapter resultsAdapter = new VehicleAdapter(vehicle -> {
+            hapticHelper.vibrateClick();
+            resultsDialog.dismiss();
+            
+            // Add to cache
+            vehicleCache.addVehicle(vehicle);
+            
+            // Navigate to detail page
+            Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
+            intent.putExtra("vehicle", vehicle);
+            startActivity(intent);
         });
 
-        dialog.show();
+        recyclerViewResults.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerViewResults.setAdapter(resultsAdapter);
+        resultsAdapter.updateVehicles(vehicles);
+
+        // Show empty state if no vehicles
+        if (vehicles.isEmpty()) {
+            recyclerViewResults.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+        } else {
+            recyclerViewResults.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.GONE);
+        }
+
+        btnClose.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            resultsDialog.dismiss();
+        });
+
+        resultsDialog.show();
     }
 
-    private void performSearchFromDialog(String chassisNumber) {
-        // Perform search (mock implementation)
-        searchVehicle(chassisNumber);
-    }
-
-    private void searchVehicle(String chassisNumber) {
-        // Simulate API call delay
-        binding.recyclerViewVehicles.postDelayed(() -> {
-            // Mock vehicle data
-            Vehicle mockVehicle = createMockVehicle(chassisNumber);
-
-            // Add to cache
-            vehicleCache.addVehicle(mockVehicle);
-
-            // Update UI
-            loadRecentVehicles();
-
-            // Navigate to vehicle details
-            Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
-            intent.putExtra("vehicle", mockVehicle);
-            startActivity(intent);
-
-            // Show success feedback
-            MotionToastHelper.showSuccess(requireContext(), "Vehicle Found", "Vehicle details loaded successfully!",
-                    MotionToast.GRAVITY_BOTTOM, MotionToast.LONG_DURATION);
-
-        }, 1500); // 1.5 second delay to simulate network call
-    }
-
-    private Vehicle createMockVehicle(String chassisNumber) {
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId("vehicle_" + System.currentTimeMillis());
-        vehicle.setSerialNumber(chassisNumber);
-        vehicle.setMake("Toyota");
-        vehicle.setModel("Camry");
-        vehicle.setChassisModel("XV70");
-        vehicle.setCc("2500");
-        vehicle.setYear("2020");
-        vehicle.setColor("White");
-        vehicle.setVehicleBuyDate("2024-01-15");
-        vehicle.setAuctionShipNumber("AUC001");
-        vehicle.setNetWeight("1500");
-        vehicle.setArea("4.5");
-        vehicle.setLength("4885");
-        vehicle.setWidth("1840");
-        vehicle.setHeight("1455");
-        vehicle.setPlateNumber("ABC-1234");
-        vehicle.setBuyingPrice("25000");
-        vehicle.setExpectedYardDate("2024-02-01");
-        vehicle.setRiksoFrom("Tokyo");
-        vehicle.setRiksoTo("Osaka");
-        vehicle.setRiksoCost("500");
-        vehicle.setRiksoCompany("Fast Logistics");
-
-        // Mock photos
-        java.util.List<String> photos = new java.util.ArrayList<>();
-        photos.add("https://example.com/photo1.jpg");
-        photos.add("https://example.com/photo2.jpg");
-        vehicle.setVehiclePhotos(photos);
-
-        return vehicle;
-    }
 
     private void loadRecentVehicles() {
-        // Create dummy vehicles based on the JSON response structure
-        List<Vehicle> dummyVehicles = createDummyVehicles();
+        // Show shimmer
+        showShimmer();
+        
+        // Simulate loading delay for shimmer effect
+        new android.os.Handler().postDelayed(() -> {
+            // Check if fragment is still attached and binding is not null
+            if (!isAdded() || binding == null) {
+                return;
+            }
+            
+            // Create dummy vehicles based on the JSON response structure
+            List<Vehicle> dummyVehicles = createDummyVehicles();
+            
+            // Hide shimmer
+            hideShimmer();
 
-        if (dummyVehicles.isEmpty()) {
-            binding.recyclerViewVehicles.setVisibility(View.GONE);
-            binding.layoutEmptyState.setVisibility(View.VISIBLE);
-        } else {
-            binding.recyclerViewVehicles.setVisibility(View.VISIBLE);
-            binding.layoutEmptyState.setVisibility(View.GONE);
-            vehicleAdapter.updateVehicles(dummyVehicles);
-        }
+            if (dummyVehicles.isEmpty()) {
+                binding.recyclerViewVehicles.setVisibility(View.GONE);
+                binding.layoutEmptyState.setVisibility(View.VISIBLE);
+            } else {
+                binding.recyclerViewVehicles.setVisibility(View.VISIBLE);
+                binding.layoutEmptyState.setVisibility(View.GONE);
+                vehicleAdapter.updateVehicles(dummyVehicles);
+            }
+        }, 1500); // Simulated loading time
+    }
+    
+    private void showShimmer() {
+        if (binding == null) return;
+        binding.shimmerVehicles.setVisibility(View.VISIBLE);
+        binding.shimmerVehicles.startShimmer();
+        binding.recyclerViewVehicles.setVisibility(View.GONE);
+        binding.layoutEmptyState.setVisibility(View.GONE);
+    }
+    
+    private void hideShimmer() {
+        if (binding == null) return;
+        binding.shimmerVehicles.stopShimmer();
+        binding.shimmerVehicles.setVisibility(View.GONE);
     }
 
     private List<Vehicle> createDummyVehicles() {
@@ -369,6 +436,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        hideLoadingDialog();
         binding = null;
     }
 }

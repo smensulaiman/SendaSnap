@@ -3,6 +3,7 @@
     
     <!-- Common strings -->
     <string name="search">Search</string>
+    <string name="search_vehicle">Search Vehicle</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="loading">Loading...</string>
@@ -22,7 +23,6 @@
     <string name="invalid_credentials">Invalid username or password</string>
     
     <!-- Vehicle -->
-    <string name="search_vehicle">Search Vehicle</string>
     <string name="chassis_number">Chassis Number</string>
     <string name="vehicle_found">Vehicle Found</string>
     <string name="vehicle_details">Vehicle Details</string>

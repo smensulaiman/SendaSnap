@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Main toolbar background with subtle border -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners
+                android:bottomLeftRadius="16dp"
+                android:bottomRightRadius="16dp" />
+        </shape>
+    </item>
+    
+    <!-- Subtle bottom border -->
+    <item 
+        android:top="?attr/actionBarSize"
+        android:left="16dp"
+        android:right="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#10000000" />
+            <corners
+                android:topLeftRadius="2dp"
+                android:topRightRadius="2dp" />
+            <size android:height="1dp" />
+        </shape>
+    </item>
+    
+    <!-- Smooth gradient shadow at bottom -->
+    <item 
+        android:top="?attr/actionBarSize"
+        android:bottom="-16dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:startColor="#25000000"
+                android:centerColor="#15000000"
+                android:endColor="@android:color/transparent"
+                android:type="linear" />
+            <corners
+                android:topLeftRadius="0dp"
+                android:topRightRadius="0dp" />
+        </shape>
+    </item>
+    
+</layer-list>
+

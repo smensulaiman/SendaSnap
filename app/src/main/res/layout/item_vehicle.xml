@@ -11,7 +11,7 @@
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="4dp"
     app:cardElevation="0dp"
-    app:strokeColor="@color/primary_varient"
+    app:strokeColor="@color/primary_variant"
     app:strokeWidth="1dp">
 
     <LinearLayout

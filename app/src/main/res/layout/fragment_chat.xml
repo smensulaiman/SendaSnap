@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,24 +7,34 @@
     android:background="@drawable/blur_background"
     tools:context=".fragments.ChatFragment">
 
-    <!-- App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <!-- Shimmer Loading -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerChats"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:shimmer_duration="1000"
+        app:shimmer_auto_start="true"
+        app:shimmer_base_alpha="0.7"
+        app:shimmer_highlight_alpha="0.9">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
-            app:title="Chat"
-            app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/dimen_8">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+            <include layout="@layout/shimmer_item_chat" />
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <!-- Main Content -->
     <androidx.recyclerview.widget.RecyclerView
@@ -32,8 +42,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/dimen_8"
-        android:paddingBottom="@dimen/dimen_8"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingBottom="106dp"
+        android:clipToPadding="false"
         tools:listitem="@layout/item_recent_chat" />
 
     <!-- Empty State -->
@@ -44,8 +54,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:padding="@dimen/dimen_24"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="120dp"
@@ -73,15 +82,20 @@
 
     </LinearLayout>
 
-    <!-- FAB to add new chat -->
+    <!-- New Chat FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNewChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/dimen_16"
-        android:src="@drawable/ic_add"
-        app:tint="@color/white"
-        app:backgroundTint="@color/primary" />
+        android:layout_margin="16dp"
+        android:layout_marginBottom="106dp"
+        android:src="@drawable/ic_telegram_64"
+        app:backgroundTint="@color/primary"
+        app:elevation="8dp"
+        app:fabSize="normal"
+        app:pressedTranslationZ="12dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.RoundedFAB"
+        app:tint="@color/white" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

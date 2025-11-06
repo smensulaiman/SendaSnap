@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Customizable outline box shape matching Material3 TextInputLayout.OutlinedBox style
+    
+    Usage Examples:
+    
+    1. Basic usage with tint:
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/outline_box_custom"
+        android:backgroundTint="@color/primary" />
+    
+    2. With different radius variants:
+    - @drawable/outline_box_shape (4dp - Material3 default)
+    - @drawable/outline_box_shape_8dp (8dp)
+    - @drawable/outline_box_shape_12dp (12dp)
+    - @drawable/outline_box_shape_16dp (16dp)
+    
+    3. With state selector:
+    <View
+        android:background="@drawable/outline_box_shape_selector" />
+    
+    4. Wrap in LinearLayout/FrameLayout for custom layouts:
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/outline_box_shape_12dp"
+        android:backgroundTint="@color/primary"
+        android:padding="16dp">
+        <Your content here>
+    </LinearLayout>
+    
+    Note: Tint changes the stroke color, not the background
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Transparent background - can be tinted to change background fill -->
+    <solid android:color="@android:color/transparent" />
+    <!-- Default Material3 corner radius (4dp) - use variants for different radii -->
+    <corners android:radius="4dp" />
+    <!-- Border stroke - color can be tinted using android:backgroundTint -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/primary" />
+</shape>
+

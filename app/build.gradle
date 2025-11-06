@@ -59,6 +59,7 @@ dependencies {
     implementation libs.firebase.storage
     implementation libs.lottie
     implementation libs.cookiebar2
+    implementation libs.shimmer
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

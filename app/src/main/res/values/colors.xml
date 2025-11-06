@@ -2,12 +2,12 @@
 <resources>
     <!-- Primary colors -->
     <color name="primary">#035294</color>
-    <color name="primary_varient">#BF035294</color>
+    <color name="primary_variant">#BF035294</color>
 
     <color name="primary_light">#E6F0FB</color>
+    <color name="primary_transparent">#80035294</color>
     <color name="primary_medium">#3F7CC7</color>
     <color name="primary_dark">#2C5FA2</color>
-    <color name="primary_variant">#BF035294</color>
 
     <color name="accent">#3FB4EB</color>
     <color name="on_primary">#FFFFFF</color>

@@ -2,6 +2,7 @@ package com.sendajapan.sendasnap.activities;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -63,10 +64,52 @@ public class MainActivity extends AppCompatActivity {
         setupDrawer();
         setupBottomNavigation();
         setupNetworkMonitoring();
+        setupToolbarMenu();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
         }
+    }
+    
+    private void setupToolbarMenu() {
+        binding.toolbar.setOnMenuItemClickListener(item -> {
+            hapticHelper.vibrateClick();
+
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_notifications) {
+                openNotifications();
+                return true;
+            } else if (itemId == R.id.action_settings) {
+                openSettings();
+                return true;
+            } else if (itemId == R.id.action_help) {
+                openHelp();
+                return true;
+            } else if (itemId == R.id.action_about) {
+                openAbout();
+                return true;
+            }
+            return false;
+        });
+    }
+    
+    private void openNotifications() {
+        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
+    }
+    
+    private void openSettings() {
+        // TODO: Implement settings activity
+        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
+    }
+    
+    private void openHelp() {
+        // TODO: Implement help activity
+        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
+    }
+    
+    private void openAbout() {
+        // TODO: Implement about dialog
+        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void initHelpers() {
@@ -75,41 +118,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawer() {
+        setSupportActionBar(binding.toolbar);
         drawerController = new DrawerController(this,
                 binding.drawerLayout,
                 binding.navigationView,
-                null);
+                binding.toolbar);
     }
 
     private void setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public boolean onItemSelect(int pos) {
-                hapticHelper.vibrateClick();
+        binding.bottomNavigation.setOnItemSelectedListener((OnItemSelectedListener) pos -> {
+            hapticHelper.vibrateClick();
 
-                Fragment selectedFragment = null;
+            Fragment selectedFragment = null;
 
-                switch (pos) {
-                    case 0:
-                        selectedFragment = new HomeFragment();
-                        break;
-                    case 1:
-                        selectedFragment = new ScheduleFragment();
-                        break;
-                    case 2:
-                        selectedFragment = new ChatFragment();
-                        break;
-                    case 3:
-                        selectedFragment = new ProfileFragment();
-                        break;
-                }
-
-                if (selectedFragment != null) {
-                    loadFragment(selectedFragment);
-                }
-
-                return true;
+            switch (pos) {
+                case 0:
+                    selectedFragment = new HomeFragment();
+                    break;
+                case 1:
+                    selectedFragment = new ScheduleFragment();
+                    break;
+                case 2:
+                    selectedFragment = new ChatFragment();
+                    break;
+                case 3:
+                    selectedFragment = new ProfileFragment();
+                    break;
             }
+
+            if (selectedFragment != null) {
+                loadFragment(selectedFragment);
+            }
+
+            return true;
         });
     }
 
@@ -118,14 +159,18 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragmentContainer, fragment);
         transaction.commit();
 
-        setupFragmentDrawer(fragment);
+        updateToolbarTitle(fragment);
     }
 
-    private void setupFragmentDrawer(Fragment fragment) {
+    private void updateToolbarTitle(Fragment fragment) {
         if (fragment instanceof HomeFragment) {
+            binding.toolbar.setTitle("Home");
         } else if (fragment instanceof ScheduleFragment) {
+            binding.toolbar.setTitle("Work Schedule");
         } else if (fragment instanceof ChatFragment) {
+            binding.toolbar.setTitle("Chat");
         } else if (fragment instanceof ProfileFragment) {
+            binding.toolbar.setTitle("Profile");
         }
     }
 

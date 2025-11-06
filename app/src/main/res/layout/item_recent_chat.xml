@@ -57,7 +57,7 @@
                     android:textColor="@color/text_primary"
                     android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold"
-                    tools:text="John Doe" />
+                    tools:text="Mohammad Sulaiman" />
 
                 <TextView
                     android:id="@+id/txtTime"

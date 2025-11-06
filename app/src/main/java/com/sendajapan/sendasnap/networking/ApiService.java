@@ -4,6 +4,7 @@ import com.sendajapan.sendasnap.models.ChangePasswordRequest;
 import com.sendajapan.sendasnap.models.LoginRequest;
 import com.sendajapan.sendasnap.models.LoginResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
+import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -12,6 +13,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import java.util.List;
 import okhttp3.MultipartBody;
 
@@ -43,5 +45,11 @@ public interface ApiService {
     // Get recent vehicles
     @GET("vehicles/recent")
     Call<List<Vehicle>> getRecentVehicles();
+
+    // Search vehicles
+    @GET("api/v1/vehicles/search")
+    Call<VehicleSearchResponse> searchVehicles(
+            @Query("search_type") String searchType,
+            @Query("search_query") String searchQuery);
 
 }

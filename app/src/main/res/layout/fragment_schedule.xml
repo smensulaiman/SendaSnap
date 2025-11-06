@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,33 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ScheduleFragment">
 
-    <!-- App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="4dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
-            app:title="Work Schedule"
-            app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="90dp">
+        android:paddingBottom="106dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -161,6 +140,31 @@
                 android:textColor="@color/text_primary"
                 android:layout_marginStart="@dimen/dimen_16"/>
 
+            <!-- Shimmer Loading -->
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerTasks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:shimmer_duration="1000"
+                app:shimmer_auto_start="true"
+                app:shimmer_base_alpha="0.7"
+                app:shimmer_highlight_alpha="0.9">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/shimmer_item_task" />
+                    <include layout="@layout/shimmer_item_task" />
+                    <include layout="@layout/shimmer_item_task" />
+                    <include layout="@layout/shimmer_item_task" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
             <!-- Tasks RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewTasks"
@@ -200,13 +204,14 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Floating Action Button -->
+    <!-- Add Task FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        android:layout_marginBottom="106dp"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/primary"
         app:tint="@color/white"
@@ -215,4 +220,4 @@
         app:pressedTranslationZ="12dp"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.RoundedFAB" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

@@ -57,7 +57,6 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
         
-        setupToolbar();
         setupRecyclerView();
         setupCalendar();
         setupFilterChips();
@@ -66,21 +65,6 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         // Load mock data for demonstration
         loadMockTasks();
-    }
-
-    private void setupToolbar() {
-        // Set up toolbar with drawer
-        if (getActivity() instanceof com.sendajapan.sendasnap.activities.MainActivity) {
-            com.sendajapan.sendasnap.activities.MainActivity mainActivity = (com.sendajapan.sendasnap.activities.MainActivity) getActivity();
-
-            // Set title only
-            binding.toolbar.setTitle("Schedule");
-
-            // Update drawer controller with this fragment's toolbar
-            if (mainActivity.drawerController != null) {
-                mainActivity.drawerController.updateToolbar(binding.toolbar);
-            }
-        }
     }
 
     private void setupRecyclerView() {
@@ -109,32 +93,9 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private void applyThemeColorToCalendar() {
         try {
-            // Apply theme color using CalendarView's built-in attributes
-            // The custom theme should handle most of the styling
             binding.calendarView.setBackgroundColor(getResources().getColor(R.color.white, null));
-
-            // Try to set the accent color programmatically
-            int primaryColor = getResources().getColor(R.color.primary, null);
-
-            // Use reflection to access CalendarView's internal color settings
-            try {
-                java.lang.reflect.Field field = binding.calendarView.getClass().getDeclaredField("mDelegate");
-                field.setAccessible(true);
-                Object delegate = field.get(binding.calendarView);
-
-                if (delegate != null) {
-                    // Try to set the accent color
-                    java.lang.reflect.Method setAccentColor = delegate.getClass().getDeclaredMethod("setAccentColor",
-                            int.class);
-                    setAccentColor.setAccessible(true);
-                    setAccentColor.invoke(delegate, primaryColor);
-                }
-            } catch (Exception reflectionException) {
-                android.util.Log.d("ScheduleFragment", "Reflection approach failed, theme should handle styling");
-            }
-
         } catch (Exception e) {
-            android.util.Log.e("ScheduleFragment", "Could not apply theme color to calendar", e);
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -211,29 +172,56 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void loadMockTasks() {
-        // Mock data for demonstration
-        allTasks.clear();
+        // Show shimmer
+        showShimmer();
+        
+        // Simulate loading delay for shimmer effect
+        new android.os.Handler().postDelayed(() -> {
+            // Check if fragment is still attached and binding is not null
+            if (!isAdded() || binding == null) {
+                return;
+            }
+            
+            // Mock data for demonstration
+            allTasks.clear();
 
-        Calendar calendar = Calendar.getInstance();
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
+            Calendar calendar = Calendar.getInstance();
+            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
 
-        allTasks.add(new Task("1", "Vehicle Inspection", "Complete safety inspection for Toyota Camry", today, "09:00",
-                Task.TaskStatus.RUNNING));
-        allTasks.add(new Task("2", "Paperwork Review", "Review and process vehicle documentation", today, "14:00",
-                Task.TaskStatus.PENDING));
-        allTasks.add(new Task("3", "Client Meeting", "Meet with client for vehicle delivery", today, "16:30",
-                Task.TaskStatus.COMPLETED));
+            allTasks.add(new Task("1", "Vehicle Inspection", "Complete safety inspection for Toyota Camry", today, "09:00",
+                    Task.TaskStatus.RUNNING));
+            allTasks.add(new Task("2", "Paperwork Review", "Review and process vehicle documentation", today, "14:00",
+                    Task.TaskStatus.PENDING));
+            allTasks.add(new Task("3", "Client Meeting", "Meet with client for vehicle delivery", today, "16:30",
+                    Task.TaskStatus.COMPLETED));
 
-        filterTasks();
+            // Hide shimmer
+            hideShimmer();
+            
+            filterTasks();
+        }, 1000); // Simulated loading time
+    }
+    
+    private void showShimmer() {
+        if (binding == null) return;
+        binding.shimmerTasks.setVisibility(View.VISIBLE);
+        binding.shimmerTasks.startShimmer();
+        binding.recyclerViewTasks.setVisibility(View.GONE);
+        binding.layoutEmptyState.setVisibility(View.INVISIBLE);
+    }
+    
+    private void hideShimmer() {
+        if (binding == null) return;
+        binding.shimmerTasks.stopShimmer();
+        binding.shimmerTasks.setVisibility(View.GONE);
+        binding.recyclerViewTasks.setVisibility(View.VISIBLE);
     }
 
     private void filterTasks() {
         filteredTasks.clear();
 
         for (Task task : allTasks) {
-            // Filter by date
-            if (selectedDate != null && task.getWorkDate().equals(selectedDate)) {
-                // Filter by status
+            if (task.getWorkDate().equals(selectedDate)) {
                 if (currentFilter == null || task.getStatus() == currentFilter) {
                     filteredTasks.add(task);
                 }

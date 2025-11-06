@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Notification Icon -->
+    <item
+        android:id="@+id/action_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="Notifications"
+        app:showAsAction="ifRoom"
+        app:iconTint="@color/white" />
+
+    <!-- Three Dot Menu -->
+    <item
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_more_vert"
+        android:title="More"
+        app:showAsAction="always"
+        app:iconTint="@color/white">
+        
+        <menu>
+            <!-- Submenu items -->
+            <item
+                android:id="@+id/action_settings"
+                android:title="Settings"
+                android:icon="@drawable/ic_settings" />
+            
+            <item
+                android:id="@+id/action_help"
+                android:title="Help &amp; Support"
+                android:icon="@drawable/ic_help" />
+            
+            <item
+                android:id="@+id/action_about"
+                android:title="About"
+                android:icon="@drawable/ic_info" />
+        </menu>
+        
+    </item>
+
+</menu>
+
