@@ -1,14 +1,17 @@
 package com.sendajapan.sendasnap.models;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
 public class Vehicle implements Serializable {
-    @SerializedName(value = "id", alternate = {"vehicle_id"})
+
+    @SerializedName(value = "id", alternate = { "vehicle_id" })
     private String id;
 
-    @SerializedName(value = "serialNumber", alternate = {"chassis_number"})
+    @SerializedName(value = "serialNumber", alternate = { "chassis_number" })
     private String serialNumber;
 
     @SerializedName("make")
@@ -20,58 +23,58 @@ public class Vehicle implements Serializable {
     @SerializedName("chassisModel")
     private String chassisModel;
 
-    @SerializedName(value = "cc", alternate = {"veh_cc"})
+    @SerializedName(value = "cc", alternate = { "veh_cc" })
     private String cc;
 
-    @SerializedName(value = "year", alternate = {"veh_year"})
+    @SerializedName(value = "year", alternate = { "veh_year" })
     private String year;
 
-    @SerializedName(value = "color", alternate = {"veh_color"})
+    @SerializedName(value = "color", alternate = { "veh_color" })
     private String color;
 
-    @SerializedName(value = "vehicleBuyDate", alternate = {"veh_buy_date"})
+    @SerializedName(value = "vehicleBuyDate", alternate = { "veh_buy_date" })
     private String vehicleBuyDate;
 
-    @SerializedName(value = "auctionShipNumber", alternate = {"veh_auc_ship_number"})
+    @SerializedName(value = "auctionShipNumber", alternate = { "veh_auc_ship_number" })
     private String auctionShipNumber;
 
-    @SerializedName(value = "netWeight", alternate = {"veh_net_weight"})
+    @SerializedName(value = "netWeight", alternate = { "veh_net_weight" })
     private String netWeight;
 
     @SerializedName("area")
     private String area;
 
-    @SerializedName(value = "length", alternate = {"veh_l"})
+    @SerializedName(value = "length", alternate = { "veh_l" })
     private String length;
 
-    @SerializedName(value = "width", alternate = {"veh_w"})
+    @SerializedName(value = "width", alternate = { "veh_w" })
     private String width;
 
-    @SerializedName(value = "height", alternate = {"veh_h"})
+    @SerializedName(value = "height", alternate = { "veh_h" })
     private String height;
 
     @SerializedName("plateNumber")
     private String plateNumber;
 
-    @SerializedName(value = "buyingPrice", alternate = {"veh_buy_price"})
+    @SerializedName(value = "buyingPrice", alternate = { "veh_buy_price" })
     private String buyingPrice;
 
-    @SerializedName(value = "expectedYardDate", alternate = {"yard_date_in"})
+    @SerializedName(value = "expectedYardDate", alternate = { "yard_date_in" })
     private String expectedYardDate;
 
-    @SerializedName(value = "riksoFrom", alternate = {"rikso_from_place_id"})
+    @SerializedName(value = "riksoFrom", alternate = { "rikso_from_place_id" })
     private String riksoFrom;
 
-    @SerializedName(value = "riksoTo", alternate = {"rikso_to_place_id"})
+    @SerializedName(value = "riksoTo", alternate = { "rikso_to_place_id" })
     private String riksoTo;
 
-    @SerializedName(value = "riksoCost", alternate = {"rikso_cost"})
+    @SerializedName(value = "riksoCost", alternate = { "rikso_cost" })
     private String riksoCost;
 
-    @SerializedName(value = "riksoCompany", alternate = {"rikso_company"})
+    @SerializedName(value = "riksoCompany", alternate = { "rikso_company" })
     private String riksoCompany;
 
-    @SerializedName("vehiclePhotos")
+    @SerializedName("images")
     private List<String> vehiclePhotos;
 
     @SerializedName("auctionSheet")
@@ -128,7 +131,7 @@ public class Vehicle implements Serializable {
     }
 
     public String getChassisModel() {
-        return chassisModel;
+        return TextUtils.isEmpty(chassisModel) ? "N/A" : chassisModel;
     }
 
     public void setChassisModel(String chassisModel) {
@@ -310,5 +313,37 @@ public class Vehicle implements Serializable {
 
     public String getDimensions() {
         return length + " x " + width + " x " + height;
+    }
+
+    @Override
+    public String toString() {
+        return "Vehicle{" +
+                "id='" + id + '\'' +
+                ", serialNumber='" + serialNumber + '\'' +
+                ", make='" + make + '\'' +
+                ", model='" + model + '\'' +
+                ", chassisModel='" + chassisModel + '\'' +
+                ", cc='" + cc + '\'' +
+                ", year='" + year + '\'' +
+                ", color='" + color + '\'' +
+                ", vehicleBuyDate='" + vehicleBuyDate + '\'' +
+                ", auctionShipNumber='" + auctionShipNumber + '\'' +
+                ", netWeight='" + netWeight + '\'' +
+                ", area='" + area + '\'' +
+                ", length='" + length + '\'' +
+                ", width='" + width + '\'' +
+                ", height='" + height + '\'' +
+                ", plateNumber='" + plateNumber + '\'' +
+                ", buyingPrice='" + buyingPrice + '\'' +
+                ", expectedYardDate='" + expectedYardDate + '\'' +
+                ", riksoFrom='" + riksoFrom + '\'' +
+                ", riksoTo='" + riksoTo + '\'' +
+                ", riksoCost='" + riksoCost + '\'' +
+                ", riksoCompany='" + riksoCompany + '\'' +
+                ", vehiclePhotos=" + vehiclePhotos +
+                ", auctionSheet='" + auctionSheet + '\'' +
+                ", tohonCopy='" + tohonCopy + '\'' +
+                ", consigneeDetails=" + consigneeDetails +
+                '}';
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class VehicleSearchResponse {
+
     @SerializedName("success")
     private Boolean success;
 
@@ -52,6 +53,7 @@ public class VehicleSearchResponse {
     }
 
     public static class VehicleSearchData {
+
         @SerializedName("vehicles")
         private List<Vehicle> vehicles;
 
@@ -67,4 +69,3 @@ public class VehicleSearchResponse {
         }
     }
 }
-

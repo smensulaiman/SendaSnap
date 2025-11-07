@@ -39,25 +39,31 @@ import java.util.List;
 
 public class VehicleDetailsActivity extends AppCompatActivity {
 
+    private static final int CAMERA_PERMISSION_REQUEST = 100;
+    private static final int STORAGE_PERMISSION_REQUEST = 101;
+
     private ActivityVehicleDetailsBinding binding;
-    private Vehicle vehicle;
+
+    private ApiService apiService;
+
+    private ActivityResultLauncher<Uri> cameraLauncher;
+    private ActivityResultLauncher<String> galleryLauncher;
+
     private VehicleImageGridAdapter vehicleImageAdapter;
     private PendingImageAdapter pendingImageAdapter;
     private HapticFeedbackHelper hapticHelper;
     private final List<String> pendingImagePaths = new ArrayList<>();
-    private ApiService apiService;
-    private ActivityResultLauncher<Uri> cameraLauncher;
-    private ActivityResultLauncher<String> galleryLauncher;
+
+    private Vehicle vehicle;
     private Uri cameraImageUri;
     private String cameraImagePath;
 
-    private static final int CAMERA_PERMISSION_REQUEST = 100;
-    private static final int STORAGE_PERMISSION_REQUEST = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         binding = ActivityVehicleDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -175,15 +181,17 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                             pendingImagePaths.add(cameraImagePath);
                             pendingImageAdapter.notifyItemInserted(pendingImagePaths.size() - 1);
                             updatePendingImagesVisibility();
-                            CookieBarToastHelper.showSuccess(this, "Success", "Photo added successfully",
- CookieBarToastHelper.SHORT_DURATION);
+
+                            CookieBarToastHelper.showSuccess(this,
+                                    "Success", "Photo added successfully",
+                                    CookieBarToastHelper.SHORT_DURATION);
                         } else {
                             CookieBarToastHelper.showError(this, "Error", "Failed to save photo",
- CookieBarToastHelper.LONG_DURATION);
+                                    CookieBarToastHelper.LONG_DURATION);
                         }
                     } else if (!result) {
                         CookieBarToastHelper.showInfo(this, "Cancelled", "Photo capture cancelled",
- CookieBarToastHelper.SHORT_DURATION);
+                                CookieBarToastHelper.SHORT_DURATION);
                     }
                 });
 
@@ -198,6 +206,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                                 pendingImagePaths.add(imagePath);
                             }
                         }
+
                         pendingImageAdapter.notifyDataSetChanged();
                         updatePendingImagesVisibility();
                     }
@@ -241,19 +250,19 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             // For Android 13+ (API 33+), we don't need storage permission for camera
-            permissions = new String[] { Manifest.permission.CAMERA };
+            permissions = new String[]{Manifest.permission.CAMERA};
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                     CookieBarToastHelper.showInfo(this, "Permission Required",
-                            "Camera permission is needed to take photos",                             CookieBarToastHelper.LONG_DURATION);
+                            "Camera permission is needed to take photos", CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION_REQUEST);
                 return;
             }
         } else {
             // For older versions, we need both camera and storage permissions
-            permissions = new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE };
+            permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                     ||
                     ContextCompat.checkSelfPermission(this,
@@ -262,7 +271,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                         ActivityCompat.shouldShowRequestPermissionRationale(this,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     CookieBarToastHelper.showInfo(this, "Permission Required",
-                            "Camera and storage permissions are needed to take photos",                             CookieBarToastHelper.LONG_DURATION);
+                            "Camera and storage permissions are needed to take photos", CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION_REQUEST);
                 return;
@@ -281,7 +290,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                             CookieBarToastHelper.LONG_DURATION);
                 }
             } else {
-                CookieBarToastHelper.showError(this, "Error", "Failed to create image file",                         CookieBarToastHelper.LONG_DURATION);
+                CookieBarToastHelper.showError(this, "Error", "Failed to create image file", CookieBarToastHelper.LONG_DURATION);
             }
         } catch (Exception e) {
             CookieBarToastHelper.showError(this, "Error", "Failed to open camera: " + e.getMessage(),
@@ -293,25 +302,25 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             // For Android 13+ (API 33+), use READ_MEDIA_IMAGES
-            permissions = new String[] { Manifest.permission.READ_MEDIA_IMAGES };
+            permissions = new String[]{Manifest.permission.READ_MEDIA_IMAGES};
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES)) {
                     CookieBarToastHelper.showInfo(this, "Permission Required",
-                            "Storage permission is needed to access photos",                             CookieBarToastHelper.LONG_DURATION);
+                            "Storage permission is needed to access photos", CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION_REQUEST);
                 return;
             }
         } else {
             // For older versions, use READ_EXTERNAL_STORAGE
-            permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
+            permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     CookieBarToastHelper.showInfo(this, "Permission Required",
-                            "Storage permission is needed to access photos",                             CookieBarToastHelper.LONG_DURATION);
+                            "Storage permission is needed to access photos", CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION_REQUEST);
                 return;
@@ -347,7 +356,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                     getPackageName() + ".fileprovider", image);
         } catch (Exception e) {
             CookieBarToastHelper.showError(this, "Error", "Failed to create image file: " + e.getMessage(),
- CookieBarToastHelper.LONG_DURATION);
+                    CookieBarToastHelper.LONG_DURATION);
             return null;
         }
     }
@@ -358,7 +367,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 return uri.getPath();
             } else if (uri.getScheme().equals("content")) {
                 // For FileProvider URIs, we need to get the actual file path
-                String[] projection = { MediaStore.Images.Media.DATA };
+                String[] projection = {MediaStore.Images.Media.DATA};
                 android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
                 if (cursor != null) {
                     int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -390,7 +399,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 openCamera();
             } else {
                 CookieBarToastHelper.showError(this, "Permission Denied", "Camera permission is required",
- CookieBarToastHelper.LONG_DURATION);
+                        CookieBarToastHelper.LONG_DURATION);
             }
         } else if (requestCode == STORAGE_PERMISSION_REQUEST) {
             boolean allPermissionsGranted = true;
@@ -404,14 +413,14 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 openGallery();
             } else {
                 CookieBarToastHelper.showError(this, "Permission Denied", "Storage permission is required",
- CookieBarToastHelper.LONG_DURATION);
+                        CookieBarToastHelper.LONG_DURATION);
             }
         }
     }
 
     private void uploadPendingImages() {
         if (pendingImagePaths.isEmpty()) {
-            CookieBarToastHelper.showInfo(this, "No Photos", "No photos to upload",                     CookieBarToastHelper.SHORT_DURATION);
+            CookieBarToastHelper.showInfo(this, "No Photos", "No photos to upload", CookieBarToastHelper.SHORT_DURATION);
             return;
         }
 
@@ -443,7 +452,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             pendingImageAdapter.notifyDataSetChanged();
             updatePendingImagesVisibility();
 
-            CookieBarToastHelper.showSuccess(this, "Success", "Photos uploaded successfully!",                     CookieBarToastHelper.LONG_DURATION);
+            CookieBarToastHelper.showSuccess(this, "Success", "Photos uploaded successfully!", CookieBarToastHelper.LONG_DURATION);
         }, 2000); // 2 second delay to simulate upload
     }
 

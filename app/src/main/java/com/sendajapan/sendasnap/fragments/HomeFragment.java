@@ -233,6 +233,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void showSearchResultsDialog(List<Vehicle> vehicles) {
+
         Dialog resultsDialog = new Dialog(requireContext());
         resultsDialog.setContentView(R.layout.dialog_vehicle_search_results);
         if (resultsDialog.getWindow() != null) {
