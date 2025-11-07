@@ -108,7 +108,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
                 if (selectedChip != null) {
                     String chipText = selectedChip.getText().toString();
                     switch (chipText) {
-                        case "Running":
+                        case "In Progress":
                             currentFilter = Task.TaskStatus.RUNNING;
                             break;
                         case "Pending":
@@ -126,6 +126,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
                     }
                 }
             }
+
             filterTasks();
         });
     }
@@ -172,17 +173,13 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void loadMockTasks() {
-        // Show shimmer
         showShimmer();
-        
-        // Simulate loading delay for shimmer effect
+
         new android.os.Handler().postDelayed(() -> {
-            // Check if fragment is still attached and binding is not null
             if (!isAdded() || binding == null) {
                 return;
             }
-            
-            // Mock data for demonstration
+
             allTasks.clear();
 
             Calendar calendar = Calendar.getInstance();
@@ -195,11 +192,10 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
             allTasks.add(new Task("3", "Client Meeting", "Meet with client for vehicle delivery", today, "16:30",
                     Task.TaskStatus.COMPLETED));
 
-            // Hide shimmer
             hideShimmer();
             
             filterTasks();
-        }, 1000); // Simulated loading time
+        }, 700);
     }
     
     private void showShimmer() {

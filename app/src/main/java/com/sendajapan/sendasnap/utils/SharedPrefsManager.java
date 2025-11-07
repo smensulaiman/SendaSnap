@@ -94,11 +94,13 @@ public class SharedPrefsManager {
 
     public List<Vehicle> getRecentVehicles() {
         String vehiclesJson = sharedPreferences.getString(KEY_RECENT_VEHICLES, null);
+
         if (vehiclesJson != null) {
             Type listType = new TypeToken<List<Vehicle>>() {
             }.getType();
             return gson.fromJson(vehiclesJson, listType);
         }
+
         return new ArrayList<>();
     }
 

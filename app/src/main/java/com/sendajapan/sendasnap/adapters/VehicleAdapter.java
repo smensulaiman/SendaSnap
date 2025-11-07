@@ -22,8 +22,8 @@ import java.util.List;
 
 public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleViewHolder> {
 
-    private List<Vehicle> vehicles;
-    private OnVehicleClickListener listener;
+    private final List<Vehicle> vehicles;
+    private final OnVehicleClickListener listener;
 
     public interface OnVehicleClickListener {
         void onVehicleClick(Vehicle vehicle);
@@ -60,6 +60,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
     }
 
     class VehicleViewHolder extends RecyclerView.ViewHolder {
+
         private ImageView imgVehicle;
         private TextView txtVehicleName;
         private TextView txtMakeModel;
@@ -108,16 +109,6 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             } else {
                 // Use placeholder
                 imgVehicle.setImageResource(R.drawable.car_placeholder);
-            }
-        }
-
-        private double parsePrice(String priceStr) {
-            try {
-                // Remove any non-numeric characters except decimal point
-                String cleanPrice = priceStr.replaceAll("[^0-9.]", "");
-                return Double.parseDouble(cleanPrice);
-            } catch (NumberFormatException e) {
-                return 0.0;
             }
         }
 

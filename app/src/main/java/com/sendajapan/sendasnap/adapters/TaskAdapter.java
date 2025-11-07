@@ -101,11 +101,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         private void setStatusColors(Task.TaskStatus status) {
             Context context = itemView.getContext();
+            cardView.setCardBackgroundColor(context.getColor(R.color.white));
 
             switch (status) {
                 case RUNNING:
                     // Card colors
-                    cardView.setCardBackgroundColor(context.getColor(R.color.primary_light));
                     cardView.setStrokeColor(context.getColor(R.color.primary));
                     // Status indicator
                     statusIndicator.setBackgroundColor(context.getColor(R.color.primary));
@@ -117,7 +117,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     break;
                 case PENDING:
                     // Card colors
-                    cardView.setCardBackgroundColor(context.getColor(R.color.warning_light));
                     cardView.setStrokeColor(context.getColor(R.color.warning_dark));
                     // Status indicator
                     statusIndicator.setBackgroundColor(context.getColor(R.color.warning_dark));
@@ -129,24 +128,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     break;
                 case COMPLETED:
                     // Card colors
-                    cardView.setCardBackgroundColor(context.getColor(R.color.success_light));
                     cardView.setStrokeColor(context.getColor(R.color.success_dark));
                     // Status indicator
                     statusIndicator.setBackgroundColor(context.getColor(R.color.success_dark));
                     // Chip
                     chipTaskStatus.setText("Completed");
-                    chipTaskStatus.setChipBackgroundColor(context.getColorStateList(R.color.success_light));
+                    chipTaskStatus.setChipBackgroundColor(context.getColorStateList(R.color.success_medium));
                     chipTaskStatus.setChipStrokeColor(context.getColorStateList(R.color.success_dark));
                     break;
                 case CANCELLED:
                     // Card colors
-                    cardView.setCardBackgroundColor(context.getColor(R.color.error_light));
                     cardView.setStrokeColor(context.getColor(R.color.error_dark));
                     // Status indicator
                     statusIndicator.setBackgroundColor(context.getColor(R.color.error_dark));
                     // Chip
                     chipTaskStatus.setText("Cancelled");
-                    chipTaskStatus.setChipBackgroundColor(context.getColorStateList(R.color.error_light));
+                    chipTaskStatus.setChipBackgroundColor(context.getColorStateList(R.color.error_medium));
                     chipTaskStatus.setChipStrokeColor(context.getColorStateList(R.color.error_dark));
                     break;
             }
