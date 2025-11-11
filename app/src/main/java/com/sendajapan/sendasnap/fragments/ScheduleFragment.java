@@ -67,7 +67,6 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         setupFAB();
         setupSelectedDate();
 
-        // Load tasks from API
         loadTasksFromApi();
     }
 
@@ -78,30 +77,18 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void setupCalendar() {
-        // Apply theme color to calendar selected date
-        applyThemeColorToCalendar();
 
         binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(year, month, dayOfMonth);
             selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
             updateSelectedDateText();
-            // Reload tasks for the new date
             loadTasksFromApi();
         });
 
-        // Set initial date to today
         Calendar today = Calendar.getInstance();
         selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(today.getTime());
         updateSelectedDateText();
-    }
-
-    private void applyThemeColorToCalendar() {
-        try {
-            binding.calendarView.setBackgroundColor(getResources().getColor(R.color.white, null));
-        } catch (Exception e) {
-            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void setupFilterChips() {
@@ -133,13 +120,11 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
             }
 
             filterTasks();
-            // Reload tasks when filter changes
             loadTasksFromApi();
         });
     }
 
     private void setupFAB() {
-        // Check user role to show/hide FAB
         UserData currentUser = prefsManager.getUser();
         boolean canCreateTask = false;
         

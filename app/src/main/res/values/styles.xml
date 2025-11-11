@@ -28,7 +28,7 @@
     <style name="CustomCalendarView">
         <item name="android:selectedDateVerticalBar">@color/primary</item>
         <item name="android:weekNumberColor">@color/text_secondary</item>
-        <item name="android:weekSeparatorLineColor">@color/border</item>
+        <item name="android:weekSeparatorLineColor">@color/text_secondary</item>
         <item name="android:selectedWeekBackgroundColor">@color/primary</item>
         <item name="android:focusedMonthDateColor">@color/white</item>
         <item name="android:unfocusedMonthDateColor">@color/text_hint</item>
@@ -36,7 +36,7 @@
         <item name="android:colorAccent">@color/primary</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorControlHighlight">@color/primary</item>
-        <item name="android:colorControlActivated">@color/white</item>
+        <item name="android:colorControlActivated">@color/primary</item>
     </style>
     
     <!-- Custom Calendar Date Text Style -->

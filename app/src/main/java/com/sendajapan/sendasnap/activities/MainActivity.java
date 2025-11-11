@@ -2,7 +2,6 @@ package com.sendajapan.sendasnap.activities;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
