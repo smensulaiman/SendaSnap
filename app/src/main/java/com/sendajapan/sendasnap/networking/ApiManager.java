@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.models.ApiResponse;
 import com.sendajapan.sendasnap.models.ErrorResponse;
+import com.sendajapan.sendasnap.models.Task;
+import com.sendajapan.sendasnap.models.TasksResponse;
 import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.models.UsersResponse;
 
@@ -104,6 +106,64 @@ public class ApiManager {
         }
         
         return defaultMessage;
+    }
+
+    /**
+     * Get tasks from the API with optional filters
+     * @param search Search query for title/description
+     * @param status Filter by status (pending, running, completed, cancelled)
+     * @param priority Filter by priority (low, medium, high, urgent)
+     * @param assignedTo Filter by assigned user ID
+     * @param dateFrom Filter by work date from (YYYY-MM-DD)
+     * @param dateTo Filter by work date to (YYYY-MM-DD)
+     * @param perPage Number of items per page (default: 15)
+     * @param callback Callback to handle success or error
+     */
+    public void getTasks(String search, String status, String priority, Integer assignedTo,
+                        String dateFrom, String dateTo, Integer perPage,
+                        ApiCallback<List<Task>> callback) {
+        Call<ApiResponse<TasksResponse.TasksData>> call = apiService.getTasks(
+                search, status, priority, assignedTo, dateFrom, dateTo, perPage
+        );
+        call.enqueue(new Callback<ApiResponse<TasksResponse.TasksData>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<TasksResponse.TasksData>> call,
+                                   @NonNull Response<ApiResponse<TasksResponse.TasksData>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<TasksResponse.TasksData> apiResponse = response.body();
+                    
+                    // Check if the API call was successful
+                    if (apiResponse.getSuccess() != null && apiResponse.getSuccess()) {
+                        // Extract tasks from the response
+                        if (apiResponse.getData() != null && apiResponse.getData().getTasks() != null) {
+                            callback.onSuccess(apiResponse.getData().getTasks());
+                        } else {
+                            callback.onError("No tasks data received", response.code());
+                        }
+                    } else {
+                        // API returned success: false
+                        String errorMessage = apiResponse.getMessage() != null 
+                                ? apiResponse.getMessage() 
+                                : "Failed to retrieve tasks";
+                        callback.onError(errorMessage, response.code());
+                    }
+                } else {
+                    // HTTP error response (4xx, 5xx)
+                    String errorMessage = parseErrorMessage(response);
+                    callback.onError(errorMessage, response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<TasksResponse.TasksData>> call,
+                                  @NonNull Throwable t) {
+                String errorMessage = "Network error. Please check your connection and try again.";
+                if (t.getMessage() != null) {
+                    errorMessage = t.getMessage();
+                }
+                callback.onError(errorMessage, 0);
+            }
+        });
     }
 }
 

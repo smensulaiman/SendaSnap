@@ -430,6 +430,209 @@ public class ChatService {
         });
     }
     
+    /**
+     * Create or get group chat for a task
+     */
+    public void createOrGetGroupChat(String taskId, String taskTitle, List<String> participantIds, GroupChatCallback callback) {
+        String currentUserId = FirebaseUtils.getCurrentUserId(null);
+        if (currentUserId.isEmpty()) {
+            callback.onFailure(new Exception("User not logged in"));
+            return;
+        }
+        
+        String chatId = "task_" + taskId;
+        
+        DatabaseReference chatRef = database.getReference("chats").child(chatId);
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    // Create new group chat
+                    Map<String, Object> chatData = new HashMap<>();
+                    chatData.put("taskId", taskId);
+                    chatData.put("taskTitle", taskTitle);
+                    chatData.put("isGroupChat", true);
+                    
+                    // Add all participants
+                    Map<String, Object> participants = new HashMap<>();
+                    for (String participantId : participantIds) {
+                        participants.put(participantId, true);
+                    }
+                    chatData.put("participants", participants);
+                    
+                    chatRef.updateChildren(chatData);
+                }
+                
+                Chat chat = new Chat();
+                chat.setChatId(chatId);
+                chat.setLastMessage("");
+                chat.setLastMessageTime(0);
+                chat.setUnreadCount(0);
+                
+                callback.onSuccess(chat);
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Failed to create/get group chat", error.toException());
+                callback.onFailure(error.toException());
+            }
+        });
+    }
+    
+    /**
+     * Send message to group chat
+     */
+    public void sendGroupMessage(String chatId, String messageText, MessageCallback callback) {
+        String senderId = FirebaseUtils.getCurrentUserId(null);
+        if (senderId.isEmpty()) {
+            callback.onFailure(new Exception("User not logged in"));
+            return;
+        }
+        
+        String messageId = database.getReference("chats").child(chatId).child("messages").push().getKey();
+        if (messageId == null) {
+            callback.onFailure(new Exception("Failed to generate message ID"));
+            return;
+        }
+        
+        Message message = new Message();
+        message.setMessageId(messageId);
+        message.setSenderId(senderId);
+        message.setMessage(messageText);
+        message.setMessageType("text");
+        message.setTimestamp(System.currentTimeMillis());
+        message.setSeen(false);
+        
+        DatabaseReference messageRef = database.getReference("chats").child(chatId).child("messages").child(messageId);
+        messageRef.setValue(message).addOnSuccessListener(aVoid -> {
+            // Update last message in chat
+            updateLastMessage(chatId, senderId, messageText, "text");
+            // Update all participants' userChats
+            updateGroupChatUserChats(chatId, senderId, messageText, System.currentTimeMillis());
+            callback.onSuccess(message);
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to send group message", e);
+            callback.onFailure(e);
+        });
+    }
+    
+    /**
+     * Get unread count for group chat
+     */
+    public void getGroupChatUnreadCount(String chatId, String userId, UnreadCountCallback callback) {
+        DatabaseReference unreadRef = database.getReference("userChats").child(userId).child(chatId).child("unreadCount");
+        unreadRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                int unreadCount = 0;
+                if (snapshot.exists() && snapshot.getValue() != null) {
+                    Object value = snapshot.getValue();
+                    if (value instanceof Long) {
+                        unreadCount = ((Long) value).intValue();
+                    } else if (value instanceof Integer) {
+                        unreadCount = (Integer) value;
+                    }
+                }
+                callback.onSuccess(unreadCount);
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Failed to get unread count", error.toException());
+                callback.onFailure(error.toException());
+            }
+        });
+    }
+    
+    /**
+     * Mark group chat as seen (reset unread count)
+     */
+    public void markGroupChatAsSeen(String chatId, String userId) {
+        DatabaseReference userChatRef = database.getReference("userChats").child(userId).child(chatId);
+        userChatRef.child("unreadCount").setValue(0);
+    }
+    
+    /**
+     * Update userChats for all participants in group chat
+     */
+    private void updateGroupChatUserChats(String chatId, String senderId, String lastMessage, long timestamp) {
+        // Get all participants from chat
+        DatabaseReference chatRef = database.getReference("chats").child(chatId).child("participants");
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                List<String> participantIds = new ArrayList<>();
+                for (DataSnapshot participantSnapshot : snapshot.getChildren()) {
+                    participantIds.add(participantSnapshot.getKey());
+                }
+                
+                // Get task info from chat
+                DatabaseReference taskInfoRef = database.getReference("chats").child(chatId);
+                taskInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot taskSnapshot) {
+                        String taskId = taskSnapshot.child("taskId").getValue(String.class);
+                        String taskTitle = taskSnapshot.child("taskTitle").getValue(String.class);
+                        
+                        // Update each participant's userChats
+                        for (String participantId : participantIds) {
+                            int unreadIncrement = participantId.equals(senderId) ? 0 : 1;
+                            updateGroupChatUserChatEntry(chatId, participantId, taskId, taskTitle, lastMessage, timestamp, unreadIncrement);
+                        }
+                    }
+                    
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        Log.e(TAG, "Failed to get task info", error.toException());
+                    }
+                });
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Failed to get participants", error.toException());
+            }
+        });
+    }
+    
+    /**
+     * Update single user's group chat entry
+     */
+    private void updateGroupChatUserChatEntry(String chatId, String userId, String taskId, String taskTitle, 
+                                               String lastMessage, long timestamp, int unreadIncrement) {
+        DatabaseReference userChatRef = database.getReference("userChats").child(userId).child(chatId);
+        
+        userChatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                int unreadCountValue = 0;
+                if (snapshot.exists()) {
+                    Chat existingChat = snapshot.getValue(Chat.class);
+                    if (existingChat != null) {
+                        unreadCountValue = existingChat.getUnreadCount() + unreadIncrement;
+                    }
+                }
+                
+                Map<String, Object> chatData = new HashMap<>();
+                chatData.put("chatId", chatId);
+                chatData.put("taskId", taskId);
+                chatData.put("taskTitle", taskTitle);
+                chatData.put("isGroupChat", true);
+                chatData.put("lastMessage", lastMessage);
+                chatData.put("lastMessageTime", timestamp);
+                chatData.put("unreadCount", unreadCountValue);
+                
+                userChatRef.setValue(chatData);
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "Failed to update group chat user entry", error.toException());
+            }
+        });
+    }
+    
     // Callback interfaces
     public interface MessageCallback {
         void onSuccess(Message message);
@@ -458,6 +661,16 @@ public class ChatService {
     
     public interface UsersCallback {
         void onSuccess(List<ChatUser> users);
+        void onFailure(Exception e);
+    }
+    
+    public interface GroupChatCallback {
+        void onSuccess(Chat chat);
+        void onFailure(Exception e);
+    }
+    
+    public interface UnreadCountCallback {
+        void onSuccess(int unreadCount);
         void onFailure(Exception e);
     }
 }

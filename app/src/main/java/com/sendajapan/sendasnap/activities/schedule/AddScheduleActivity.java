@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +60,7 @@ public class AddScheduleActivity extends AppCompatActivity {
     private final List<TaskAttachment> attachments = new ArrayList<>();
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
-    private final List<String> selectedAssignees = new ArrayList<>();
+    private final List<UserData> selectedAssignees = new ArrayList<>();
 
     private Task editingTask;
     private boolean isEditMode = false;
@@ -233,10 +232,15 @@ public class AddScheduleActivity extends AppCompatActivity {
                 users.addAll(userList);
                 
                 // If in edit mode, update selected users in dropdown
-                if (isEditMode && editingTask != null) {
-                    if (userDropdownAdapter != null) {
-                        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+                if (isEditMode && editingTask != null && userDropdownAdapter != null) {
+                    // Convert UserData list to names list for adapter
+                    List<String> selectedNames = new ArrayList<>();
+                    for (UserData user : selectedAssignees) {
+                        if (user != null && user.getName() != null) {
+                            selectedNames.add(user.getName());
+                        }
                     }
+                    userDropdownAdapter.setSelectedUsers(selectedNames);
                 }
             }
 
@@ -268,15 +272,33 @@ public class AddScheduleActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(AddScheduleActivity.this));
 
         userDropdownAdapter = new UserDropdownAdapter(users);
-        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+        // Convert UserData list to names list for adapter
+        List<String> selectedNames = new ArrayList<>();
+        for (UserData user : selectedAssignees) {
+            if (user != null && user.getName() != null) {
+                selectedNames.add(user.getName());
+            }
+        }
+        userDropdownAdapter.setSelectedUsers(selectedNames);
         userDropdownAdapter.setOnUserClickListener((user, isSelected) -> {
             hapticHelper.vibrateClick();
             if (isSelected) {
-                if (!selectedAssignees.contains(user.getName())) {
-                    selectedAssignees.add(user.getName());
+                // Check if user already exists by ID
+                boolean exists = false;
+                for (UserData existing : selectedAssignees) {
+                    if (existing != null && user != null && 
+                        existing.getId() == user.getId()) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    selectedAssignees.add(user);
                 }
             } else {
-                selectedAssignees.remove(user.getName());
+                // Remove by ID
+                selectedAssignees.removeIf(u -> u != null && user != null && 
+                    u.getId() == user.getId());
             }
 
             updateAssigneeChips();
@@ -318,17 +340,26 @@ public class AddScheduleActivity extends AppCompatActivity {
             binding.editTextAssignee.setText(selectedAssignees.size() + " assignee(s) selected");
             binding.chipGroupAssignees.setVisibility(View.VISIBLE);
             
-            for (String assigneeName : selectedAssignees) {
+            for (UserData assignee : selectedAssignees) {
+                if (assignee == null) continue;
+                
                 Chip chip = new Chip(this);
-                chip.setText(assigneeName);
+                chip.setText(assignee.getName() != null ? assignee.getName() : "");
                 chip.setCloseIconVisible(true);
                 chip.setCloseIconTint(getColorStateList(R.color.text_primary));
                 chip.setOnCloseIconClickListener(v -> {
                     hapticHelper.vibrateClick();
-                    selectedAssignees.remove(assigneeName);
+                    selectedAssignees.remove(assignee);
                     updateAssigneeChips();
                     if (userDropdownAdapter != null) {
-                        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+                        // Update adapter with names
+                        List<String> selectedNames = new ArrayList<>();
+                        for (UserData user : selectedAssignees) {
+                            if (user != null && user.getName() != null) {
+                                selectedNames.add(user.getName());
+                            }
+                        }
+                        userDropdownAdapter.setSelectedUsers(selectedNames);
                     }
                 });
                 binding.chipGroupAssignees.addView(chip);
@@ -344,7 +375,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         selectedAssignees.clear();
         if (editingTask.getAssignees() != null && !editingTask.getAssignees().isEmpty()) {
             selectedAssignees.addAll(editingTask.getAssignees());
-        } else if (editingTask.getAssignee() != null && !editingTask.getAssignee().isEmpty()) {
+        } else if (editingTask.getAssignee() != null) {
             // Migrate from old single assignee field
             selectedAssignees.add(editingTask.getAssignee());
         }
@@ -567,11 +598,13 @@ public class AddScheduleActivity extends AppCompatActivity {
             }
             // Always allow status update
             task.setStatus(status);
-            task.setUpdatedAt(System.currentTimeMillis());
+            task.setUpdatedAt(String.valueOf(System.currentTimeMillis()));
         } else {
             // Create new task
+            // Generate a temporary ID (will be replaced by server when saved)
+            int tempId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
             task = new Task(
-                    String.valueOf(System.currentTimeMillis()),
+                    tempId,
                     title,
                     description,
                     workDate,
@@ -580,6 +613,20 @@ public class AddScheduleActivity extends AppCompatActivity {
             task.setAssignees(new ArrayList<>(selectedAssignees));
             task.setPriority(priority);
             task.setAttachments(attachments);
+            // Set creator ID for new tasks (convert from UserData if available)
+            if (currentUser != null) {
+                task.setCreatedByUserId(currentUser.getId());
+            } else {
+                // Fallback: try to get from Firebase
+                String creatorIdStr = com.sendajapan.sendasnap.utils.FirebaseUtils.getCurrentUserId(this);
+                try {
+                    int creatorId = Integer.parseInt(creatorIdStr);
+                    task.setCreatedByUserId(creatorId);
+                } catch (NumberFormatException e) {
+                    // If can't parse, use 0 as default
+                    task.setCreatedByUserId(0);
+                }
+            }
         }
 
         // Set alarm for the task

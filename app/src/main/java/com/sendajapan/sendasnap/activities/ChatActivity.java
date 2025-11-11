@@ -47,6 +47,9 @@ public class ChatActivity extends AppCompatActivity {
     private String otherUserName;
     private String otherUserEmail;
     private String currentUserId;
+    private boolean isGroupChat = false;
+    private String taskId;
+    private String taskTitle;
     
     private ActivityResultLauncher<Uri> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
@@ -91,6 +94,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getIntentData() {
         chatId = getIntent().getStringExtra("chatId");
+        isGroupChat = getIntent().getBooleanExtra("isGroupChat", false);
+        taskId = getIntent().getStringExtra("taskId");
+        taskTitle = getIntent().getStringExtra("taskTitle");
         otherUserId = getIntent().getStringExtra("otherUserId");
         otherUserName = getIntent().getStringExtra("otherUserName");
         otherUserEmail = getIntent().getStringExtra("otherUserEmail");
@@ -102,7 +108,14 @@ public class ChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        binding.toolbar.setTitle(otherUserName != null ? otherUserName : "Chat");
+        if (isGroupChat && taskTitle != null) {
+            binding.toolbar.setTitle(taskTitle);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setSubtitle("Group Chat");
+            }
+        } else {
+            binding.toolbar.setTitle(otherUserName != null ? otherUserName : "Chat");
+        }
         binding.toolbar.setNavigationOnClickListener(v -> {
             hapticHelper.vibrateClick();
             finish();
@@ -110,7 +123,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        messageAdapter = new MessageAdapter(currentUserId);
+        messageAdapter = new MessageAdapter(currentUserId, isGroupChat);
         messageAdapter.setOnImageClickListener(imageUrl -> {
             // Open full-screen image viewer (can be implemented later)
             Toast.makeText(this, "Image viewer coming soon", Toast.LENGTH_SHORT).show();
@@ -198,19 +211,35 @@ public class ChatActivity extends AppCompatActivity {
         
         binding.etMessage.setText("");
         
-        chatService.sendMessage(chatId, otherUserId, messageText, new ChatService.MessageCallback() {
-            @Override
-            public void onSuccess(Message message) {
-                // Message will be added via real-time listener
-                scrollToBottom();
-            }
+        if (isGroupChat) {
+            chatService.sendGroupMessage(chatId, messageText, new ChatService.MessageCallback() {
+                @Override
+                public void onSuccess(Message message) {
+                    // Message will be added via real-time listener
+                    scrollToBottom();
+                }
 
-            @Override
-            public void onFailure(Exception e) {
-                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
-                        "Failed to send message", CookieBarToastHelper.LONG_DURATION);
-            }
-        });
+                @Override
+                public void onFailure(Exception e) {
+                    CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                            "Failed to send message", CookieBarToastHelper.LONG_DURATION);
+                }
+            });
+        } else {
+            chatService.sendMessage(chatId, otherUserId, messageText, new ChatService.MessageCallback() {
+                @Override
+                public void onSuccess(Message message) {
+                    // Message will be added via real-time listener
+                    scrollToBottom();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                            "Failed to send message", CookieBarToastHelper.LONG_DURATION);
+                }
+            });
+        }
     }
 
     private void showAttachmentBottomSheet() {
@@ -370,7 +399,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void markMessagesAsSeen() {
-        chatService.markAsSeen(chatId, currentUserId);
+        if (isGroupChat) {
+            chatService.markGroupChatAsSeen(chatId, currentUserId);
+        } else {
+            chatService.markAsSeen(chatId, currentUserId);
+        }
     }
 
     private void scrollToBottom() {

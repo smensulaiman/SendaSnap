@@ -29,6 +29,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     
     private List<Message> messages;
     private String currentUserId;
+    private boolean isGroupChat;
     private OnImageClickListener imageClickListener;
     private OnFileClickListener fileClickListener;
     
@@ -43,6 +44,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public MessageAdapter(String currentUserId) {
         this.messages = new ArrayList<>();
         this.currentUserId = currentUserId;
+        this.isGroupChat = false;
+    }
+    
+    public MessageAdapter(String currentUserId, boolean isGroupChat) {
+        this.messages = new ArrayList<>();
+        this.currentUserId = currentUserId;
+        this.isGroupChat = isGroupChat;
     }
     
     public void setOnImageClickListener(OnImageClickListener listener) {

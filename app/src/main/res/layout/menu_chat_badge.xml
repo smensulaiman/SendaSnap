@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/icon_chat"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_chat_outlined"
+        android:contentDescription="Chat" />
+
+    <TextView
+        android:id="@+id/badge_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="-4dp"
+        android:layout_marginEnd="-4dp"
+        android:background="@drawable/badge_background"
+        android:textColor="@color/white"
+        android:textSize="10sp"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="2dp"
+        android:minWidth="16dp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</FrameLayout>
+

@@ -51,18 +51,12 @@ public class AlarmHelper {
             // Create intent for alarm
             Intent intent = new Intent(context, TaskAlarmReceiver.class);
             intent.setAction(ACTION_TASK_REMINDER);
-            intent.putExtra("task_id", task.getId());
+            intent.putExtra("task_id", String.valueOf(task.getId()));
             intent.putExtra("task_title", task.getTitle());
             intent.putExtra("task_description", task.getDescription());
 
             // Use task ID as request code to ensure unique alarms
-            int requestCode;
-            try {
-                requestCode = (int) (Long.parseLong(task.getId()) % Integer.MAX_VALUE);
-            } catch (NumberFormatException e) {
-                // If ID is not a number, use hash code
-                requestCode = task.getId().hashCode() & 0x7FFFFFFF;
-            }
+            int requestCode = task.getId() & 0x7FFFFFFF;
             
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     context,
@@ -110,13 +104,7 @@ public class AlarmHelper {
         Intent intent = new Intent(context, TaskAlarmReceiver.class);
         intent.setAction(ACTION_TASK_REMINDER);
         
-        int requestCode;
-        try {
-            requestCode = (int) (Long.parseLong(task.getId()) % Integer.MAX_VALUE);
-        } catch (NumberFormatException e) {
-            // If ID is not a number, use hash code
-            requestCode = task.getId().hashCode() & 0x7FFFFFFF;
-        }
+        int requestCode = task.getId() & 0x7FFFFFFF;
         
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,

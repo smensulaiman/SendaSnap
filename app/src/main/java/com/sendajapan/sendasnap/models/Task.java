@@ -1,50 +1,93 @@
 package com.sendajapan.sendasnap.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Task implements Serializable {
 
-    private String id;
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("title")
     private String title;
+
+    @SerializedName("description")
     private String description;
+
+    @SerializedName("work_date")
     private String workDate;
+
+    @SerializedName("work_time")
     private String workTime;
-    private TaskStatus status;
-    private String assignee; // Keep for backward compatibility
-    private List<String> assignees; // New: multiple assignees
-    private TaskPriority priority;
+
+    @SerializedName("status")
+    private String statusString; // Field for API deserialization
+
+    private transient TaskStatus status; // Actual enum field (not serialized by Gson)
+
+    private UserData assignee; // Legacy field for backward compatibility
+
+    @SerializedName("assigned_users")
+    private List<UserData> assignees;
+
+    @SerializedName("created_by")
+    private int createdByUserId;
+
+    @SerializedName("priority")
+    private String priorityString; // Field for API deserialization
+
+    private transient TaskPriority priority; // Actual enum field (not serialized by Gson)
+
+    @SerializedName("attachments")
     private List<TaskAttachment> attachments;
-    private long createdAt;
-    private long updatedAt;
+
+    @SerializedName("due_date")
+    private String dueDate;
+
+    @SerializedName("completed_at")
+    private String completedAt;
+
+    @SerializedName("created_at")
+    private String createdAt;
+
+    @SerializedName("updated_at")
+    private String updatedAt;
+
+    @SerializedName("creator")
+    private UserData creator;
+
     private boolean isNew;
 
     public Task() {
     }
 
-    public Task(String id, String title, String description, String workDate, String workTime, TaskStatus status) {
+    public Task(int id, String title, String description, String workDate, String workTime, TaskStatus status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.workDate = workDate;
         this.workTime = workTime;
         this.status = status;
-        this.assignee = "";
+        this.statusString = status != null ? status.name().toLowerCase() : null;
+        this.assignee = null;
         this.assignees = new ArrayList<>();
         this.priority = TaskPriority.NORMAL;
+        this.priorityString = "medium";
         this.attachments = new ArrayList<>();
-        this.createdAt = System.currentTimeMillis();
-        this.updatedAt = System.currentTimeMillis();
+        this.createdAt = String.valueOf(System.currentTimeMillis());
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
         this.isNew = true;
     }
 
     // Getters and Setters
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -81,91 +124,197 @@ public class Task implements Serializable {
     }
 
     public TaskStatus getStatus() {
+        // Convert statusString to enum if status is null but statusString exists
+        if (status == null && statusString != null) {
+            status = parseStatus(statusString);
+        }
         return status;
     }
 
     public void setStatus(TaskStatus status) {
         this.status = status;
-        this.updatedAt = System.currentTimeMillis();
+        this.statusString = status != null ? status.name().toLowerCase() : null;
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
-    public String getAssignee() {
+    // Helper method to parse status string to enum
+    private TaskStatus parseStatus(String statusStr) {
+        if (statusStr == null) {
+            return TaskStatus.PENDING;
+        }
+        switch (statusStr.toLowerCase()) {
+            case "running":
+                return TaskStatus.RUNNING;
+            case "pending":
+                return TaskStatus.PENDING;
+            case "completed":
+                return TaskStatus.COMPLETED;
+            case "cancelled":
+                return TaskStatus.CANCELLED;
+            default:
+                return TaskStatus.PENDING;
+        }
+    }
+
+    public UserData getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(String assignee) {
+    public void setAssignee(UserData assignee) {
         this.assignee = assignee;
-        this.updatedAt = System.currentTimeMillis();
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
-    public List<String> getAssignees() {
+    public List<UserData> getAssignees() {
         if (assignees == null) {
             assignees = new ArrayList<>();
             // Migrate from old assignee field if exists
-            if (assignee != null && !assignee.isEmpty()) {
+            if (assignee != null) {
                 assignees.add(assignee);
             }
         }
         return assignees;
     }
 
-    public void setAssignees(List<String> assignees) {
+    public void setAssignees(List<UserData> assignees) {
         this.assignees = assignees;
         // Also update legacy assignee field for backward compatibility
         if (assignees != null && !assignees.isEmpty()) {
-            this.assignee = String.join(", ", assignees);
+            this.assignee = assignees.get(0); // Set first assignee as legacy field
         } else {
-            this.assignee = "";
+            this.assignee = null;
         }
-        this.updatedAt = System.currentTimeMillis();
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
-    public void addAssignee(String assigneeName) {
+    public void addAssignee(UserData assignee) {
         if (assignees == null) {
             assignees = new ArrayList<>();
         }
-        if (!assignees.contains(assigneeName)) {
-            assignees.add(assigneeName);
-            this.assignee = String.join(", ", assignees);
-            this.updatedAt = System.currentTimeMillis();
+        // Check if user already exists by ID
+        boolean exists = false;
+        for (UserData existing : assignees) {
+            if (existing != null && assignee != null && 
+                existing.getId() == assignee.getId()) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            assignees.add(assignee);
+            if (this.assignee == null) {
+                this.assignee = assignee; // Set as legacy field if empty
+            }
+            this.updatedAt = String.valueOf(System.currentTimeMillis());
         }
     }
 
-    public void removeAssignee(String assigneeName) {
-        if (assignees != null) {
-            assignees.remove(assigneeName);
+    public void removeAssignee(UserData assignee) {
+        if (assignees != null && assignee != null) {
+            assignees.removeIf(user -> user != null && user.getId() == assignee.getId());
             if (assignees.isEmpty()) {
-                this.assignee = "";
+                this.assignee = null;
             } else {
-                this.assignee = String.join(", ", assignees);
+                this.assignee = assignees.get(0); // Set first as legacy field
             }
-            this.updatedAt = System.currentTimeMillis();
+            this.updatedAt = String.valueOf(System.currentTimeMillis());
         }
+    }
+
+    public int getCreatedByUserId() {
+        return createdByUserId;
+    }
+
+    public void setCreatedByUserId(int createdByUserId) {
+        this.createdByUserId = createdByUserId;
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
     public TaskPriority getPriority() {
+        // Convert priorityString to enum if priority is null but priorityString exists
+        if (priority == null && priorityString != null) {
+            priority = parsePriority(priorityString);
+        }
         return priority;
     }
 
     public void setPriority(TaskPriority priority) {
         this.priority = priority;
-        this.updatedAt = System.currentTimeMillis();
+        // Convert enum to API string format
+        if (priority != null) {
+            switch (priority) {
+                case LOW:
+                    this.priorityString = "low";
+                    break;
+                case NORMAL:
+                    this.priorityString = "medium";
+                    break;
+                case HIGH:
+                    this.priorityString = "high";
+                    break;
+            }
+        } else {
+            this.priorityString = null;
+        }
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
-    public long getCreatedAt() {
+    // Helper method to parse priority string to enum
+    private TaskPriority parsePriority(String priorityStr) {
+        if (priorityStr == null) {
+            return TaskPriority.NORMAL;
+        }
+        switch (priorityStr.toLowerCase()) {
+            case "low":
+                return TaskPriority.LOW;
+            case "medium":
+                return TaskPriority.NORMAL;
+            case "high":
+            case "urgent":
+                return TaskPriority.HIGH;
+            default:
+                return TaskPriority.NORMAL;
+        }
+    }
+
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(long createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
-    public long getUpdatedAt() {
+    public String getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(long updatedAt) {
+    public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(String completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public UserData getCreator() {
+        return creator;
+    }
+
+    public void setCreator(UserData creator) {
+        this.creator = creator;
     }
 
     public boolean isNew() {
@@ -182,7 +331,7 @@ public class Task implements Serializable {
 
     public void setAttachments(List<TaskAttachment> attachments) {
         this.attachments = attachments;
-        this.updatedAt = System.currentTimeMillis();
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
     public void addAttachment(TaskAttachment attachment) {
@@ -190,13 +339,13 @@ public class Task implements Serializable {
             this.attachments = new ArrayList<>();
         }
         this.attachments.add(attachment);
-        this.updatedAt = System.currentTimeMillis();
+        this.updatedAt = String.valueOf(System.currentTimeMillis());
     }
 
     public void removeAttachment(TaskAttachment attachment) {
         if (this.attachments != null) {
             this.attachments.remove(attachment);
-            this.updatedAt = System.currentTimeMillis();
+            this.updatedAt = String.valueOf(System.currentTimeMillis());
         }
     }
 

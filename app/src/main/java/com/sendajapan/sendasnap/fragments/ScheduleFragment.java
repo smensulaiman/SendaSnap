@@ -20,6 +20,8 @@ import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.networking.ApiCallback;
+import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.text.SimpleDateFormat;
@@ -39,6 +41,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
     private SharedPrefsManager prefsManager;
+    private ApiManager apiManager;
 
     private String selectedDate;
     private Task.TaskStatus currentFilter = null;
@@ -56,6 +59,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         super.onViewCreated(view, savedInstanceState);
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
+        apiManager = ApiManager.getInstance(requireContext());
         
         setupRecyclerView();
         setupCalendar();
@@ -63,8 +67,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         setupFAB();
         setupSelectedDate();
 
-        // Load mock data for demonstration
-        loadMockTasks();
+        // Load tasks from API
+        loadTasksFromApi();
     }
 
     private void setupRecyclerView() {
@@ -82,7 +86,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
             calendar.set(year, month, dayOfMonth);
             selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
             updateSelectedDateText();
-            filterTasks();
+            // Reload tasks for the new date
+            loadTasksFromApi();
         });
 
         // Set initial date to today
@@ -128,6 +133,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
             }
 
             filterTasks();
+            // Reload tasks when filter changes
+            loadTasksFromApi();
         });
     }
 
@@ -172,30 +179,82 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         }
     }
 
-    private void loadMockTasks() {
+    private void loadTasksFromApi() {
+        if (selectedDate == null) {
+            // Set default to today if not set
+            Calendar today = Calendar.getInstance();
+            selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(today.getTime());
+        }
+
         showShimmer();
 
-        new android.os.Handler().postDelayed(() -> {
-            if (!isAdded() || binding == null) {
-                return;
+        // Convert status filter to API format
+        String statusFilter = null;
+        if (currentFilter != null) {
+            switch (currentFilter) {
+                case RUNNING:
+                    statusFilter = "running";
+                    break;
+                case PENDING:
+                    statusFilter = "pending";
+                    break;
+                case COMPLETED:
+                    statusFilter = "completed";
+                    break;
+                case CANCELLED:
+                    statusFilter = "cancelled";
+                    break;
             }
+        }
 
-            allTasks.clear();
+        // Get current user for assigned_to filter (optional - can be null to get all tasks)
+        UserData currentUser = prefsManager.getUser();
+        Integer assignedTo = null;
+        // Uncomment below if you want to filter by current user only
+        // if (currentUser != null) {
+        //     assignedTo = currentUser.getId();
+        // }
 
-            Calendar calendar = Calendar.getInstance();
-            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
+        // Load tasks for the selected date
+        apiManager.getTasks(
+                null, // search
+                statusFilter, // status
+                null, // priority
+                assignedTo, // assigned_to
+                selectedDate, // date_from
+                selectedDate, // date_to
+                100, // per_page (large number to get all tasks for the date)
+                new ApiCallback<List<Task>>() {
+                    @Override
+                    public void onSuccess(List<Task> tasks) {
+                        if (!isAdded() || binding == null) {
+                            return;
+                        }
 
-            allTasks.add(new Task("1", "Vehicle Inspection", "Complete safety inspection for Toyota Camry", today, "09:00",
-                    Task.TaskStatus.RUNNING));
-            allTasks.add(new Task("2", "Paperwork Review", "Review and process vehicle documentation", today, "14:00",
-                    Task.TaskStatus.PENDING));
-            allTasks.add(new Task("3", "Client Meeting", "Meet with client for vehicle delivery", today, "16:30",
-                    Task.TaskStatus.COMPLETED));
+                        allTasks.clear();
+                        if (tasks != null) {
+                            allTasks.addAll(tasks);
+                        }
 
-            hideShimmer();
-            
-            filterTasks();
-        }, 700);
+                        hideShimmer();
+                        filterTasks();
+                    }
+
+                    @Override
+                    public void onError(String message, int errorCode) {
+                        if (!isAdded() || binding == null) {
+                            return;
+                        }
+
+                        hideShimmer();
+                        allTasks.clear();
+                        filterTasks();
+                        
+                        // Show error message
+                        Toast.makeText(requireContext(), "Failed to load tasks: " + message, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
     
     private void showShimmer() {
@@ -217,7 +276,11 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         filteredTasks.clear();
 
         for (Task task : allTasks) {
-            if (task.getWorkDate().equals(selectedDate)) {
+            // Extract date from workDate (API returns ISO format like "2025-11-12T00:00:00.000000Z")
+            String taskDate = extractDateFromWorkDate(task.getWorkDate());
+            
+            if (taskDate != null && taskDate.equals(selectedDate)) {
+                // Status filter is already applied in API call, but keep this for safety
                 if (currentFilter == null || task.getStatus() == currentFilter) {
                     filteredTasks.add(task);
                 }
@@ -226,6 +289,28 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         taskAdapter.notifyDataSetChanged();
         updateEmptyState();
+    }
+
+    /**
+     * Extract date in YYYY-MM-DD format from workDate string
+     * Handles both ISO format (2025-11-12T00:00:00.000000Z) and simple format (2025-11-12)
+     */
+    private String extractDateFromWorkDate(String workDate) {
+        if (workDate == null || workDate.isEmpty()) {
+            return null;
+        }
+        
+        // If it contains 'T', it's ISO format - extract date part
+        if (workDate.contains("T")) {
+            return workDate.substring(0, 10); // Get "YYYY-MM-DD" part
+        }
+        
+        // If it's already in YYYY-MM-DD format, return as is
+        if (workDate.length() >= 10) {
+            return workDate.substring(0, 10);
+        }
+        
+        return workDate;
     }
 
     private void updateEmptyState() {
@@ -239,8 +324,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void onTaskSaved(Task task) {
-        allTasks.add(task);
-        filterTasks();
+        // Reload tasks from API to get the latest data
+        loadTasksFromApi();
         Toast.makeText(getContext(), "Task added successfully", Toast.LENGTH_SHORT).show();
     }
 
