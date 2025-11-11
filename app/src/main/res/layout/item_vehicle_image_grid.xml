@@ -7,7 +7,7 @@
     android:layout_margin="2dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="0dp"
-    app:strokeColor="@color/primary">
+    app:strokeColor="@color/black">
 
     <ImageView
         android:id="@+id/imgVehiclePhoto"

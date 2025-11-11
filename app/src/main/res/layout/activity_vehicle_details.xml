@@ -446,7 +446,9 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewVehicleImages"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        tools:listitem="@layout/item_vehicle_image_grid"
+                        tools:itemCount="1"/>
 
                 </LinearLayout>
 
@@ -495,18 +497,21 @@
                         android:id="@+id/recyclerViewPendingImages"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="gone" />
+                        android:background="@color/background_blur"
+                        android:visibility="gone"
+                        tools:listitem="@layout/item_pending_image"
+                        tools:itemCount="2"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnUploadPhotos"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
+                        android:layout_marginVertical="@dimen/dimen_16"
                         android:text="Upload Photos"
-                        android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
+                        android:textAppearance="@style/TextAppearance.Montserrat.LabelLarge"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:minWidth="160dp"
-                        android:letterSpacing="0.01"
                         app:backgroundTint="@color/primary"
                         app:cornerRadius="4dp"
                         android:visibility="gone"

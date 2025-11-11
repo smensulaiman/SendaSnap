@@ -1,11 +1,11 @@
 package com.sendajapan.sendasnap.activities;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.View;
 
@@ -31,6 +31,7 @@ import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+import com.sendajapan.sendasnap.utils.LoadingDialog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private Uri cameraImageUri;
     private String cameraImagePath;
 
+    private LoadingDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +91,13 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private void initHelpers() {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         apiService = RetrofitClient.getInstance(this).getApiService();
+
+        loadingDialog = new LoadingDialog.Builder(VehicleDetailsActivity.this)
+                .setMessage("Uploading Data!")
+                .setSubtitle("Please wait while uploading images...")
+                .setCancelable(false)
+                .setShowProgressIndicator(true)
+                .build();
     }
 
     private void getVehicleData() {
@@ -424,36 +433,35 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        // Show progress dialog
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Uploading photos...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        if (!loadingDialog.isShowing()) {
+            loadingDialog.show();
+        }
 
-        // TODO: Replace with actual API call when provided
-        // For now, simulate upload process
-        new android.os.Handler().postDelayed(() -> {
-            progressDialog.dismiss();
+        new Handler().postDelayed(() -> {
 
-            // Simulate successful upload
-            // Move pending images to server images
+            if (loadingDialog.isShowing()) {
+                loadingDialog.dismiss();
+            }
+
             List<String> currentServerImages = vehicle.getVehiclePhotos();
             if (currentServerImages == null) {
                 currentServerImages = new ArrayList<>();
             }
-            currentServerImages.addAll(pendingImagePaths);
-            vehicle.setVehiclePhotos(currentServerImages);
 
-            // Update server images grid
-            vehicleImageAdapter.notifyDataSetChanged();
+//            currentServerImages.addAll(pendingImagePaths);
+//            vehicle.setVehiclePhotos(currentServerImages);
+//
+//            vehicleImageAdapter.notifyDataSetChanged();
+//
+//            pendingImagePaths.clear();
+//            pendingImageAdapter.notifyDataSetChanged();
+//            updatePendingImagesVisibility();
 
-            // Clear pending images
-            pendingImagePaths.clear();
-            pendingImageAdapter.notifyDataSetChanged();
-            updatePendingImagesVisibility();
-
-            CookieBarToastHelper.showSuccess(this, "Success", "Photos uploaded successfully!", CookieBarToastHelper.LONG_DURATION);
-        }, 2000); // 2 second delay to simulate upload
+            CookieBarToastHelper.showSuccessWithListener(VehicleDetailsActivity.this,
+                    "Success", "Photos uploaded successfully!",
+                    CookieBarToastHelper.SHORT_DURATION,
+                    i -> finish());
+        }, 2000);
     }
 
     @Override

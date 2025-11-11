@@ -13,23 +13,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.sendajapan.sendasnap.R;
 
-/**
- * Modern, reusable Loading Dialog component with beautiful animations
- * 
- * Features:
- * - Lottie animation support
- * - Customizable message and subtitle
- * - Optional linear progress indicator
- * - Cancellable option
- * - Modern Material Design 3 UI
- * 
- * Usage:
- * LoadingDialog dialog = new LoadingDialog.Builder(context)
- *     .setMessage("Loading...")
- *     .setCancelable(true)
- *     .build();
- * dialog.show();
- */
+
 public class LoadingDialog {
     
     private final Dialog dialog;

@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import com.sendajapan.sendasnap.R;
 
 import org.aviran.cookiebar2.CookieBar;
+import org.aviran.cookiebar2.CookieBarDismissListener;
 
 
 public class CookieBarToastHelper {
@@ -56,6 +57,27 @@ public class CookieBarToastHelper {
                 .setEnableAutoDismiss(true);
     }
 
+    private static CookieBar.Builder buildCookieWithListener(@NonNull Context context, String title, String message,
+                                                 @ColorRes int backgroundColorRes, int iconRes,
+                                                 long duration, CookieBarDismissListener cookieBarDismissListener) {
+        Activity activity = getActivity(context);
+        if (activity == null) {
+            throw new IllegalArgumentException("Context must be an Activity or contain an Activity");
+        }
+
+        return CookieBar.build(activity)
+                .setTitle(title)
+                .setMessage(message)
+                .setDuration(duration)
+                .setBackgroundColor(backgroundColorRes)
+                .setIcon(iconRes)
+                .setIconAnimation(R.animator.fade_in)
+                .setCookiePosition(Gravity.TOP)
+                .setSwipeToDismiss(true)
+                .setEnableAutoDismiss(true)
+                .setCookieListener(cookieBarDismissListener);
+    }
+
     /**
      * Show success message
      */
@@ -65,6 +87,15 @@ public class CookieBarToastHelper {
 
     public static void showSuccess(@NonNull Context context, String title, String message, long duration) {
         buildCookie(context, title, message, R.color.success_dark, R.drawable.ic_check_circle, duration).show();
+    }
+
+    public static void showSuccessWithListener(@NonNull Context context, String title, String message,
+                                               CookieBarDismissListener cookieBarDismissListener) {
+        showSuccessWithListener(context, title, message, SHORT_DURATION, cookieBarDismissListener);
+    }
+
+    public static void showSuccessWithListener(@NonNull Context context, String title, String message, long duration, CookieBarDismissListener cookieBarDismissListener) {
+        buildCookieWithListener(context, title, message, R.color.success_dark, R.drawable.ic_check_circle, duration, cookieBarDismissListener).show();
     }
 
     /**
