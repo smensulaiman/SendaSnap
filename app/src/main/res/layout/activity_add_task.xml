@@ -197,7 +197,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="Task Assignee"
+                        android:text="Task Assignees"
                         android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"
                         android:textStyle="bold"/>
@@ -205,16 +205,16 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Select Assignee"
+                        android:hint="Select Assignees"
                         app:boxStrokeColor="@color/primary"
                         app:boxStrokeWidthFocused="1dp"
                         app:endIconDrawable="@drawable/ic_arrow_drop_down"
                         app:endIconMode="dropdown_menu"
                         app:endIconTint="@color/primary"
                         app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@drawable/ic_profile_outlined"
+                        app:startIconDrawable="@drawable/ic_user_24"
                         app:startIconTint="@color/black"
-                        app:startIconContentDescription="Select assignee"
+                        app:startIconContentDescription="Select assignees"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -222,14 +222,24 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:clickable="true"
-                            android:focusable="false"
-                            android:inputType="none"
-                            android:textSize="@dimen/text_size_small"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
                             android:fontFamily="@font/montserrat_semi_bold"
+                            android:inputType="none"
+                            android:padding="16dp"
                             android:textColor="@color/text_black"
-                            android:padding="16dp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Selected Assignees Chips -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupAssignees"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="8dp" />
 
                 </LinearLayout>
 
@@ -462,73 +472,13 @@
                 </LinearLayout>
 
                 <!-- Attached Files List -->
-                <LinearLayout
-                    android:id="@+id/layoutAttachedFiles"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewAttachments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimen_8"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <!-- File Item Template -->
-                    <LinearLayout
-                        android:id="@+id/layoutFileItem"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/dimen_8"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_file"
-                            app:tint="@color/primary" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/textFileName"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="document.pdf"
-                                android:textAppearance="@style/TextAppearance.Montserrat.BodyMedium"
-                                android:textColor="@color/text_primary"
-                                android:textSize="@dimen/text_size_small"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/textFileSize"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2.4 MB"
-                                android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="@dimen/text_size_xsmall" />
-
-                        </LinearLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/buttonRemoveFile"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Remove"
-                            android:textSize="@dimen/text_size_xsmall"
-                            android:textColor="@color/error"
-                            app:icon="@drawable/ic_delete"
-                            app:iconSize="14dp"
-                            app:iconTint="@color/error" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
 
                 <!-- No Files Message -->
                 <TextView

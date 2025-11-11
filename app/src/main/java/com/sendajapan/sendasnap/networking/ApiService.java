@@ -1,8 +1,10 @@
 package com.sendajapan.sendasnap.networking;
 
+import com.sendajapan.sendasnap.models.ApiResponse;
 import com.sendajapan.sendasnap.models.ChangePasswordRequest;
 import com.sendajapan.sendasnap.models.LoginRequest;
 import com.sendajapan.sendasnap.models.LoginResponse;
+import com.sendajapan.sendasnap.models.UsersResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import okhttp3.ResponseBody;
@@ -51,5 +53,9 @@ public interface ApiService {
     Call<VehicleSearchResponse> searchVehicles(
             @Query("search_type") String searchType,
             @Query("search_query") String searchQuery);
+
+    // Get all users
+    @GET("api/v1/users")
+    Call<ApiResponse<UsersResponse.UsersData>> getUsers();
 
 }

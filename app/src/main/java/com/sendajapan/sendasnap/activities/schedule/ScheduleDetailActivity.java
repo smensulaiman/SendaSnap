@@ -2,10 +2,9 @@ package com.sendajapan.sendasnap.activities.schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +15,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.chip.Chip;
 import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
@@ -23,6 +23,7 @@ import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class ScheduleDetailActivity extends AppCompatActivity {
@@ -30,6 +31,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private ActivityAddTaskBinding binding;
     private HapticFeedbackHelper hapticHelper;
     private Task task;
+    private TaskAttachmentAdapter attachmentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +61,22 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         initHelpers();
         setupToolbar();
         loadTask();
+        setupRecyclerView();
         populateFields();
         makeFieldsReadOnly();
     }
 
     private void initHelpers() {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
+    }
+
+    private void setupRecyclerView() {
+        java.util.List<TaskAttachment> attachmentList = (task != null && task.getAttachments() != null) 
+                ? task.getAttachments() 
+                : new java.util.ArrayList<>();
+        attachmentAdapter = new TaskAttachmentAdapter(attachmentList, false); // No remove button in detail view
+        binding.recyclerViewAttachments.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
     }
 
     private void loadTask() {
@@ -83,21 +95,26 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Task Details");
         }
 
-        // Add edit icon to toolbar
-        binding.toolbar.inflateMenu(R.menu.menu_schedule_detail);
-        binding.toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_edit) {
-                hapticHelper.vibrateClick();
-                openEditMode();
-                return true;
-            }
-            return false;
-        });
-
         binding.toolbar.setNavigationOnClickListener(v -> {
             hapticHelper.vibrateClick();
             finish();
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_schedule_detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_edit) {
+            hapticHelper.vibrateClick();
+            openEditMode();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void openEditMode() {
@@ -123,7 +140,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
         binding.editTextTitle.setText(task.getTitle());
         binding.editTextDescription.setText(task.getDescription());
-        binding.editTextAssignee.setText(task.getAssignee());
+        
+        // Display assignees
+        displayAssignees();
 
         // Format and display date
         try {
@@ -149,9 +168,12 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
         // Display attachments
         if (task.getAttachments() != null && !task.getAttachments().isEmpty()) {
-            displayAttachments(task.getAttachments());
+            attachmentAdapter = new TaskAttachmentAdapter(task.getAttachments(), false);
+            binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
+            binding.recyclerViewAttachments.setVisibility(View.VISIBLE);
+            binding.textNoFiles.setVisibility(View.GONE);
         } else {
-            binding.layoutAttachedFiles.setVisibility(View.GONE);
+            binding.recyclerViewAttachments.setVisibility(View.GONE);
             binding.textNoFiles.setVisibility(View.VISIBLE);
         }
 
@@ -217,61 +239,35 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void displayAttachments(java.util.List<TaskAttachment> attachments) {
-        binding.layoutAttachedFiles.setVisibility(View.VISIBLE);
-        binding.textNoFiles.setVisibility(View.GONE);
-        binding.layoutAttachedFiles.removeAllViews();
 
-        for (TaskAttachment attachment : attachments) {
-            addFileItemView(attachment);
+    private void displayAssignees() {
+        binding.chipGroupAssignees.removeAllViews();
+        
+        List<String> assignees = task.getAssignees();
+        if (assignees != null && !assignees.isEmpty()) {
+            binding.editTextAssignee.setText(assignees.size() + " assignee(s)");
+            binding.chipGroupAssignees.setVisibility(View.VISIBLE);
+            
+            for (String assigneeName : assignees) {
+                Chip chip = new Chip(this);
+                chip.setText(assigneeName);
+                chip.setCloseIconVisible(false);
+                chip.setClickable(false);
+                binding.chipGroupAssignees.addView(chip);
+            }
+        } else if (task.getAssignee() != null && !task.getAssignee().isEmpty()) {
+            // Fallback to old single assignee field
+            binding.editTextAssignee.setText(task.getAssignee());
+            Chip chip = new Chip(this);
+            chip.setText(task.getAssignee());
+            chip.setCloseIconVisible(false);
+            chip.setClickable(false);
+            binding.chipGroupAssignees.addView(chip);
+            binding.chipGroupAssignees.setVisibility(View.VISIBLE);
+        } else {
+            binding.editTextAssignee.setText("No assignees");
+            binding.chipGroupAssignees.setVisibility(View.GONE);
         }
-    }
-
-    private void addFileItemView(TaskAttachment attachment) {
-        LinearLayout fileItem = new LinearLayout(this);
-        fileItem.setOrientation(LinearLayout.HORIZONTAL);
-        fileItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        fileItem.setPadding(48, 48, 48, 48);
-        fileItem.setBackgroundColor(getColor(R.color.surface));
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.bottomMargin = 32;
-        fileItem.setLayoutParams(params);
-
-        // File icon
-        ImageView fileIcon = new ImageView(this);
-        fileIcon.setLayoutParams(new LinearLayout.LayoutParams(96, 96));
-        fileIcon.setImageResource(R.drawable.ic_file);
-        fileIcon.setColorFilter(getColor(R.color.primary));
-        fileIcon.setPadding(0, 0, 48, 0);
-        fileItem.addView(fileIcon);
-
-        // File info
-        LinearLayout fileInfo = new LinearLayout(this);
-        fileInfo.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        fileInfo.setLayoutParams(infoParams);
-
-        TextView fileName = new TextView(this);
-        fileName.setText(attachment.getFileName());
-        fileName.setTextAppearance(R.style.TextAppearance_Montserrat_BodyMedium);
-        fileName.setTextColor(getColor(R.color.text_primary));
-        fileName.setTextSize(12);
-        fileName.setTypeface(null, android.graphics.Typeface.BOLD);
-        fileInfo.addView(fileName);
-
-        TextView fileSize = new TextView(this);
-        fileSize.setText(attachment.getFormattedFileSize());
-        fileSize.setTextAppearance(R.style.TextAppearance_Montserrat_BodySmall);
-        fileSize.setTextColor(getColor(R.color.text_secondary));
-        fileSize.setTextSize(10);
-        fileInfo.addView(fileSize);
-
-        fileItem.addView(fileInfo);
-        binding.layoutAttachedFiles.addView(fileItem);
     }
 
     private void makeFieldsReadOnly() {

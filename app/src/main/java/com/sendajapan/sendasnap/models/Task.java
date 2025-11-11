@@ -12,7 +12,8 @@ public class Task implements Serializable {
     private String workDate;
     private String workTime;
     private TaskStatus status;
-    private String assignee;
+    private String assignee; // Keep for backward compatibility
+    private List<String> assignees; // New: multiple assignees
     private TaskPriority priority;
     private List<TaskAttachment> attachments;
     private long createdAt;
@@ -30,6 +31,7 @@ public class Task implements Serializable {
         this.workTime = workTime;
         this.status = status;
         this.assignee = "";
+        this.assignees = new ArrayList<>();
         this.priority = TaskPriority.NORMAL;
         this.attachments = new ArrayList<>();
         this.createdAt = System.currentTimeMillis();
@@ -94,6 +96,51 @@ public class Task implements Serializable {
     public void setAssignee(String assignee) {
         this.assignee = assignee;
         this.updatedAt = System.currentTimeMillis();
+    }
+
+    public List<String> getAssignees() {
+        if (assignees == null) {
+            assignees = new ArrayList<>();
+            // Migrate from old assignee field if exists
+            if (assignee != null && !assignee.isEmpty()) {
+                assignees.add(assignee);
+            }
+        }
+        return assignees;
+    }
+
+    public void setAssignees(List<String> assignees) {
+        this.assignees = assignees;
+        // Also update legacy assignee field for backward compatibility
+        if (assignees != null && !assignees.isEmpty()) {
+            this.assignee = String.join(", ", assignees);
+        } else {
+            this.assignee = "";
+        }
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void addAssignee(String assigneeName) {
+        if (assignees == null) {
+            assignees = new ArrayList<>();
+        }
+        if (!assignees.contains(assigneeName)) {
+            assignees.add(assigneeName);
+            this.assignee = String.join(", ", assignees);
+            this.updatedAt = System.currentTimeMillis();
+        }
+    }
+
+    public void removeAssignee(String assigneeName) {
+        if (assignees != null) {
+            assignees.remove(assigneeName);
+            if (assignees.isEmpty()) {
+                this.assignee = "";
+            } else {
+                this.assignee = String.join(", ", assignees);
+            }
+            this.updatedAt = System.currentTimeMillis();
+        }
     }
 
     public TaskPriority getPriority() {

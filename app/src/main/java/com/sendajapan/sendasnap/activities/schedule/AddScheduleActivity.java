@@ -4,13 +4,16 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,14 +23,19 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
+import com.sendajapan.sendasnap.adapters.UserDropdownAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.networking.ApiCallback;
+import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -47,16 +55,21 @@ public class AddScheduleActivity extends AppCompatActivity {
     private HapticFeedbackHelper hapticHelper;
     private SharedPrefsManager prefsManager;
     private UserData currentUser;
+    private ApiManager apiManager;
 
-    private final String[] assigneeOptions = { "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown",
-            "Lisa Davis" };
+    private final List<UserData> users = new ArrayList<>();
     private final List<TaskAttachment> attachments = new ArrayList<>();
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
+    private final List<String> selectedAssignees = new ArrayList<>();
 
     private Task editingTask;
     private boolean isEditMode = false;
-    private boolean isRestrictedEditMode = false; // For non-admin/manager users
+    private boolean isRestrictedEditMode = false;
+    private PopupWindow userDropdownPopup;
+    private TaskAttachmentAdapter attachmentAdapter;
+    private boolean isShowingDropdown = false;
+    private UserDropdownAdapter userDropdownAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +100,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         setupToolbar();
         checkEditMode();
         checkUserRole();
+        setupRecyclerView();
         setupListeners();
         setupInitialValues();
     }
@@ -95,6 +109,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         prefsManager = SharedPrefsManager.getInstance(this);
         currentUser = prefsManager.getUser();
+        apiManager = ApiManager.getInstance(this);
     }
 
     private void checkUserRole() {
@@ -115,8 +130,8 @@ public class AddScheduleActivity extends AppCompatActivity {
         if (editingTask != null) {
             isEditMode = true;
             // Update toolbar title and button text for edit mode
-            binding.toolbar.setTitle("Edit Task");
-            binding.buttonSave.setText("Update Task");
+            binding.toolbar.setTitle("Edit Schedule");
+            binding.buttonSave.setText("Update");
         }
     }
 
@@ -133,9 +148,45 @@ public class AddScheduleActivity extends AppCompatActivity {
         });
     }
 
+    private void setupRecyclerView() {
+        attachmentAdapter = new TaskAttachmentAdapter(attachments, true);
+        attachmentAdapter.setOnAttachmentRemoveListener((position, attachment) -> {
+            hapticHelper.vibrateClick();
+            attachments.remove(position);
+            attachmentAdapter.notifyItemRemoved(position);
+            attachmentAdapter.notifyItemRangeChanged(position, attachments.size());
+            updateFileDisplay();
+        });
+        binding.recyclerViewAttachments.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
+    }
+
     private void setupListeners() {
         binding.editTextDate.setOnClickListener(v -> showDatePicker());
         binding.editTextTime.setOnClickListener(v -> showTimePicker());
+
+        // Handle assignee field click to show custom dropdown
+        binding.editTextAssignee.setOnClickListener(v -> {
+            if (!isShowingDropdown) {
+                hapticHelper.vibrateClick();
+                // Hide keyboard
+                android.view.inputmethod.InputMethodManager imm = (InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                showUserDropdown();
+            }
+        });
+        
+        // Also handle focus to show dropdown
+        binding.editTextAssignee.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && !isShowingDropdown) {
+                hapticHelper.vibrateClick();
+                // Hide keyboard
+                android.view.inputmethod.InputMethodManager imm = (InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                // Post to avoid immediate dismissal
+                v.post(() -> showUserDropdown());
+            }
+        });
 
         binding.buttonCancel.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
@@ -160,9 +211,8 @@ public class AddScheduleActivity extends AppCompatActivity {
             setDefaultValues();
         }
 
-        ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, assigneeOptions);
-        binding.editTextAssignee.setAdapter(assigneeAdapter);
+        // Fetch users from API
+        fetchUsers();
 
         binding.editTextTitle.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
@@ -175,10 +225,131 @@ public class AddScheduleActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchUsers() {
+        apiManager.getUsers(new ApiCallback<List<UserData>>() {
+            @Override
+            public void onSuccess(List<UserData> userList) {
+                users.clear();
+                users.addAll(userList);
+                
+                // If in edit mode, update selected users in dropdown
+                if (isEditMode && editingTask != null) {
+                    if (userDropdownAdapter != null) {
+                        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String message, int errorCode) {
+                Toast.makeText(AddScheduleActivity.this, "Failed to load users: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showUserDropdown() {
+        if (users.isEmpty()) {
+            Toast.makeText(this, "No users available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (userDropdownPopup != null && userDropdownPopup.isShowing()) {
+            userDropdownPopup.dismiss();
+            isShowingDropdown = false;
+            return;
+        }
+
+        isShowingDropdown = true;
+
+        LayoutInflater inflater = LayoutInflater.from(AddScheduleActivity.this);
+        View popupView = inflater.inflate(R.layout.dialog_user_dropdown, null);
+
+        RecyclerView recyclerView = popupView.findViewById(R.id.recyclerViewUsers);
+        recyclerView.setLayoutManager(new LinearLayoutManager(AddScheduleActivity.this));
+
+        userDropdownAdapter = new UserDropdownAdapter(users);
+        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+        userDropdownAdapter.setOnUserClickListener((user, isSelected) -> {
+            hapticHelper.vibrateClick();
+            if (isSelected) {
+                if (!selectedAssignees.contains(user.getName())) {
+                    selectedAssignees.add(user.getName());
+                }
+            } else {
+                selectedAssignees.remove(user.getName());
+            }
+
+            updateAssigneeChips();
+        });
+
+        recyclerView.setAdapter(userDropdownAdapter);
+
+        binding.editTextAssignee.post(() -> {
+            int width = binding.editTextAssignee.getWidth();
+
+            userDropdownPopup = new PopupWindow(
+                    popupView,
+                    width,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true
+            );
+
+            userDropdownPopup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            userDropdownPopup.setElevation(8f);
+            userDropdownPopup.setOutsideTouchable(true);
+            userDropdownPopup.setFocusable(false);
+
+            userDropdownPopup.showAsDropDown(binding.editTextAssignee, 0, 0);
+
+            userDropdownPopup.setOnDismissListener(() -> {
+                isShowingDropdown = false;
+                binding.editTextAssignee.clearFocus();
+            });
+        });
+    }
+
+    private void updateAssigneeChips() {
+        binding.chipGroupAssignees.removeAllViews();
+        
+        if (selectedAssignees.isEmpty()) {
+            binding.editTextAssignee.setText("");
+            binding.chipGroupAssignees.setVisibility(View.GONE);
+        } else {
+            binding.editTextAssignee.setText(selectedAssignees.size() + " assignee(s) selected");
+            binding.chipGroupAssignees.setVisibility(View.VISIBLE);
+            
+            for (String assigneeName : selectedAssignees) {
+                Chip chip = new Chip(this);
+                chip.setText(assigneeName);
+                chip.setCloseIconVisible(true);
+                chip.setCloseIconTint(getColorStateList(R.color.text_primary));
+                chip.setOnCloseIconClickListener(v -> {
+                    hapticHelper.vibrateClick();
+                    selectedAssignees.remove(assigneeName);
+                    updateAssigneeChips();
+                    if (userDropdownAdapter != null) {
+                        userDropdownAdapter.setSelectedUsers(selectedAssignees);
+                    }
+                });
+                binding.chipGroupAssignees.addView(chip);
+            }
+        }
+    }
+
     private void populateFieldsForEdit() {
         binding.editTextTitle.setText(editingTask.getTitle());
         binding.editTextDescription.setText(editingTask.getDescription());
-        binding.editTextAssignee.setText(editingTask.getAssignee());
+        
+        // Load assignees
+        selectedAssignees.clear();
+        if (editingTask.getAssignees() != null && !editingTask.getAssignees().isEmpty()) {
+            selectedAssignees.addAll(editingTask.getAssignees());
+        } else if (editingTask.getAssignee() != null && !editingTask.getAssignee().isEmpty()) {
+            // Migrate from old single assignee field
+            selectedAssignees.add(editingTask.getAssignee());
+        }
+
+        updateAssigneeChips();
 
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -364,7 +535,6 @@ public class AddScheduleActivity extends AppCompatActivity {
     private void saveTask() {
         String title = Objects.requireNonNull(binding.editTextTitle.getText()).toString().trim();
         String description = Objects.requireNonNull(binding.editTextDescription.getText()).toString().trim();
-        String assignee = binding.editTextAssignee.getText().toString().trim();
 
         if (title.isEmpty()) {
             binding.editTextTitle.setError("Title is required");
@@ -391,7 +561,7 @@ public class AddScheduleActivity extends AppCompatActivity {
                 task.setDescription(description);
                 task.setWorkDate(workDate);
                 task.setWorkTime(workTime);
-                task.setAssignee(assignee);
+                task.setAssignees(new ArrayList<>(selectedAssignees));
                 task.setAttachments(attachments);
                 task.setPriority(priority);
             }
@@ -407,7 +577,7 @@ public class AddScheduleActivity extends AppCompatActivity {
                     workDate,
                     workTime,
                     status);
-            task.setAssignee(assignee);
+            task.setAssignees(new ArrayList<>(selectedAssignees));
             task.setPriority(priority);
             task.setAttachments(attachments);
         }
@@ -466,121 +636,15 @@ public class AddScheduleActivity extends AppCompatActivity {
         return "";
     }
 
-    private long parseFileSize(String sizeStr) {
-        // Simple parsing for demo - in real app, you'd get actual file size
-        if (sizeStr.contains("MB")) {
-            return (long) (Double.parseDouble(sizeStr.replace(" MB", "")) * 1024 * 1024);
-        } else if (sizeStr.contains("KB")) {
-            return (long) (Double.parseDouble(sizeStr.replace(" KB", "")) * 1024);
-        } else {
-            return Long.parseLong(sizeStr.replace(" B", ""));
-        }
-    }
-
-    private String getMimeType(String fileName) {
-        String extension = getFileExtension(fileName);
-        switch (extension) {
-            case "pdf":
-                return "application/pdf";
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "xlsx":
-                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "pptx":
-                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-            case "txt":
-                return "text/plain";
-            default:
-                return "application/octet-stream";
-        }
-    }
-
     private void updateFileDisplay() {
         if (attachments.isEmpty()) {
-            binding.layoutAttachedFiles.setVisibility(View.GONE);
+            binding.recyclerViewAttachments.setVisibility(View.GONE);
             binding.textNoFiles.setVisibility(View.VISIBLE);
         } else {
-            binding.layoutAttachedFiles.setVisibility(View.VISIBLE);
+            binding.recyclerViewAttachments.setVisibility(View.VISIBLE);
             binding.textNoFiles.setVisibility(View.GONE);
-
-            // Clear existing file items (except template)
-            binding.layoutAttachedFiles.removeAllViews();
-
-            // Add file items for each attachment
-            for (int i = 0; i < attachments.size(); i++) {
-                TaskAttachment attachment = attachments.get(i);
-                addFileItem(attachment, i);
-            }
+            attachmentAdapter.notifyDataSetChanged();
         }
-    }
-
-    private void addFileItem(TaskAttachment attachment, int index) {
-        // Create file item layout
-        LinearLayout fileItem = new LinearLayout(this);
-        fileItem.setOrientation(LinearLayout.HORIZONTAL);
-        fileItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        fileItem.setPadding(48, 48, 48, 48); // 12dp padding
-        fileItem.setBackgroundColor(getColor(R.color.surface));
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.bottomMargin = 32; // 8dp margin
-        fileItem.setLayoutParams(params);
-
-        // Add file icon
-        ImageView fileIcon = new ImageView(this);
-        fileIcon.setLayoutParams(new LinearLayout.LayoutParams(96, 96)); // 24dp
-        fileIcon.setImageResource(R.drawable.ic_file);
-        fileIcon.setColorFilter(getColor(R.color.primary));
-        fileIcon.setPadding(0, 0, 48, 0); // 12dp margin end
-        fileItem.addView(fileIcon);
-
-        // Add file info
-        LinearLayout fileInfo = new LinearLayout(this);
-        fileInfo.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        fileInfo.setLayoutParams(infoParams);
-
-        TextView fileName = new TextView(this);
-        fileName.setText(attachment.getFileName());
-        fileName.setTextAppearance(R.style.TextAppearance_Montserrat_BodyMedium);
-        fileName.setTextColor(getColor(R.color.text_primary));
-        fileName.setTextSize(12);
-        fileName.setTypeface(null, android.graphics.Typeface.BOLD);
-        fileInfo.addView(fileName);
-
-        TextView fileSize = new TextView(this);
-        fileSize.setText(attachment.getFormattedFileSize());
-        fileSize.setTextAppearance(R.style.TextAppearance_Montserrat_BodySmall);
-        fileSize.setTextColor(getColor(R.color.text_secondary));
-        fileSize.setTextSize(10);
-        fileInfo.addView(fileSize);
-
-        fileItem.addView(fileInfo);
-
-        // Add remove button
-        MaterialButton removeButton = new MaterialButton(this, null,
-                com.google.android.material.R.style.Widget_Material3_Button_TextButton);
-        removeButton.setIconResource(R.drawable.ic_delete);
-        removeButton.setIconSize(56); // 14dp
-        removeButton.setIconTint(getColorStateList(R.color.error));
-        removeButton.setIconPadding(0);
-        removeButton.setMinWidth(48); // 48dp minimum width for touch target
-        removeButton.setMinHeight(48); // 48dp minimum height for touch target
-
-        removeButton.setOnClickListener(v -> {
-            hapticHelper.vibrateClick();
-            attachments.remove(index);
-            updateFileDisplay();
-        });
-
-        fileItem.addView(removeButton);
-        binding.layoutAttachedFiles.addView(fileItem);
     }
 
     @Override
@@ -613,6 +677,7 @@ public class AddScheduleActivity extends AppCompatActivity {
 
             attachments.add(attachment);
             updateFileDisplay();
+            attachmentAdapter.notifyItemInserted(attachments.size() - 1);
 
             Toast.makeText(this, "File added: " + fileName, Toast.LENGTH_SHORT).show();
 
