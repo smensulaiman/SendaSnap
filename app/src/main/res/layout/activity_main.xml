@@ -5,7 +5,7 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/professional_gradient"
+    android:background="@color/glass_effect"
     android:elevation="12dp"
     android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
@@ -75,6 +75,7 @@
             app:activeItem="0"
             app:backgroundColor="@color/primary"
             app:cornerRadius="24dp"
+            app:sideMargins="40dp"
             app:duration="200"
             app:iconSize="18dp"
             app:iconTint="@color/white"
