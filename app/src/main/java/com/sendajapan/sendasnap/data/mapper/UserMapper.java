@@ -20,7 +20,9 @@ public class UserMapper {
         user.setRole(normalizeString(dto.getRole()));
         user.setEmail(normalizeString(dto.getEmail()));
         user.setPhone(normalizeString(dto.getPhone()));
+        user.setAvisId(normalizeString(dto.getAvisId()));
         user.setAvatar(normalizeString(dto.getAvatar()));
+        user.setAvatarUrl(normalizeString(dto.getAvatarUrl()));
         user.setEmailVerifiedAt(normalizeString(dto.getEmailVerifiedAt()));
         user.setCreatedAt(normalizeString(dto.getCreatedAt()));
         user.setUpdatedAt(normalizeString(dto.getUpdatedAt()));

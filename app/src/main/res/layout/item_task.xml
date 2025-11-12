@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
+    android:layout_height="140dp"
     android:layout_marginHorizontal="16dp"
     android:layout_marginBottom="@dimen/dimen_8"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/background_blur"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
     app:strokeWidth="1dp">
@@ -46,24 +47,6 @@
             app:layout_constraintStart_toEndOf="@id/statusIndicator"
             app:layout_constraintTop_toTopOf="@+id/statusIndicator" />
 
-        <!-- NEW Badge -->
-        <TextView
-            android:id="@+id/badgeNew"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/badge_8"
-            android:backgroundTint="@color/text_black"
-            android:fontFamily="@font/montserrat_regular"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
-            android:text="NEW"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_size_xxsmall"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/imgRightArrow"
-            app:layout_constraintEnd_toStartOf="@+id/imgRightArrow"
-            app:layout_constraintTop_toTopOf="@+id/imgRightArrow" />
-
         <!-- Task Description -->
         <TextView
             android:id="@+id/textTaskDescription"
@@ -76,14 +59,53 @@
             android:text="Task description goes here\ndfjhdfjhdsjkhf\nhdsafkjdshfkdj\nkjdhfjksdhfkhds"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_xsmall"
-            app:layout_constraintBottom_toTopOf="@+id/layoutTime"
-            app:layout_constraintEnd_toStartOf="@+id/badgeNew"
+            app:layout_constraintBottom_toTopOf="@+id/layoutTimeRow"
+            app:layout_constraintEnd_toStartOf="@+id/imgRightArrow"
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle"
             app:layout_constraintTop_toBottomOf="@id/textTaskTitle" />
 
-        <!-- Time LinearLayout -->
+        <!-- Time and Assignees Row -->
         <LinearLayout
-            android:id="@+id/layoutTime"
+            android:id="@+id/layoutTimeRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/layoutCreatedBy"
+            app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
+
+            <TextView
+                android:id="@+id/textTaskTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9:00 AM"
+                android:fontFamily="@font/montserrat_regular"
+                android:textColor="@color/text_secondary" />
+
+            <!-- Overlapping Assignee Avatars Container -->
+            <LinearLayout
+                android:id="@+id/layoutAssigneeAvatars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+
+            <!-- File Attachment Icon -->
+            <ImageView
+                android:id="@+id/imgAttachment"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_attach_file"
+                android:visibility="gone"
+                app:tint="@color/primary" />
+
+        </LinearLayout>
+
+        <!-- Created By Row -->
+        <LinearLayout
+            android:id="@+id/layoutCreatedBy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -91,66 +113,32 @@
             app:layout_constraintBottom_toBottomOf="@+id/statusIndicator"
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
 
-            <ImageView
-                android:id="@+id/imgTimeIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="4dp"
-                android:src="@drawable/ic_time"
-                app:tint="@color/text_secondary" />
-
             <TextView
-                android:id="@+id/textTaskTime"
+                android:id="@+id/textCreatedByLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="09:00"
+                android:text="Created by"
+                android:fontFamily="@font/montserrat_regular"
+                android:textSize="@dimen/text_size_xsmall"
+                android:textColor="@color/text_secondary"
+                android:layout_marginEnd="4dp" />
+
+            <ImageView
+                android:id="@+id/imgCreatorAvatar"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="4dp"
+                android:scaleType="centerCrop"/>
+
+            <TextView
+                android:id="@+id/textCreatorName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sulaiman"
                 android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
                 android:textColor="@color/text_secondary" />
 
         </LinearLayout>
-
-        <!-- Assignee LinearLayout -->
-        <LinearLayout
-            android:id="@+id/layoutAssignee"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintTop_toTopOf="@id/layoutTime"
-            app:layout_constraintBottom_toBottomOf="@id/layoutTime"
-            app:layout_constraintStart_toEndOf="@id/layoutTime">
-
-            <ImageView
-                android:id="@+id/imgAssigneeIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="4dp"
-                android:src="@drawable/ic_person"
-                app:tint="@color/text_secondary" />
-
-            <TextView
-                android:id="@+id/textTaskAssignee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mohammad Sulaiman"
-                android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
-                android:textColor="@color/text_secondary" />
-
-        </LinearLayout>
-
-        <!-- File Attachment Icon -->
-        <ImageView
-            android:id="@+id/imgAttachment"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/ic_attach_file"
-            android:visibility="gone"
-            app:tint="@color/primary"
-            app:layout_constraintTop_toTopOf="@id/layoutTime"
-            app:layout_constraintBottom_toBottomOf="@id/layoutTime"
-            app:layout_constraintStart_toEndOf="@id/layoutAssignee" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipTaskStatus"

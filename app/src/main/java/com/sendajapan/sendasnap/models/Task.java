@@ -24,11 +24,11 @@ public class Task implements Serializable {
     private String workTime;
 
     @SerializedName("status")
-    private String statusString; // Field for API deserialization
+    private String statusString;
 
-    private transient TaskStatus status; // Actual enum field (not serialized by Gson)
+    private transient TaskStatus status;
 
-    private UserData assignee; // Legacy field for backward compatibility
+    private UserData assignee;
 
     @SerializedName("assigned_users")
     private List<UserData> assignees;
@@ -37,9 +37,9 @@ public class Task implements Serializable {
     private int createdByUserId;
 
     @SerializedName("priority")
-    private String priorityString; // Field for API deserialization
+    private String priorityString;
 
-    private transient TaskPriority priority; // Actual enum field (not serialized by Gson)
+    private transient TaskPriority priority;
 
     @SerializedName("attachments")
     private List<TaskAttachment> attachments;
@@ -355,5 +355,30 @@ public class Task implements Serializable {
 
     public enum TaskPriority {
         LOW, NORMAL, HIGH
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", workDate='" + workDate + '\'' +
+                ", workTime='" + workTime + '\'' +
+                ", statusString='" + statusString + '\'' +
+                ", status=" + status +
+                ", assignee=" + assignee +
+                ", assignees=" + assignees +
+                ", createdByUserId=" + createdByUserId +
+                ", priorityString='" + priorityString + '\'' +
+                ", priority=" + priority +
+                ", attachments=" + attachments +
+                ", dueDate='" + dueDate + '\'' +
+                ", completedAt='" + completedAt + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                ", creator=" + creator +
+                ", isNew=" + isNew +
+                '}';
     }
 }

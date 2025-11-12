@@ -1,5 +1,6 @@
 package com.sendajapan.sendasnap.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -237,15 +238,14 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         binding.recyclerViewTasks.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void filterTasks() {
         filteredTasks.clear();
 
         for (Task task : allTasks) {
-            // Extract date from workDate (API returns ISO format like "2025-11-12T00:00:00.000000Z")
             String taskDate = extractDateFromWorkDate(task.getWorkDate());
-            
+
             if (taskDate != null && taskDate.equals(selectedDate)) {
-                // Status filter is already applied in API call, but keep this for safety
                 if (currentFilter == null || task.getStatus() == currentFilter) {
                     filteredTasks.add(task);
                 }
