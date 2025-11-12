@@ -12,6 +12,8 @@
     <color name="accent">#3FB4EB</color>
     <color name="on_primary">#FFFFFF</color>
 
+    <color name="color_background">#FDFDFD</color>
+
     <!-- Background colors -->
     <color name="background">#E4EEF8</color>
     <color name="surface">#CCC9C1</color>

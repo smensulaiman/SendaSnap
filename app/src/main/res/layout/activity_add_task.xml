@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:elevation="12dp"
     android:fitsSystemWindows="true"
-    android:background="@drawable/professional_gradient">
+    android:background="@color/color_background">
 
     <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -35,7 +35,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:fillViewport="true"
-        android:background="@color/background"
         android:scrollbars="none"
         android:overScrollMode="never">
 
@@ -250,7 +249,7 @@
                     android:orientation="vertical"
                     android:background="@drawable/badge_12"
                     android:padding="@dimen/dimen_12"
-                    android:backgroundTint="@color/white">
+                    android:backgroundTint="@color/primary_light">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -264,8 +263,8 @@
                         android:id="@+id/chipGroupStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="16dp"
-                        app:chipSpacingVertical="0dp"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="-8dp"
                         app:singleSelection="true">
 
                         <com.google.android.material.chip.Chip
@@ -274,11 +273,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:minHeight="48dp"
                             android:text="Pending"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
-                            android:textColor="@color/warning_dark"
+                            android:textColor="@color/black"
                             app:chipBackgroundColor="@color/white"
                             app:chipStrokeColor="@color/warning_dark"
                             app:chipCornerRadius="24dp"
@@ -289,11 +287,10 @@
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minHeight="48dp"
                             android:text="In Progress"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
-                            android:textColor="@color/primary"
+                            android:textColor="@color/black"
                             app:chipBackgroundColor="@color/primary_light"
                             app:chipStrokeColor="@color/primary"
                             app:chipCornerRadius="24dp"
@@ -304,11 +301,10 @@
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minHeight="48dp"
                             android:text="Completed"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
-                            android:textColor="@color/success_dark"
+                            android:textColor="@color/black"
                             app:chipBackgroundColor="@color/success_light"
                             app:chipStrokeColor="@color/success_dark"
                             app:chipCornerRadius="24dp"
@@ -319,11 +315,10 @@
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minHeight="48dp"
                             android:text="Cancelled"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
-                            android:textColor="@color/error_dark"
+                            android:textColor="@color/black"
                             app:chipBackgroundColor="@color/error_light"
                             app:chipStrokeColor="@color/error_dark"
                             app:chipCornerRadius="24dp"
@@ -341,7 +336,7 @@
                     android:orientation="vertical"
                     android:background="@drawable/badge_12"
                     android:padding="@dimen/dimen_12"
-                    android:backgroundTint="@color/white">
+                    android:backgroundTint="@color/success_light">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -355,8 +350,8 @@
                         android:id="@+id/chipGroupPriority"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="16dp"
-                        app:chipSpacingVertical="0dp"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="-8dp"
                         app:singleSelection="true">
 
                         <com.google.android.material.chip.Chip
@@ -365,11 +360,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Low"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/black"
                             app:chipBackgroundColor="@color/warning_medium"
-                            app:chipStrokeColor="@color/warning_dark"
+                            app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp"/>
 
@@ -380,11 +375,11 @@
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="Normal"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/black"
                             app:chipBackgroundColor="@color/success_medium"
-                            app:chipStrokeColor="@color/success_dark"
+                            app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp" />
 
@@ -394,11 +389,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="High"
-                            android:textSize="@dimen/text_size_medium"
+                            android:textSize="@dimen/text_size_small"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/black"
                             app:chipBackgroundColor="@color/error_medium"
-                            app:chipStrokeColor="@color/error_dark"
+                            app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp" />
 
@@ -416,7 +411,7 @@
                 android:background="@drawable/badge_12"
                 android:padding="16dp"
                 android:layout_marginTop="@dimen/dimen_16"
-                android:backgroundTint="@color/success_light">
+                android:backgroundTint="@color/warning_light">
 
                 <!-- Section Header -->
                 <LinearLayout
