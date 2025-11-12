@@ -30,6 +30,9 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.adapters.UserDropdownAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
+import com.sendajapan.sendasnap.domain.usecase.CreateTaskUseCase;
+import com.sendajapan.sendasnap.domain.usecase.ListUsersUseCase;
+import com.sendajapan.sendasnap.domain.usecase.UpdateTaskUseCase;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -58,6 +61,7 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private final List<UserData> users = new ArrayList<>();
     private final List<TaskAttachment> attachments = new ArrayList<>();
+    private final List<android.net.Uri> attachmentUris = new ArrayList<>(); // Store URIs for file upload
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
     private final List<UserData> selectedAssignees = new ArrayList<>();
@@ -65,10 +69,15 @@ public class AddScheduleActivity extends AppCompatActivity {
     private Task editingTask;
     private boolean isEditMode = false;
     private boolean isRestrictedEditMode = false;
+    private boolean replaceAttachments = false; // Flag for "Replace attachments" toggle
     private PopupWindow userDropdownPopup;
     private TaskAttachmentAdapter attachmentAdapter;
     private boolean isShowingDropdown = false;
     private UserDropdownAdapter userDropdownAdapter;
+    private CreateTaskUseCase createTaskUseCase;
+    private UpdateTaskUseCase updateTaskUseCase;
+    private ListUsersUseCase listUsersUseCase;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +118,9 @@ public class AddScheduleActivity extends AppCompatActivity {
         prefsManager = SharedPrefsManager.getInstance(this);
         currentUser = prefsManager.getUser();
         apiManager = ApiManager.getInstance(this);
+        createTaskUseCase = new CreateTaskUseCase(this);
+        updateTaskUseCase = new UpdateTaskUseCase(this);
+        listUsersUseCase = new ListUsersUseCase(this);
     }
 
     private void checkUserRole() {
@@ -225,7 +237,7 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private void fetchUsers() {
-        apiManager.getUsers(new ApiCallback<List<UserData>>() {
+        listUsersUseCase.execute(new ListUsersUseCase.UseCaseCallback<List<UserData>>() {
             @Override
             public void onSuccess(List<UserData> userList) {
                 users.clear();
@@ -246,7 +258,9 @@ public class AddScheduleActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message, int errorCode) {
-                Toast.makeText(AddScheduleActivity.this, "Failed to load users: " + message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddScheduleActivity.this, 
+                        getErrorMessage("Failed to load users: " + message, errorCode), 
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -572,71 +586,192 @@ public class AddScheduleActivity extends AppCompatActivity {
             return;
         }
 
-        // Get selected status
-        Task.TaskStatus status = getSelectedStatus();
+        // Validate file sizes
+        if (!validateFileSizes()) {
+            return;
+        }
 
         // Get selected priority
         Task.TaskPriority priority = getSelectedPriority();
+        String priorityStr = priorityToString(priority);
 
         // Format date and time
         String workDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.getTime());
         String workTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(selectedTime.getTime());
 
-        Task task;
-        if (isEditMode && editingTask != null) {
-            // Update existing task
-            task = editingTask;
-            if (!isRestrictedEditMode) {
-                // Only update fields if user has permission
-                task.setTitle(title);
-                task.setDescription(description);
-                task.setWorkDate(workDate);
-                task.setWorkTime(workTime);
-                task.setAssignees(new ArrayList<>(selectedAssignees));
-                task.setAttachments(attachments);
-                task.setPriority(priority);
-            }
-            // Always allow status update
-            task.setStatus(status);
-            task.setUpdatedAt(String.valueOf(System.currentTimeMillis()));
-        } else {
-            // Create new task
-            // Generate a temporary ID (will be replaced by server when saved)
-            int tempId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
-            task = new Task(
-                    tempId,
-                    title,
-                    description,
-                    workDate,
-                    workTime,
-                    status);
-            task.setAssignees(new ArrayList<>(selectedAssignees));
-            task.setPriority(priority);
-            task.setAttachments(attachments);
-            // Set creator ID for new tasks (convert from UserData if available)
-            if (currentUser != null) {
-                task.setCreatedByUserId(currentUser.getId());
-            } else {
-                // Fallback: try to get from Firebase
-                String creatorIdStr = com.sendajapan.sendasnap.utils.FirebaseUtils.getCurrentUserId(this);
-                try {
-                    int creatorId = Integer.parseInt(creatorIdStr);
-                    task.setCreatedByUserId(creatorId);
-                } catch (NumberFormatException e) {
-                    // If can't parse, use 0 as default
-                    task.setCreatedByUserId(0);
-                }
+        // Get assigned user IDs
+        List<Integer> assignedTo = new ArrayList<>();
+        for (UserData user : selectedAssignees) {
+            if (user != null && user.getId() > 0) {
+                assignedTo.add(user.getId());
             }
         }
 
-        // Set alarm for the task
-        AlarmHelper.setTaskAlarm(this, task);
+        // Convert attachment URIs to Files
+        List<java.io.File> files = convertUrisToFiles(attachmentUris);
 
-        // Return result to calling activity
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("task", task);
-        setResult(RESULT_OK, resultIntent);
-        finish();
+        if (isEditMode && editingTask != null) {
+            // Update existing task
+            UpdateTaskUseCase.UpdateTaskParams params = new UpdateTaskUseCase.UpdateTaskParams();
+            if (!isRestrictedEditMode) {
+                params.title = title;
+                params.description = description;
+                params.workDate = workDate;
+                params.workTime = workTime;
+                params.priority = priorityStr;
+                params.assignedTo = assignedTo;
+            }
+
+            Boolean attachmentsUpdate = replaceAttachments ? true : null;
+
+            updateTaskUseCase.execute(editingTask.getId(), params, files, attachmentsUpdate,
+                    new UpdateTaskUseCase.UseCaseCallback<Task>() {
+                @Override
+                public void onSuccess(Task updatedTask) {
+                    // Set alarm for the task
+                    AlarmHelper.setTaskAlarm(AddScheduleActivity.this, updatedTask);
+
+                    // Return result to calling activity
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("task", updatedTask);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                }
+
+                @Override
+                public void onError(String message, int errorCode) {
+                    showValidationErrors(message, errorCode);
+                }
+            });
+        } else {
+            // Create new task
+            CreateTaskUseCase.CreateTaskParams params = new CreateTaskUseCase.CreateTaskParams();
+            params.title = title;
+            params.description = description;
+            params.workDate = workDate;
+            params.workTime = workTime;
+            params.priority = priorityStr;
+            params.assignedTo = assignedTo;
+
+            createTaskUseCase.execute(params, files, new CreateTaskUseCase.UseCaseCallback<Task>() {
+                @Override
+                public void onSuccess(Task createdTask) {
+                    // Set alarm for the task
+                    AlarmHelper.setTaskAlarm(AddScheduleActivity.this, createdTask);
+
+                    // Return result to calling activity
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("task", createdTask);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                }
+
+                @Override
+                public void onError(String message, int errorCode) {
+                    showValidationErrors(message, errorCode);
+                }
+            });
+        }
+    }
+
+    private boolean validateFileSizes() {
+        for (android.net.Uri uri : attachmentUris) {
+            long fileSize = getFileSize(uri);
+            if (fileSize > MAX_FILE_SIZE) {
+                String fileName = getFileName(uri);
+                Toast.makeText(this, 
+                        "File size exceeds 10MB limit: " + fileName, 
+                        Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<java.io.File> convertUrisToFiles(List<android.net.Uri> uris) {
+        List<java.io.File> files = new ArrayList<>();
+        for (android.net.Uri uri : uris) {
+            try {
+                // Create a temporary file copy from URI
+                java.io.File tempFile = createTempFileFromUri(uri);
+                if (tempFile != null && tempFile.exists()) {
+                    files.add(tempFile);
+                }
+            } catch (Exception e) {
+                // Skip files that can't be converted
+            }
+        }
+        return files;
+    }
+
+    private java.io.File createTempFileFromUri(android.net.Uri uri) {
+        try {
+            java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+            if (inputStream == null) return null;
+
+            String fileName = getFileName(uri);
+            java.io.File tempFile = new java.io.File(getCacheDir(), "upload_" + System.currentTimeMillis() + "_" + fileName);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            outputStream.close();
+            inputStream.close();
+            return tempFile;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    private String priorityToString(Task.TaskPriority priority) {
+        switch (priority) {
+            case LOW:
+                return "low";
+            case NORMAL:
+                return "medium";
+            case HIGH:
+                return "high";
+            default:
+                return "medium";
+        }
+    }
+
+    private void showValidationErrors(String message, int errorCode) {
+        String errorMessage = getErrorMessage(message, errorCode);
+        
+        // Show error on appropriate field if it's a validation error
+        if (errorCode == 422) {
+            // Try to parse validation errors and show on specific fields
+            if (message.contains("title")) {
+                binding.editTextTitle.setError("Title: " + message);
+            } else if (message.contains("priority")) {
+                Toast.makeText(this, "Priority: " + message, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private String getErrorMessage(String message, int errorCode) {
+        switch (errorCode) {
+            case 401:
+                return "Authentication required. Please login again.";
+            case 403:
+                return "You don't have permission to perform this action.";
+            case 404:
+                return "Resource not found.";
+            case 422:
+                return "Validation error: " + message;
+            default:
+                return message != null ? message : "An error occurred. Please try again.";
+        }
     }
 
     private Task.TaskStatus getSelectedStatus() {
@@ -708,12 +843,24 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void addFileFromUri(Uri fileUri) {
         try {
+            // Validate file size
+            long fileSize = getFileSize(fileUri);
+            if (fileSize > MAX_FILE_SIZE) {
+                String fileName = getFileName(fileUri);
+                Toast.makeText(this, 
+                        "File size exceeds 10MB limit: " + fileName, 
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
             // Get file information
             String fileName = getFileName(fileUri);
             String mimeType = getContentResolver().getType(fileUri);
-            long fileSize = getFileSize(fileUri);
 
-            // Create attachment
+            // Store URI for upload
+            attachmentUris.add(fileUri);
+
+            // Create attachment for display
             TaskAttachment attachment = new TaskAttachment(
                     String.valueOf(System.currentTimeMillis()),
                     fileName,

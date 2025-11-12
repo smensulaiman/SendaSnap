@@ -3,9 +3,6 @@ package com.sendajapan.sendasnap.activities.auth;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AlertDialog;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -263,8 +260,8 @@ public class LoginActivity extends AppCompatActivity {
             binding.etPassword.setText(savedPassword);
             binding.cbRememberMe.setChecked(true);
         } else {
-            binding.etUsername.setText("sulaiman@sendasnap.com");
-            binding.etPassword.setText("password");
+            binding.etUsername.setText("acj.shiroyama@gmail.com");
+            binding.etPassword.setText("acjl7861");
         }
     }
 

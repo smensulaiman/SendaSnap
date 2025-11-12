@@ -15,12 +15,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityMainBinding;
-import com.sendajapan.sendasnap.fragments.ChatFragment;
 import com.sendajapan.sendasnap.fragments.HomeFragment;
 import com.sendajapan.sendasnap.fragments.ProfileFragment;
 import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
-import com.sendajapan.sendasnap.ui.DrawerController;
+import com.sendajapan.sendasnap.utils.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 
@@ -139,9 +138,6 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = new ScheduleFragment();
                     break;
                 case 2:
-                    selectedFragment = new ChatFragment();
-                    break;
-                case 3:
                     selectedFragment = new ProfileFragment();
                     break;
             }
@@ -167,15 +163,13 @@ public class MainActivity extends AppCompatActivity {
             binding.toolbar.setTitle("Home");
         } else if (fragment instanceof ScheduleFragment) {
             binding.toolbar.setTitle("Work Schedule");
-        } else if (fragment instanceof ChatFragment) {
-            binding.toolbar.setTitle("Chat");
         } else if (fragment instanceof ProfileFragment) {
             binding.toolbar.setTitle("Profile");
         }
     }
 
     public void switchToProfileTab() {
-        binding.bottomNavigation.setItemActiveIndex(3);
+        binding.bottomNavigation.setItemActiveIndex(2);
         loadFragment(new ProfileFragment());
     }
 

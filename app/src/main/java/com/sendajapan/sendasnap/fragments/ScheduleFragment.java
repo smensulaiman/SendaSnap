@@ -13,15 +13,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
-import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.schedule.AddScheduleActivity;
 import com.sendajapan.sendasnap.activities.schedule.ScheduleDetailActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
+import com.sendajapan.sendasnap.data.dto.PagedResult;
+import com.sendajapan.sendasnap.domain.usecase.ListTasksUseCase;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
-import com.sendajapan.sendasnap.networking.ApiCallback;
-import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.text.SimpleDateFormat;
@@ -41,7 +40,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
     private SharedPrefsManager prefsManager;
-    private ApiManager apiManager;
+    private ListTasksUseCase listTasksUseCase;
 
     private String selectedDate;
     private Task.TaskStatus currentFilter = null;
@@ -59,7 +58,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         super.onViewCreated(view, savedInstanceState);
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
-        apiManager = ApiManager.getInstance(requireContext());
+        listTasksUseCase = new ListTasksUseCase(requireContext());
         
         setupRecyclerView();
         setupCalendar();
@@ -173,73 +172,54 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         showShimmer();
 
-        // Convert status filter to API format
-        String statusFilter = null;
-        if (currentFilter != null) {
-            switch (currentFilter) {
-                case RUNNING:
-                    statusFilter = "running";
-                    break;
-                case PENDING:
-                    statusFilter = "pending";
-                    break;
-                case COMPLETED:
-                    statusFilter = "completed";
-                    break;
-                case CANCELLED:
-                    statusFilter = "cancelled";
-                    break;
-            }
-        }
-
-        // Get current user for assigned_to filter (optional - can be null to get all tasks)
-        UserData currentUser = prefsManager.getUser();
-        Integer assignedTo = null;
-        // Uncomment below if you want to filter by current user only
-        // if (currentUser != null) {
-        //     assignedTo = currentUser.getId();
-        // }
-
-        // Load tasks for the selected date
-        apiManager.getTasks(
-                null, // search
-                statusFilter, // status
-                null, // priority
-                assignedTo, // assigned_to
-                selectedDate, // date_from
-                selectedDate, // date_to
-                100, // per_page (large number to get all tasks for the date)
-                new ApiCallback<List<Task>>() {
-                    @Override
-                    public void onSuccess(List<Task> tasks) {
-                        if (!isAdded() || binding == null) {
-                            return;
-                        }
-
-                        allTasks.clear();
-                        if (tasks != null) {
-                            allTasks.addAll(tasks);
-                        }
-
-                        hideShimmer();
-                        filterTasks();
-                    }
-
-                    @Override
-                    public void onError(String message, int errorCode) {
-                        if (!isAdded() || binding == null) {
-                            return;
-                        }
-
-                        hideShimmer();
-                        allTasks.clear();
-                        filterTasks();
-                        
-                        // Show error message
-                        Toast.makeText(requireContext(), "Failed to load tasks: " + message, Toast.LENGTH_SHORT).show();
-                    }
+        // Use selectedDate as both from_date and to_date to get tasks for that specific date
+        listTasksUseCase.execute(selectedDate, selectedDate, 1, new ListTasksUseCase.UseCaseCallback<PagedResult<Task>>() {
+            @Override
+            public void onSuccess(PagedResult<Task> result) {
+                if (!isAdded() || binding == null) {
+                    return;
                 }
-        );
+
+                allTasks.clear();
+                if (result != null && result.getItems() != null) {
+                    allTasks.addAll(result.getItems());
+                }
+
+                hideShimmer();
+                filterTasks();
+            }
+
+            @Override
+            public void onError(String message, int errorCode) {
+                if (!isAdded() || binding == null) {
+                    return;
+                }
+
+                hideShimmer();
+                allTasks.clear();
+                filterTasks();
+                
+                // Show error message with user-friendly text
+                String errorMessage = getErrorMessage(message, errorCode);
+                Toast.makeText(requireContext(), "Failed to load tasks: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private String getErrorMessage(String message, int errorCode) {
+        switch (errorCode) {
+            case 401:
+                return "Authentication required. Please login again.";
+            case 403:
+                return "You don't have permission to perform this action.";
+            case 404:
+                return "Resource not found.";
+            case 422:
+                return "Validation error: " + message;
+            default:
+                return message != null ? message : "An error occurred. Please try again.";
+        }
     }
     
     private void showShimmer() {

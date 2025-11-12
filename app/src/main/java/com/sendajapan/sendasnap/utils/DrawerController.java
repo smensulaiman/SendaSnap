@@ -1,4 +1,4 @@
-package com.sendajapan.sendasnap.ui;
+package com.sendajapan.sendasnap.utils;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -15,8 +15,6 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.HistoryActivity;
 import com.sendajapan.sendasnap.activities.MainActivity;
-import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 public class DrawerController {
 

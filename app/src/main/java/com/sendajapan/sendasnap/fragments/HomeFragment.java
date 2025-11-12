@@ -3,9 +3,7 @@ package com.sendajapan.sendasnap.fragments;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,10 +33,9 @@ import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
-import com.sendajapan.sendasnap.utils.LoadingDialog;
-import com.sendajapan.sendasnap.utils.VehicleSearchDialog;
+import com.sendajapan.sendasnap.dialogs.LoadingDialog;
+import com.sendajapan.sendasnap.dialogs.VehicleSearchDialog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;

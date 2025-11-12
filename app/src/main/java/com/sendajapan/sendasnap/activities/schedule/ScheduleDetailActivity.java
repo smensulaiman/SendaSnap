@@ -23,6 +23,9 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.ChatActivity;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
+import com.sendajapan.sendasnap.domain.usecase.DeleteTaskUseCase;
+import com.sendajapan.sendasnap.domain.usecase.GetTaskUseCase;
+import com.sendajapan.sendasnap.domain.usecase.UpdateTaskStatusUseCase;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -52,6 +55,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private ValueEventListener unreadCountListener;
     private List<UserData> allUsers = new ArrayList<>();
     private TextView badgeTextView;
+    private GetTaskUseCase getTaskUseCase;
+    private UpdateTaskStatusUseCase updateTaskStatusUseCase;
+    private DeleteTaskUseCase deleteTaskUseCase;
+    private Integer taskId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +98,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         chatService = ChatService.getInstance();
         apiManager = ApiManager.getInstance(this);
+        getTaskUseCase = new GetTaskUseCase(this);
+        updateTaskStatusUseCase = new UpdateTaskStatusUseCase(this);
+        deleteTaskUseCase = new DeleteTaskUseCase(this);
     }
 
     private void setupRecyclerView() {
@@ -104,9 +114,53 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
     private void loadTask() {
         task = (Task) getIntent().getSerializableExtra("task");
-        if (task == null) {
-            finish();
-            return;
+        if (task != null) {
+            taskId = task.getId();
+        } else {
+            // Try to load by ID if task object not passed
+            taskId = getIntent().getIntExtra("taskId", -1);
+            if (taskId == -1) {
+                finish();
+                return;
+            }
+            loadTaskFromApi();
+        }
+    }
+
+    private void loadTaskFromApi() {
+        if (taskId == null) return;
+        
+        getTaskUseCase.execute(taskId, new GetTaskUseCase.UseCaseCallback<Task>() {
+            @Override
+            public void onSuccess(Task loadedTask) {
+                task = loadedTask;
+                populateFields();
+            }
+
+            @Override
+            public void onError(String message, int errorCode) {
+                Toast.makeText(ScheduleDetailActivity.this, 
+                        getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
+                if (errorCode == 404) {
+                    finish();
+                }
+            }
+        });
+    }
+
+
+    private String getErrorMessage(String message, int errorCode) {
+        switch (errorCode) {
+            case 401:
+                return "Authentication required. Please login again.";
+            case 403:
+                return "You don't have permission to perform this action.";
+            case 404:
+                return "Task not found.";
+            case 422:
+                return "Validation error: " + message;
+            default:
+                return message != null ? message : "An error occurred. Please try again.";
         }
     }
 
@@ -134,16 +188,70 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_edit) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_edit) {
             hapticHelper.vibrateClick();
             openEditMode();
             return true;
-        } else if (item.getItemId() == R.id.action_chat) {
+        } else if (itemId == R.id.action_chat) {
             hapticHelper.vibrateClick();
             openTaskChat();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateStatus(Task.TaskStatus newStatus) {
+        if (taskId == null) {
+            Toast.makeText(this, "Task ID not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        updateTaskStatusUseCase.execute(taskId, newStatus, new UpdateTaskStatusUseCase.UseCaseCallback<Task>() {
+            @Override
+            public void onSuccess(Task updatedTask) {
+                task = updatedTask;
+                populateFields();
+                Toast.makeText(ScheduleDetailActivity.this, "Status updated successfully", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message, int errorCode) {
+                Toast.makeText(ScheduleDetailActivity.this, 
+                        getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showDeleteConfirmation() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to delete this task? This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteTask())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteTask() {
+        if (taskId == null) {
+            Toast.makeText(this, "Task ID not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        deleteTaskUseCase.execute(taskId, new DeleteTaskUseCase.UseCaseCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Toast.makeText(ScheduleDetailActivity.this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void onError(String message, int errorCode) {
+                Toast.makeText(ScheduleDetailActivity.this, 
+                        getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void openEditMode() {

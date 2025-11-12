@@ -1,4 +1,4 @@
-package com.sendajapan.sendasnap.utils;
+package com.sendajapan.sendasnap.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;

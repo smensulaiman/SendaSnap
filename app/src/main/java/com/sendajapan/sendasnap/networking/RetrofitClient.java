@@ -18,12 +18,13 @@ public class RetrofitClient {
 
     private RetrofitClient(Context context) {
         this.context = context.getApplicationContext();
-        
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         // Create auth interceptor to add bearer token
         AuthInterceptor authInterceptor = new AuthInterceptor(this.context);
+
+        // Create logging interceptor
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(authInterceptor)

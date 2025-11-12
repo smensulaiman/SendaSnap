@@ -31,7 +31,7 @@ import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
-import com.sendajapan.sendasnap.utils.LoadingDialog;
+import com.sendajapan.sendasnap.dialogs.LoadingDialog;
 
 import java.io.File;
 import java.util.ArrayList;

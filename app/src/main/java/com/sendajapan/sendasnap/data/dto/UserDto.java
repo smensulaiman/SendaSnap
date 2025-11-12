@@ -1,27 +1,19 @@
-package com.sendajapan.sendasnap.models;
-
-import androidx.annotation.NonNull;
+package com.sendajapan.sendasnap.data.dto;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
-public class UserData implements Serializable {
-
+public class UserDto {
     @SerializedName("id")
-    private int id;
+    private Integer id;
 
     @SerializedName("name")
     private String name;
 
-    @SerializedName("email")
-    private String email;
-
-    @SerializedName("email_verified_at")
-    private String emailVerifiedAt;
-
     @SerializedName("role")
     private String role;
+
+    @SerializedName("email")
+    private String email;
 
     @SerializedName("phone")
     private String phone;
@@ -35,22 +27,23 @@ public class UserData implements Serializable {
     @SerializedName("avatar_url")
     private String avatarUrl;
 
+    @SerializedName("email_verified_at")
+    private String emailVerifiedAt;
+
     @SerializedName("created_at")
     private String createdAt;
 
     @SerializedName("updated_at")
     private String updatedAt;
 
-    private boolean loggedIn = true;
-
-    public UserData() {
+    public UserDto() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -62,28 +55,20 @@ public class UserData implements Serializable {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getEmailVerifiedAt() {
-        return emailVerifiedAt;
-    }
-
-    public void setEmailVerifiedAt(String emailVerifiedAt) {
-        this.emailVerifiedAt = emailVerifiedAt;
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPhone() {
@@ -118,6 +103,14 @@ public class UserData implements Serializable {
         this.avatarUrl = avatarUrl;
     }
 
+    public String getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    public void setEmailVerifiedAt(String emailVerifiedAt) {
+        this.emailVerifiedAt = emailVerifiedAt;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -132,33 +125,6 @@ public class UserData implements Serializable {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public boolean isLoggedIn() {
-        return loggedIn;
-    }
-
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "UserData{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", emailVerifiedAt='" + emailVerifiedAt + '\'' +
-                ", role='" + role + '\'' +
-                ", phone='" + phone + '\'' +
-                ", avisId='" + avisId + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", avatarUrl='" + avatarUrl + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", loggedIn=" + loggedIn +
-                '}';
     }
 }
 

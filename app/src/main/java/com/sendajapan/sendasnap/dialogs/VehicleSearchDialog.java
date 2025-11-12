@@ -1,4 +1,4 @@
-package com.sendajapan.sendasnap.utils;
+package com.sendajapan.sendasnap.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -14,6 +14,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 
 public class VehicleSearchDialog {
 

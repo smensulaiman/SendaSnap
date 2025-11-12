@@ -8,13 +8,8 @@
     
     <item
         android:id="@+id/nav_schedule"
-        android:title="Task"
+        android:title="Schedule"
         android:icon="@drawable/ic_calendar_24" />
-    
-    <item
-        android:id="@+id/nav_chat"
-        android:title="Chat"
-        android:icon="@drawable/ic_messenger_24" />
     
     <item
         android:id="@+id/nav_profile"
