@@ -135,9 +135,7 @@ public class CookieBarToastHelper {
      * Show no internet connection message
      */
     public static void showNoInternet(@NonNull Context context) {
-        buildCookie(context, "No Internet Connection", 
-                "Please check your network settings and try again",
-                R.color.error_dark, R.drawable.ic_wifi_off, LONG_DURATION).show();
+        buildCookie(context, "No Internet Connection", "Please check your network settings and try again", R.color.error_dark, R.drawable.ic_wifi_off, EXTRA_LONG_DURATION).show();
     }
 
     /**

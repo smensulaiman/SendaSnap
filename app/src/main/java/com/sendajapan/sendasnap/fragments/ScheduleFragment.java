@@ -314,6 +314,15 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh badges when fragment resumes
+        if (taskAdapter != null) {
+            taskAdapter.notifyDataSetChanged();
+        }
+    }
+    
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

@@ -1,77 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/blur_background">
+    android:background="@color/color_background"
+    android:fitsSystemWindows="true">
 
     <!-- App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/white"
+        app:title="Create Work Schedule"
+        app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Subtitle"
+        app:titleTextColor="@color/white" />
+
+    <View
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
-            app:title="Chat"
-            app:titleTextColor="@color/text_primary"
-            app:navigationIcon="@drawable/ic_chevron_right"
-            app:navigationIconTint="@color/text_primary" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:background="@drawable/bg_chat"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:alpha=".5"/>
 
     <!-- Messages RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMessages"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
         android:paddingTop="@dimen/dimen_8"
         android:paddingBottom="@dimen/dimen_8"
-        android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_message" />
+        app:layout_constraintBottom_toTopOf="@id/cardInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        tools:listitem="@layout/item_message_sent"
+        tools:itemCount="1"/>
 
     <!-- Message Input Container -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardInput"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         android:layout_margin="@dimen/dimen_8"
         app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="24dp"
         app:cardElevation="4dp"
-        app:strokeWidth="0dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/primary">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/dimen_8"
-            android:gravity="center_vertical">
+            android:padding="@dimen/dimen_16">
 
             <!-- Attachment Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAttachment"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
                 android:padding="0dp"
-                app:icon="@drawable/ic_add"
+                app:icon="@drawable/ic_attach_file"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="24dp"
-                app:iconTint="@color/primary"
-                style="@style/Widget.Material3.Button.TextButton" />
+                app:iconTint="@color/primary" />
 
             <!-- Message Input -->
             <com.google.android.material.textfield.TextInputLayout
@@ -82,7 +93,6 @@
                 android:hint="Type a message..."
                 app:boxBackgroundMode="none"
                 app:hintTextColor="@color/text_hint"
-                app:startIconDrawable="@drawable/ic_file"
                 app:startIconTint="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -103,6 +113,7 @@
             <!-- Send Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSend"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:insetLeft="0dp"
@@ -116,12 +127,11 @@
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="24dp"
-                app:iconTint="@color/white"
-                style="@style/Widget.Material3.Button" />
+                app:iconTint="@color/white" />
 
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

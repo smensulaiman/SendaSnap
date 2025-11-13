@@ -4,7 +4,7 @@
     <color name="primary">#035294</color>
     <color name="primary_variant">#BF035294</color>
 
-    <color name="primary_light">#E6F0FB</color>
+    <color name="primary_light">#EBF3FC</color>
     <color name="primary_transparent">#80035294</color>
     <color name="primary_medium">#3F7CC7</color>
     <color name="primary_dark">#2C5FA2</color>
@@ -15,10 +15,10 @@
     <color name="color_background">#FDFDFD</color>
 
     <!-- Background colors -->
-    <color name="background">#E4EEF8</color>
+    <color name="background">@color/color_background</color>
     <color name="surface">#CCC9C1</color>
     <color name="surface_variant">#FDFDFD</color>
-    <color name="surface_container">#FAFAFA</color>
+    <color name="surface_container">#F8F8F8</color>
     <color name="background_blur">#CBDCEC</color>
     <color name="glass_effect">#80FFFFFF</color>
 
@@ -30,6 +30,7 @@
     <color name="text_primary">#035294</color>
     <color name="text_black">#0F1523</color>
     <color name="text_secondary">#6B7280</color>
+    <color name="text_secondary_dark">#727272</color>
     <color name="text_hint">#9CA3AF</color>
 
     <color name="error">#F78A8A</color>
@@ -54,7 +55,8 @@
     <color name="border_light">#9D9FA0</color>
 
     <!-- Basic colors -->
-    <color name="black">#FF000000</color>
+    <color name="black">#2B2B2B</color>
+    <color name="light_black">#494848</color>
     <color name="white">#FDFDFD</color>
     <color name="ic_launcher_background">#FDFDFD</color>
     

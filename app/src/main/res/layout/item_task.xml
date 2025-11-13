@@ -35,14 +35,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8"
+            android:ellipsize="end"
             android:fontFamily="@font/montserrat_medium"
+            android:maxLines="2"
             android:text="Task Title"
             android:textColor="@color/text_black"
             android:textSize="@dimen/text_size_small"
             android:textStyle="bold"
-            android:maxLines="2"
-            android:ellipsize="end"
-            app:layout_constraintEnd_toStartOf="@+id/chipTaskStatus"
+            android:paddingEnd="@dimen/dimen_8"
+            app:layout_constraintEnd_toStartOf="@+id/layoutStatusBadge"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toEndOf="@id/statusIndicator"
             app:layout_constraintTop_toTopOf="@+id/statusIndicator" />
@@ -140,23 +141,48 @@
 
         </LinearLayout>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipTaskStatus"
-            style="@style/Widget.Material3.Chip.Filter"
+        <!-- Status Chip with Badge Container -->
+        <FrameLayout
+            android:id="@+id/layoutStatusBadge"
             android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:minHeight="43dp"
-            android:text="Pending"
-            android:fontFamily="@font/montserrat_semi_bold"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_xsmall"
-            app:chipBackgroundColor="@color/white"
-            app:chipCornerRadius="8dp"
-            app:chipStrokeColor="@color/warning_dark"
-            app:chipStrokeWidth="1dp"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="@dimen/dimen_8"/>
+            android:layout_marginEnd="@dimen/dimen_8">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTaskStatus"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="match_parent"
+                android:layout_height="34dp"
+                android:minHeight="43dp"
+                android:layout_marginEnd="@dimen/dimen_4"
+                android:text="Pending"
+                android:fontFamily="@font/montserrat_semi_bold"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_xsmall"
+                app:chipBackgroundColor="@color/white"
+                app:chipCornerRadius="8dp"
+                app:chipStrokeColor="@color/warning_dark"
+                app:chipStrokeWidth="1dp" />
+
+            <!-- Unread Message Badge -->
+            <TextView
+                android:id="@+id/badgeUnreadCount"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:text="4"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_xxsmall"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/badge_background"
+                android:visibility="gone"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"/>
+
+        </FrameLayout>
 
         <!-- Chevron -->
         <ImageView

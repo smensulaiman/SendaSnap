@@ -100,6 +100,20 @@
                     android:textSize="@dimen/text_size_xxsmall"
                     tools:text="FK'-1212" />
 
+                <TextView
+                    android:id="@+id/txtVehicleId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/success"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:maxLines="1"
+                    android:paddingHorizontal="@dimen/dimen_4"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_size_xxsmall"
+                    tools:text="FK'-1212"
+                    android:layout_marginStart="@dimen/dimen_4"/>
+
             </LinearLayout>
 
         </LinearLayout>
@@ -118,12 +132,11 @@
                 android:text="New"
                 android:textSize="@dimen/text_size_xxsmall"
                 android:fontFamily="@font/montserrat_bold"
-                android:background="@drawable/badge_8"
-                android:backgroundTint="@color/success"
+                android:background="@drawable/badge_dark_8"
                 android:layout_marginEnd="@dimen/dimen_12"
                 android:layout_marginTop="@dimen/dimen_12"
                 android:paddingHorizontal="@dimen/dimen_8"
-                android:textColor="@color/text_black"/>
+                android:textColor="@color/white"/>
 
             <LinearLayout
                 android:id="@+id/layoutEnter"

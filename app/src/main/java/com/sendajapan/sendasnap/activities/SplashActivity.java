@@ -17,6 +17,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -38,17 +40,14 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Start logo animation
         startLogoAnimation();
 
-        // Navigate after delay
         new Handler(Looper.getMainLooper()).postDelayed(this::navigateToNextActivity, SPLASH_DELAY);
     }
 
     private void startLogoAnimation() {
         View logoView = findViewById(R.id.imgLogo);
 
-        // Scale animation
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(logoView, "scaleX", 0.0f, 1.0f);
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(logoView, "scaleY", 0.0f, 1.0f);
         ObjectAnimator alpha = ObjectAnimator.ofFloat(logoView, "alpha", 0.0f, 1.0f);
@@ -65,7 +64,6 @@ public class SplashActivity extends AppCompatActivity {
         scaleY.start();
         alpha.start();
 
-        // Add a subtle bounce effect
         scaleX.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

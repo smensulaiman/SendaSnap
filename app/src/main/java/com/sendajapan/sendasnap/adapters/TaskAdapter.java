@@ -16,9 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.services.ChatService;
+import com.sendajapan.sendasnap.utils.FirebaseUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,6 +37,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     private final List<Task> tasks;
     private final OnTaskClickListener listener;
+    private final ChatService chatService;
+    private final String currentUserId;
 
     public interface OnTaskClickListener {
         void onTaskClick(Task task);
@@ -40,6 +47,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public TaskAdapter(List<Task> tasks, OnTaskClickListener listener) {
         this.tasks = tasks;
         this.listener = listener;
+        this.chatService = ChatService.getInstance();
+        this.currentUserId = FirebaseUtils.getCurrentUserId(null);
     }
 
     @NonNull
@@ -53,6 +62,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = tasks.get(position);
         holder.bind(task);
+    }
+    
+    @Override
+    public void onViewRecycled(@NonNull TaskViewHolder holder) {
+        super.onViewRecycled(holder);
+        // Clean up listener when view is recycled
+        holder.removeUnreadCountListener();
     }
 
     @Override
@@ -73,6 +89,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         private final ImageView imgCreatorAvatar;
         private final TextView textCreatorName;
         private final TextView textCreatedByLabel;
+        private final TextView badgeUnreadCount;
+        private ValueEventListener unreadCountListener;
+        private String currentTaskChatId;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -88,6 +107,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             imgCreatorAvatar = itemView.findViewById(R.id.imgCreatorAvatar);
             textCreatorName = itemView.findViewById(R.id.textCreatorName);
             textCreatedByLabel = itemView.findViewById(R.id.textCreatedByLabel);
+            badgeUnreadCount = itemView.findViewById(R.id.badgeUnreadCount);
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
@@ -97,6 +117,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
 
         public void bind(Task task) {
+            // Remove previous listener if exists
+            removeUnreadCountListener();
+            
             textTaskTitle.setText(task.getTitle());
             textTaskDescription.setText(task.getDescription());
             
@@ -116,6 +139,66 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             // Load creator information
             loadCreatorInfo(task.getCreator());
+            
+            // Load unread count for this task's chat
+            loadUnreadCount(task);
+        }
+        
+        private void loadUnreadCount(Task task) {
+            if (task == null || currentUserId == null || currentUserId.isEmpty()) {
+                if (badgeUnreadCount != null) {
+                    badgeUnreadCount.setVisibility(View.GONE);
+                }
+                return;
+            }
+            
+            String chatId = "task_" + String.valueOf(task.getId());
+            currentTaskChatId = chatId;
+            
+            // First get current count immediately
+            chatService.getGroupChatUnreadCount(chatId, currentUserId, new ChatService.UnreadCountCallback() {
+                @Override
+                public void onSuccess(int unreadCount) {
+                    updateBadge(unreadCount);
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    // Silently fail, but still set up listener
+                }
+            });
+            
+            // Then add listener for real-time updates
+            unreadCountListener = chatService.addUnreadCountListener(chatId, currentUserId, new ChatService.UnreadCountCallback() {
+                @Override
+                public void onSuccess(int unreadCount) {
+                    updateBadge(unreadCount);
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    // Silently fail
+                }
+            });
+        }
+        
+        private void updateBadge(int unreadCount) {
+            if (badgeUnreadCount != null) {
+                if (unreadCount > 0) {
+                    badgeUnreadCount.setText(String.valueOf(unreadCount > 99 ? "99+" : unreadCount));
+                    badgeUnreadCount.setVisibility(View.VISIBLE);
+                } else {
+                    badgeUnreadCount.setVisibility(View.GONE);
+                }
+            }
+        }
+        
+        private void removeUnreadCountListener() {
+            if (unreadCountListener != null && currentTaskChatId != null && currentUserId != null && !currentUserId.isEmpty()) {
+                chatService.removeUnreadCountListener(currentTaskChatId, currentUserId, unreadCountListener);
+                unreadCountListener = null;
+                currentTaskChatId = null;
+            }
         }
 
         private void loadAssigneeAvatars(List<UserData> assignees) {

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/dimen_8">
+
+    <ImageView
+        android:id="@+id/imgUserAvatar"
+        android:layout_width="@dimen/dimen_16"
+        android:layout_height="@dimen/dimen_16"
+        android:clipToOutline="true"
+        android:scaleType="centerCrop"
+        android:layout_marginTop="@dimen/dimen_4"
+        android:src="@drawable/car_placeholder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardReceivedMessage"
+        tools:src="@drawable/avater_placeholder" />
+
+    <!-- User Name -->
+    <TextView
+        android:id="@+id/txtSenderName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_xxsmall"
+        app:layout_constraintStart_toStartOf="@+id/cardReceivedMessage"
+        app:layout_constraintBottom_toTopOf="@id/cardReceivedMessage"
+        android:includeFontPadding="false"
+        tools:text="Sulaiman"
+        android:layout_marginStart="@dimen/dimen_8"/>
+
+    <!-- Message Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardReceivedMessage"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dimen_12"
+        app:cardBackgroundColor="@color/surface_container"
+        app:cardCornerRadius="@dimen/dimen_12"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtSenderName"
+        app:strokeWidth="1dp">
+
+        <TextView
+            android:id="@+id/txtMessageReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_semi_bold"
+            android:lineSpacingExtra="4dp"
+            android:padding="@dimen/dimen_8"
+            android:textColor="@color/text_black"
+            android:textSize="@dimen/text_size_medium"
+            tools:text="I'm doing great, thanks! This is a longer message to test the layout." />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Time -->
+    <TextView
+        android:id="@+id/txtReceivedTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_xsmall"
+        app:layout_constraintStart_toEndOf="@+id/imgUserAvatar"
+        app:layout_constraintTop_toBottomOf="@id/cardReceivedMessage"
+        tools:text="10:31 AM"
+        android:layout_marginStart="@dimen/dimen_4"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

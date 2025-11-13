@@ -140,17 +140,14 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void performSearchFromDialog(String searchType, String searchQuery) {
-        // Check internet connection
         if (!networkUtils.isNetworkAvailable()) {
             CookieBarToastHelper.showNoInternet(requireContext());
             hapticHelper.vibrateError();
             return;
         }
 
-        // Show progress dialog
-        showLoadingDialog("Searching vehicles...");
+        showLoadingDialog("Searching vehicles, please wait...");
 
-        // Perform API call
         Call<VehicleSearchResponse> call = apiService.searchVehicles(searchType, searchQuery);
         call.enqueue(new Callback<VehicleSearchResponse>() {
             @Override
@@ -167,11 +164,11 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                             List<Vehicle> vehicles = data.getVehicles();
 
                             if (vehicles.isEmpty()) {
-                                CookieBarToastHelper.showInfo(requireContext(), "No Results",
+                                CookieBarToastHelper.showError(requireContext(), "No Vehicle",
                                         "No vehicles found matching your search criteria",
-                                        CookieBarToastHelper.LONG_DURATION);
+                                        CookieBarToastHelper.EXTRA_LONG_DURATION);
+
                             } else if (vehicles.size() == 1) {
-                                // Single vehicle - navigate directly to detail page
                                 Vehicle vehicle = vehicles.get(0);
                                 vehicleCache.addVehicle(vehicle);
 

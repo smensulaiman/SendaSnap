@@ -28,6 +28,7 @@
         android:required="false" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -98,7 +99,8 @@
             android:name=".activities.schedule.ScheduleDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.SendaSnap" />
+            android:theme="@style/Theme.SendaSnap"
+            android:windowSoftInputMode="adjustResize" />
         
         <!-- Task Alarm Receiver -->
         <receiver
@@ -112,7 +114,7 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan|stateVisible" />
         
         <!-- Contacts Activity -->
         <activity

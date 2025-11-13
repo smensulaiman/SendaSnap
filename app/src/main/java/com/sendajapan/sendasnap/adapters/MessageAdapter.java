@@ -11,12 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.models.Message;
-import com.sendajapan.sendasnap.utils.FirebaseUtils;
+import com.sendajapan.sendasnap.models.ChatUser;
+import com.sendajapan.sendasnap.services.ChatService;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     
@@ -32,6 +35,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean isGroupChat;
     private OnImageClickListener imageClickListener;
     private OnFileClickListener fileClickListener;
+    private ChatService chatService;
+    private Map<String, ChatUser> userCache = new HashMap<>();
     
     public interface OnImageClickListener {
         void onImageClick(String imageUrl);
@@ -45,12 +50,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.messages = new ArrayList<>();
         this.currentUserId = currentUserId;
         this.isGroupChat = false;
+        this.chatService = ChatService.getInstance();
     }
     
     public MessageAdapter(String currentUserId, boolean isGroupChat) {
         this.messages = new ArrayList<>();
         this.currentUserId = currentUserId;
         this.isGroupChat = isGroupChat;
+        this.chatService = ChatService.getInstance();
     }
     
     public void setOnImageClickListener(OnImageClickListener listener) {
@@ -91,10 +98,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return new FileMessageViewHolder(
                     inflater.inflate(R.layout.item_message_file, parent, false), viewType);
             case TYPE_TEXT_SENT:
+                return new TextMessageViewHolder(
+                    inflater.inflate(R.layout.item_message_sent, parent, false), viewType);
             case TYPE_TEXT_RECEIVED:
             default:
                 return new TextMessageViewHolder(
-                    inflater.inflate(R.layout.item_message, parent, false), viewType);
+                    inflater.inflate(R.layout.item_message_received, parent, false), viewType);
         }
     }
     
@@ -129,32 +138,38 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     
     // Text Message ViewHolder
     class TextMessageViewHolder extends RecyclerView.ViewHolder {
-        private View layoutSentMessage;
-        private View layoutReceivedMessage;
         private TextView txtSentMessage;
         private TextView txtReceivedMessage;
         private TextView txtSentTime;
         private TextView txtReceivedTime;
+        private TextView txtSenderName;
         private ImageView imgSentStatus;
+        private ImageView imgUserAvatar;
+        private boolean isSentLayout;
         
         public TextMessageViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
             
-            layoutSentMessage = itemView.findViewById(R.id.layoutSentMessage);
-            layoutReceivedMessage = itemView.findViewById(R.id.layoutReceivedMessage);
-            txtSentMessage = itemView.findViewById(R.id.txtSentMessage);
-            txtReceivedMessage = itemView.findViewById(R.id.txtReceivedMessage);
-            txtSentTime = itemView.findViewById(R.id.txtSentTime);
-            txtReceivedTime = itemView.findViewById(R.id.txtReceivedTime);
-            imgSentStatus = itemView.findViewById(R.id.imgSentStatus);
+            // Check which layout we're using based on viewType
+            isSentLayout = (viewType == TYPE_TEXT_SENT);
+            
+            if (isSentLayout) {
+                // Sent message layout
+                txtSentMessage = itemView.findViewById(R.id.txtSentMessage);
+                txtSentTime = itemView.findViewById(R.id.txtSentTime);
+                imgSentStatus = itemView.findViewById(R.id.imgSentStatus);
+            } else {
+                // Received message layout
+                txtReceivedMessage = itemView.findViewById(R.id.txtMessageReceived);
+                txtReceivedTime = itemView.findViewById(R.id.txtReceivedTime);
+                txtSenderName = itemView.findViewById(R.id.txtSenderName);
+                imgUserAvatar = itemView.findViewById(R.id.imgUserAvatar);
+            }
         }
         
         public void bind(Message message) {
-            boolean isSent = message.getSenderId().equals(currentUserId);
-            
-            if (isSent) {
-                layoutSentMessage.setVisibility(View.VISIBLE);
-                layoutReceivedMessage.setVisibility(View.GONE);
+            if (isSentLayout) {
+                // Sent message
                 txtSentMessage.setText(message.getMessage());
                 txtSentTime.setText(formatTime(message.getTimestamp()));
                 
@@ -167,10 +182,69 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     imgSentStatus.setAlpha(0.5f); // Single checkmark
                 }
             } else {
-                layoutSentMessage.setVisibility(View.GONE);
-                layoutReceivedMessage.setVisibility(View.VISIBLE);
+                // Received message
                 txtReceivedMessage.setText(message.getMessage());
                 txtReceivedTime.setText(formatTime(message.getTimestamp()));
+                
+                // Load and display user info (avatar and name)
+                if (txtSenderName != null && imgUserAvatar != null) {
+                    txtSenderName.setVisibility(View.VISIBLE);
+                    imgUserAvatar.setVisibility(View.VISIBLE);
+                    loadUserInfo(message.getSenderId());
+                }
+            }
+        }
+        
+        private void loadUserInfo(String senderId) {
+            if (senderId == null || senderId.isEmpty()) {
+                return;
+            }
+            
+            // Check cache first
+            ChatUser cachedUser = userCache.get(senderId);
+            if (cachedUser != null) {
+                updateUserInfo(cachedUser);
+                return;
+            }
+            
+            // Fetch from Firebase
+            chatService.getUserById(senderId, new ChatService.UserCallback() {
+                @Override
+                public void onSuccess(ChatUser user) {
+                    userCache.put(senderId, user);
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        updateUserInfo(user);
+                    }
+                }
+                
+                @Override
+                public void onFailure(Exception e) {
+                    // Use default/fallback
+                    if (txtSenderName != null) {
+                        txtSenderName.setText("User");
+                    }
+                }
+            });
+        }
+        
+        private void updateUserInfo(ChatUser user) {
+            if (user == null) return;
+            
+            if (txtSenderName != null) {
+                txtSenderName.setText(user.getUsername() != null ? user.getUsername() : "User");
+            }
+            
+            if (imgUserAvatar != null) {
+                String avatarUrl = user.getProfileImageUrl();
+                if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                    Glide.with(itemView.getContext())
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.avater_placeholder)
+                            .circleCrop()
+                            .into(imgUserAvatar);
+                } else {
+                    imgUserAvatar.setImageResource(R.drawable.avater_placeholder);
+                }
             }
         }
     }
@@ -210,7 +284,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(itemView.getContext())
                             .load(imageUrl)
-                            .placeholder(R.drawable.car_placeholder)
+                            .placeholder(R.drawable.avater_placeholder)
                             .into(imgSentImage);
                     progressSentImage.setVisibility(View.GONE);
                 } else {
@@ -237,7 +311,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(itemView.getContext())
                             .load(imageUrl)
-                            .placeholder(R.drawable.car_placeholder)
+                            .placeholder(R.drawable.avater_placeholder)
                             .into(imgReceivedImage);
                 }
                 

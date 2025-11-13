@@ -1,13 +1,11 @@
 package com.sendajapan.sendasnap.activities;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,7 +17,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.MessageAdapter;
@@ -81,6 +79,7 @@ public class ChatActivity extends AppCompatActivity {
         setupRecyclerView();
         setupClickListeners();
         setupActivityResultLaunchers();
+        initializeCurrentUser();
         loadMessages();
         markMessagesAsSeen();
     }
@@ -90,6 +89,18 @@ public class ChatActivity extends AppCompatActivity {
         storageService = FirebaseStorageService.getInstance();
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
+    }
+    
+    /**
+     * Initialize current user's data in Firebase when they visit the chat activity
+     */
+    private void initializeCurrentUser() {
+        try {
+            chatService.initializeUser(this);
+        } catch (Exception e) {
+            android.util.Log.e("ChatActivity", "Failed to initialize user in Firebase", e);
+            // Continue anyway - user initialization is not critical
+        }
     }
 
     private void getIntentData() {
@@ -108,18 +119,47 @@ public class ChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+        
         if (isGroupChat && taskTitle != null) {
             binding.toolbar.setTitle(taskTitle);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setSubtitle("Group Chat");
-            }
         } else {
             binding.toolbar.setTitle(otherUserName != null ? otherUserName : "Chat");
         }
+
+        binding.toolbar.post(() -> {
+            android.widget.TextView titleView = findTitleTextView(binding.toolbar);
+            if (titleView != null) {
+                titleView.setMaxLines(2);
+                titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                titleView.setSingleLine(false);
+            }
+        });
+        
         binding.toolbar.setNavigationOnClickListener(v -> {
             hapticHelper.vibrateClick();
             finish();
         });
+    }
+    
+    private android.widget.TextView findTitleTextView(android.view.ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            android.view.View child = parent.getChildAt(i);
+            if (child instanceof android.widget.TextView) {
+                android.widget.TextView textView = (android.widget.TextView) child;
+                // Check if this TextView matches the toolbar title
+                String toolbarTitle = binding.toolbar.getTitle() != null ? binding.toolbar.getTitle().toString() : "";
+                String textViewText = textView.getText() != null ? textView.getText().toString() : "";
+                if (textViewText.equals(toolbarTitle) && textView.getVisibility() == android.view.View.VISIBLE) {
+                    return textView;
+                }
+            } else if (child instanceof android.view.ViewGroup) {
+                android.widget.TextView found = findTitleTextView((android.view.ViewGroup) child);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     private void setupRecyclerView() {
@@ -157,6 +197,13 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+        
+        // Scroll to bottom when EditText gets focus
+        binding.etMessage.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                binding.recyclerViewMessages.postDelayed(() -> scrollToBottom(), 100);
+            }
         });
     }
 
@@ -387,13 +434,25 @@ public class ChatActivity extends AppCompatActivity {
         chatService.getChatMessages(chatId, new ChatService.MessagesCallback() {
             @Override
             public void onSuccess(List<Message> messages) {
-                messageAdapter.updateMessages(messages);
-                scrollToBottom();
+                // Check if activity is still valid before updating UI
+                if (isFinishing() || binding == null || messageAdapter == null) {
+                    return;
+                }
+                
+                try {
+                    messageAdapter.updateMessages(messages);
+                    scrollToBottom();
+                } catch (Exception e) {
+                    android.util.Log.e("ChatActivity", "Error updating messages", e);
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
-                // Handle error
+                // Handle error silently if activity is destroyed
+                if (!isFinishing() && binding != null) {
+                    android.util.Log.e("ChatActivity", "Failed to load messages", e);
+                }
             }
         });
     }
@@ -407,11 +466,59 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void scrollToBottom() {
-        binding.recyclerViewMessages.post(() -> {
-            if (messageAdapter.getItemCount() > 0) {
-                binding.recyclerViewMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+        // Check if activity is still valid and binding is initialized
+        if (isFinishing() || binding == null) {
+            return;
+        }
+        
+        // Check isDestroyed() safely (available from API 17+)
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (isDestroyed()) {
+                    return;
+                }
             }
-        });
+        } catch (Exception e) {
+            // Ignore - isDestroyed() might not be available
+        }
+        
+        if (binding.recyclerViewMessages == null) {
+            return;
+        }
+        
+        if (messageAdapter == null) {
+            return;
+        }
+        
+        try {
+            binding.recyclerViewMessages.post(() -> {
+                // Double-check after posting to UI thread
+                if (isFinishing() || binding == null || binding.recyclerViewMessages == null) {
+                    return;
+                }
+                
+                // Check isDestroyed() safely
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        if (isDestroyed()) {
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+                
+                if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
+                    try {
+                        binding.recyclerViewMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                    } catch (Exception e) {
+                        android.util.Log.e("ChatActivity", "Error scrolling to bottom", e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            android.util.Log.e("ChatActivity", "Error posting scroll to bottom", e);
+        }
     }
 
     @Override

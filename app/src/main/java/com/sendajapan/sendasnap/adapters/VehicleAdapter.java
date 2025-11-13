@@ -11,10 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.utils.CurrencyFormatter;
@@ -67,6 +63,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         private TextView txtVehicleName;
         private TextView txtMakeModel;
         private TextView txtChassisNumber;
+        private TextView txtVehicleId;
         private TextView txtBuyingPrice;
 
         public VehicleViewHolder(@NonNull View itemView) {
@@ -76,6 +73,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtVehicleName = itemView.findViewById(R.id.txtVehicleName);
             txtMakeModel = itemView.findViewById(R.id.txtMakeModel);
             txtChassisNumber = itemView.findViewById(R.id.txtChassisNumber);
+            txtVehicleId = itemView.findViewById(R.id.txtVehicleId);
             txtBuyingPrice = itemView.findViewById(R.id.txtBuyingPrice);
 
             itemView.setOnClickListener(v -> {
@@ -94,26 +92,22 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtVehicleName.setText(vehicle.getDisplayName());
             txtMakeModel.setText(vehicle.getModel());
             txtChassisNumber.setText(vehicle.getChassisModel() + "-" + vehicle.getSerialNumber());
+            txtVehicleId.setText(vehicle.getId());
 
             txtBuyingPrice.setText("￥" + CurrencyFormatter.formatBuyingPrice(vehicle.getBuyingPrice()));
         }
 
         private void loadVehicleImage(Vehicle vehicle) {
-            // Set placeholder immediately to show while loading
             imgVehicle.setImageResource(R.drawable.car_placeholder);
 
             if (vehicle.getVehiclePhotos() != null && !vehicle.getVehiclePhotos().isEmpty()) {
-                // Load first photo from the list
                 String imageUrl = vehicle.getVehiclePhotos().get(0);
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(itemView.getContext())
                             .load(imageUrl)
                             .placeholder(R.drawable.car_placeholder)
                             .error(R.drawable.car_placeholder)
-                            .apply(RequestOptions.bitmapTransform(
-                                    new MultiTransformation<>(
-                                            new CenterCrop(),
-                                            new RoundedCorners(8))))
+                            .centerCrop()
                             .into(imgVehicle);
                 }
             }
