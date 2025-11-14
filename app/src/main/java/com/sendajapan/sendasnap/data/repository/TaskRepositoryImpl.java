@@ -36,6 +36,7 @@ public class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public void list(String fromDate, String toDate, TaskRepositoryCallback<PagedResult<Task>> callback) {
+
         Call<ApiResponse<TasksListResponseDto>> call = apiService.getTasksList(fromDate, toDate);
         call.enqueue(new Callback<ApiResponse<TasksListResponseDto>>() {
             @Override

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -74,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:fontFamily="@font/montserrat"
+                android:fontFamily="@font/montserrat_semi_bold"
                 android:maxLines="1"
                 android:textColor="@color/text_black"
                 android:textSize="@dimen/text_size_xsmall"

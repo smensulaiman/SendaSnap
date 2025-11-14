@@ -36,7 +36,6 @@ import com.sendajapan.sendasnap.domain.usecase.UpdateTaskUseCase;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
-import com.sendajapan.sendasnap.networking.ApiCallback;
 import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
@@ -61,7 +60,7 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private final List<UserData> users = new ArrayList<>();
     private final List<TaskAttachment> attachments = new ArrayList<>();
-    private final List<android.net.Uri> attachmentUris = new ArrayList<>(); // Store URIs for file upload
+    private final List<android.net.Uri> attachmentUris = new ArrayList<>();
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
     private final List<UserData> selectedAssignees = new ArrayList<>();
@@ -69,7 +68,7 @@ public class AddScheduleActivity extends AppCompatActivity {
     private Task editingTask;
     private boolean isEditMode = false;
     private boolean isRestrictedEditMode = false;
-    private boolean replaceAttachments = false; // Flag for "Replace attachments" toggle
+    private boolean replaceAttachments = false;
     private PopupWindow userDropdownPopup;
     private TaskAttachmentAdapter attachmentAdapter;
     private boolean isShowingDropdown = false;
@@ -77,7 +76,7 @@ public class AddScheduleActivity extends AppCompatActivity {
     private CreateTaskUseCase createTaskUseCase;
     private UpdateTaskUseCase updateTaskUseCase;
     private ListUsersUseCase listUsersUseCase;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
