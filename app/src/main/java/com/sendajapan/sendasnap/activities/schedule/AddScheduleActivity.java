@@ -30,17 +30,19 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.adapters.UserDropdownAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
-import com.sendajapan.sendasnap.domain.usecase.CreateTaskUseCase;
-import com.sendajapan.sendasnap.domain.usecase.ListUsersUseCase;
-import com.sendajapan.sendasnap.domain.usecase.UpdateTaskUseCase;
+import androidx.lifecycle.ViewModelProvider;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
+import com.sendajapan.sendasnap.viewmodel.UserViewModel;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.AlarmHelper;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,9 +75,8 @@ public class AddScheduleActivity extends AppCompatActivity {
     private TaskAttachmentAdapter attachmentAdapter;
     private boolean isShowingDropdown = false;
     private UserDropdownAdapter userDropdownAdapter;
-    private CreateTaskUseCase createTaskUseCase;
-    private UpdateTaskUseCase updateTaskUseCase;
-    private ListUsersUseCase listUsersUseCase;
+    private TaskViewModel taskViewModel;
+    private UserViewModel userViewModel;
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     @Override
@@ -117,9 +118,8 @@ public class AddScheduleActivity extends AppCompatActivity {
         prefsManager = SharedPrefsManager.getInstance(this);
         currentUser = prefsManager.getUser();
         apiManager = ApiManager.getInstance(this);
-        createTaskUseCase = new CreateTaskUseCase(this);
-        updateTaskUseCase = new UpdateTaskUseCase(this);
-        listUsersUseCase = new ListUsersUseCase(this);
+        taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(TaskViewModel.class);
+        userViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(UserViewModel.class);
     }
 
     private void checkUserRole() {
@@ -160,6 +160,7 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         attachmentAdapter = new TaskAttachmentAdapter(attachments, true);
+        attachmentAdapter.setContext(this);
         attachmentAdapter.setOnAttachmentRemoveListener((position, attachment) -> {
             hapticHelper.vibrateClick();
             attachments.remove(position);
@@ -167,8 +168,27 @@ public class AddScheduleActivity extends AppCompatActivity {
             attachmentAdapter.notifyItemRangeChanged(position, attachments.size());
             updateFileDisplay();
         });
+        // Set action listener immediately after creating adapter
+        setAttachmentActionListener();
         binding.recyclerViewAttachments.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
         binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
+        // Set listener again after setting adapter to ensure it's not lost
+        setAttachmentActionListener();
+    }
+
+    private void setAttachmentActionListener() {
+        if (attachmentAdapter != null) {
+            android.util.Log.d("AddScheduleActivity", "Setting action listener on adapter");
+            attachmentAdapter.setOnAttachmentActionListener((position, attachment) -> {
+                android.util.Log.d("AddScheduleActivity", "Action listener called for position: " + position);
+                hapticHelper.vibrateClick();
+                openAttachment(attachment);
+            });
+            // Verify listener was set (can't access private field, but we can check via a test call)
+            android.util.Log.d("AddScheduleActivity", "Action listener set successfully");
+        } else {
+            android.util.Log.e("AddScheduleActivity", "attachmentAdapter is null when trying to set listener!");
+        }
     }
 
     private void setupListeners() {
@@ -236,7 +256,7 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private void fetchUsers() {
-        listUsersUseCase.execute(new ListUsersUseCase.UseCaseCallback<List<UserData>>() {
+        userViewModel.listUsers(new UserViewModel.UserCallback<List<UserData>>() {
             @Override
             public void onSuccess(List<UserData> userList) {
                 users.clear();
@@ -427,6 +447,8 @@ public class AddScheduleActivity extends AppCompatActivity {
         if (editingTask.getAttachments() != null) {
             attachments.clear();
             attachments.addAll(editingTask.getAttachments());
+            // Ensure listener is set after loading attachments
+            setAttachmentActionListener();
             updateFileDisplay();
         }
     }
@@ -611,7 +633,7 @@ public class AddScheduleActivity extends AppCompatActivity {
 
         if (isEditMode && editingTask != null) {
             // Update existing task
-            UpdateTaskUseCase.UpdateTaskParams params = new UpdateTaskUseCase.UpdateTaskParams();
+            TaskViewModel.UpdateTaskParams params = new TaskViewModel.UpdateTaskParams();
             if (!isRestrictedEditMode) {
                 params.title = title;
                 params.description = description;
@@ -623,18 +645,30 @@ public class AddScheduleActivity extends AppCompatActivity {
 
             Boolean attachmentsUpdate = replaceAttachments ? true : null;
 
-            updateTaskUseCase.execute(editingTask.getId(), params, files, attachmentsUpdate,
-                    new UpdateTaskUseCase.UseCaseCallback<Task>() {
+            taskViewModel.updateTask(editingTask.getId(), params, files, attachmentsUpdate,
+                    new TaskViewModel.TaskCallback<Task>() {
                 @Override
                 public void onSuccess(Task updatedTask) {
                     // Set alarm for the task
                     AlarmHelper.setTaskAlarm(AddScheduleActivity.this, updatedTask);
 
+                    // Show success cookiebar
+                    CookieBarToastHelper.showSuccess(
+                            AddScheduleActivity.this,
+                            "Task Updated",
+                            "Task has been updated successfully",
+                            CookieBarToastHelper.SHORT_DURATION
+                    );
+
                     // Return result to calling activity
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("task", updatedTask);
                     setResult(RESULT_OK, resultIntent);
-                    finish();
+                    
+                    // Delay finish to allow cookiebar to be visible
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        finish();
+                    }, 500);
                 }
 
                 @Override
@@ -644,7 +678,7 @@ public class AddScheduleActivity extends AppCompatActivity {
             });
         } else {
             // Create new task
-            CreateTaskUseCase.CreateTaskParams params = new CreateTaskUseCase.CreateTaskParams();
+            TaskViewModel.CreateTaskParams params = new TaskViewModel.CreateTaskParams();
             params.title = title;
             params.description = description;
             params.workDate = workDate;
@@ -652,7 +686,7 @@ public class AddScheduleActivity extends AppCompatActivity {
             params.priority = priorityStr;
             params.assignedTo = assignedTo;
 
-            createTaskUseCase.execute(params, files, new CreateTaskUseCase.UseCaseCallback<Task>() {
+            taskViewModel.createTask(params, files, new TaskViewModel.TaskCallback<Task>() {
                 @Override
                 public void onSuccess(Task createdTask) {
                     // Set alarm for the task
@@ -824,7 +858,11 @@ public class AddScheduleActivity extends AppCompatActivity {
         } else {
             binding.recyclerViewAttachments.setVisibility(View.VISIBLE);
             binding.textNoFiles.setVisibility(View.GONE);
-            attachmentAdapter.notifyDataSetChanged();
+            // Ensure listener is set before notifying adapter
+            if (attachmentAdapter != null) {
+                setAttachmentActionListener();
+                attachmentAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -918,6 +956,86 @@ public class AddScheduleActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    private void openAttachment(TaskAttachment attachment) {
+        android.util.Log.d("AddScheduleActivity", "openAttachment called for: " + (attachment != null ? attachment.getFileName() : "null"));
+        
+        // Prefer file_url if available, otherwise use file_path
+        String filePathOrUrl = attachment.getFileUrl();
+        if (filePathOrUrl == null || filePathOrUrl.isEmpty()) {
+            filePathOrUrl = attachment.getFilePath();
+        }
+        
+        android.util.Log.d("AddScheduleActivity", "filePathOrUrl: " + filePathOrUrl);
+        
+        if (filePathOrUrl == null || filePathOrUrl.isEmpty()) {
+            Toast.makeText(this, "Invalid file path", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            // Check if it's a URL or server path
+            boolean isUrl = filePathOrUrl.startsWith("http://") || filePathOrUrl.startsWith("https://");
+            boolean isLocalUri = filePathOrUrl.startsWith("content://") || filePathOrUrl.startsWith("file://");
+            boolean isServerPath = !isUrl && !isLocalUri;
+
+            if (isUrl || isServerPath) {
+                // Server file - open in browser
+                String fileUrl = filePathOrUrl;
+                if (isServerPath) {
+                    // Construct full URL from relative path
+                    if (filePathOrUrl.startsWith("/")) {
+                        fileUrl = "https://snap.senda.fit" + filePathOrUrl;
+                    } else {
+                        fileUrl = "https://snap.senda.fit/storage/" + filePathOrUrl;
+                    }
+                }
+                
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(android.net.Uri.parse(fileUrl));
+                startActivity(Intent.createChooser(intent, "Open file"));
+            } else if (isLocalUri) {
+                // Local URI - open with appropriate app
+                android.net.Uri fileUri = android.net.Uri.parse(filePathOrUrl);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String mimeType = attachment.getMimeType();
+                if (mimeType == null || mimeType.isEmpty()) {
+                    mimeType = getContentResolver().getType(fileUri);
+                }
+                if (mimeType == null) {
+                    mimeType = "*/*";
+                }
+                intent.setDataAndType(fileUri, mimeType);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(intent, "Open file"));
+            } else {
+                // Local file path
+                File file = new File(filePathOrUrl);
+                if (file.exists()) {
+                    android.net.Uri fileUri = androidx.core.content.FileProvider.getUriForFile(
+                            this,
+                            getPackageName() + ".fileprovider",
+                            file);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    String mimeType = attachment.getMimeType();
+                    if (mimeType == null || mimeType.isEmpty()) {
+                        mimeType = getContentResolver().getType(fileUri);
+                    }
+                    if (mimeType == null) {
+                        mimeType = "*/*";
+                    }
+                    intent.setDataAndType(fileUri, mimeType);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(intent, "Open file"));
+                } else {
+                    Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error opening file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

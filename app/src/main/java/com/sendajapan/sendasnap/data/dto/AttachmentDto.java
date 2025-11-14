@@ -15,6 +15,12 @@ public class AttachmentDto {
     @SerializedName("file_type")
     private String fileType;
 
+    @SerializedName("file_size")
+    private Long fileSize;
+
+    @SerializedName("file_url")
+    private String fileUrl;
+
     public AttachmentDto() {
     }
 
@@ -48,6 +54,22 @@ public class AttachmentDto {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }
 

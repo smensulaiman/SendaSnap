@@ -3,7 +3,6 @@ package com.sendajapan.sendasnap.networking;
 import android.content.Context;
 
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.concurrent.TimeUnit;
@@ -14,24 +13,16 @@ public class RetrofitClient {
 
     private static RetrofitClient instance;
     private final ApiService apiService;
-    private Context context;
 
     private RetrofitClient(Context context) {
-        this.context = context.getApplicationContext();
 
-        // Create auth interceptor to add bearer token
-        AuthInterceptor authInterceptor = new AuthInterceptor(this.context);
-
-        // Create logging interceptor
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        AuthInterceptor authInterceptor = new AuthInterceptor(context.getApplicationContext());
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(authInterceptor)
-                .addInterceptor(loggingInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()

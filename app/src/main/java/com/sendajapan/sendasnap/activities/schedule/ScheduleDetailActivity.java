@@ -23,9 +23,8 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.ChatActivity;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
-import com.sendajapan.sendasnap.domain.usecase.DeleteTaskUseCase;
-import com.sendajapan.sendasnap.domain.usecase.GetTaskUseCase;
-import com.sendajapan.sendasnap.domain.usecase.UpdateTaskStatusUseCase;
+import androidx.lifecycle.ViewModelProvider;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -56,9 +55,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private ValueEventListener unreadCountListener;
     private List<UserData> allUsers = new ArrayList<>();
     private TextView badgeTextView;
-    private GetTaskUseCase getTaskUseCase;
-    private UpdateTaskStatusUseCase updateTaskStatusUseCase;
-    private DeleteTaskUseCase deleteTaskUseCase;
+    private TaskViewModel taskViewModel;
     private Integer taskId;
 
     @Override
@@ -106,9 +103,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         chatService = ChatService.getInstance();
         apiManager = ApiManager.getInstance(this);
-        getTaskUseCase = new GetTaskUseCase(this);
-        updateTaskStatusUseCase = new UpdateTaskStatusUseCase(this);
-        deleteTaskUseCase = new DeleteTaskUseCase(this);
+        taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(TaskViewModel.class);
     }
 
     private void setupRecyclerView() {
@@ -138,7 +133,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private void loadTaskFromApi() {
         if (taskId == null) return;
         
-        getTaskUseCase.execute(taskId, new GetTaskUseCase.UseCaseCallback<Task>() {
+        taskViewModel.getTask(taskId, new TaskViewModel.TaskCallback<Task>() {
             @Override
             public void onSuccess(Task loadedTask) {
                 task = loadedTask;
@@ -215,7 +210,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             return;
         }
 
-        updateTaskStatusUseCase.execute(taskId, newStatus, new UpdateTaskStatusUseCase.UseCaseCallback<Task>() {
+        taskViewModel.updateTaskStatus(taskId, newStatus, new TaskViewModel.TaskCallback<Task>() {
             @Override
             public void onSuccess(Task updatedTask) {
                 task = updatedTask;
@@ -246,7 +241,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             return;
         }
 
-        deleteTaskUseCase.execute(taskId, new DeleteTaskUseCase.UseCaseCallback<Void>() {
+        taskViewModel.deleteTask(taskId, new TaskViewModel.TaskCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 Toast.makeText(ScheduleDetailActivity.this, "Task deleted successfully", Toast.LENGTH_SHORT).show();

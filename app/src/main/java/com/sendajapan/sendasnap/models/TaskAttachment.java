@@ -10,6 +10,7 @@ public class TaskAttachment implements Serializable {
     private String fileType;
     private long fileSize;
     private String mimeType;
+    private String fileUrl;
     private long uploadedAt;
 
     public TaskAttachment() {
@@ -83,6 +84,14 @@ public class TaskAttachment implements Serializable {
         this.uploadedAt = uploadedAt;
     }
 
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
     // Helper methods
     public String getFormattedFileSize() {
         if (fileSize < 1024) {
@@ -121,5 +130,18 @@ public class TaskAttachment implements Serializable {
         String extension = getFileExtension();
         return extension.equals("xls") || extension.equals("xlsx") ||
                 extension.equals("csv");
+    }
+
+    @Override
+    public String toString() {
+        return "TaskAttachment{\n" +
+                "  id='" + id + "',\n" +
+                "  fileName='" + fileName + "',\n" +
+                "  filePath='" + filePath + "',\n" +
+                "  fileType='" + fileType + "',\n" +
+                "  fileSize=" + fileSize + ",\n" +
+                "  mimeType='" + mimeType + "',\n" +
+                "  uploadedAt=" + uploadedAt + "\n" +
+                "}";
     }
 }

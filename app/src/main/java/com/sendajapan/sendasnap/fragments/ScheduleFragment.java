@@ -18,8 +18,9 @@ import com.sendajapan.sendasnap.activities.schedule.AddScheduleActivity;
 import com.sendajapan.sendasnap.activities.schedule.ScheduleDetailActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
+import androidx.lifecycle.ViewModelProvider;
 import com.sendajapan.sendasnap.data.dto.PagedResult;
-import com.sendajapan.sendasnap.domain.usecase.ListTasksUseCase;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -41,10 +42,11 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     private FragmentScheduleBinding binding;
     private TaskAdapter taskAdapter;
     private SharedPrefsManager prefsManager;
-    private ListTasksUseCase listTasksUseCase;
+    private TaskViewModel taskViewModel;
 
     private String selectedDate;
     private Task.TaskStatus currentFilter = null;
+    private boolean isFirstLoad = true;
 
     @Nullable
     @Override
@@ -59,7 +61,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         super.onViewCreated(view, savedInstanceState);
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
-        listTasksUseCase = new ListTasksUseCase(requireContext());
+        taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(TaskViewModel.class);
         
         setupRecyclerView();
         setupCalendar();
@@ -174,7 +176,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         showShimmer();
 
         // Use selectedDate as both from_date and to_date to get tasks for that specific date
-        listTasksUseCase.execute(selectedDate, selectedDate, 1, new ListTasksUseCase.UseCaseCallback<PagedResult<Task>>() {
+        taskViewModel.listTasks(selectedDate, selectedDate, new TaskViewModel.TaskCallback<PagedResult<Task>>() {
             @Override
             public void onSuccess(PagedResult<Task> result) {
                 if (!isAdded() || binding == null) {
@@ -316,10 +318,13 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh badges when fragment resumes
-        if (taskAdapter != null) {
-            taskAdapter.notifyDataSetChanged();
+        // Refetch tasks from server when fragment becomes visible
+        // This ensures we have the latest data after returning from other activities
+        // Skip on first load since loadTasksFromApi() is already called in onViewCreated
+        if (isAdded() && binding != null && !isFirstLoad) {
+            loadTasksFromApi();
         }
+        isFirstLoad = false;
     }
     
     @Override

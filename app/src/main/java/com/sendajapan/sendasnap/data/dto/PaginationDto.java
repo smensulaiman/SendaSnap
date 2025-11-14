@@ -49,5 +49,15 @@ public class PaginationDto {
     public void setTotal(Integer total) {
         this.total = total;
     }
+
+    @Override
+    public String toString() {
+        return "PaginationDto{\n" +
+                "  currentPage=" + currentPage + ",\n" +
+                "  lastPage=" + lastPage + ",\n" +
+                "  perPage=" + perPage + ",\n" +
+                "  total=" + total + "\n" +
+                "}";
+    }
 }
 

@@ -359,26 +359,26 @@ public class Task implements Serializable {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", workDate='" + workDate + '\'' +
-                ", workTime='" + workTime + '\'' +
-                ", statusString='" + statusString + '\'' +
-                ", status=" + status +
-                ", assignee=" + assignee +
-                ", assignees=" + assignees +
-                ", createdByUserId=" + createdByUserId +
-                ", priorityString='" + priorityString + '\'' +
-                ", priority=" + priority +
-                ", attachments=" + attachments +
-                ", dueDate='" + dueDate + '\'' +
-                ", completedAt='" + completedAt + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", creator=" + creator +
-                ", isNew=" + isNew +
-                '}';
+        return "Task{\n" +
+                "  id=" + id + ",\n" +
+                "  title='" + title + "',\n" +
+                "  description='" + description + "',\n" +
+                "  workDate='" + workDate + "',\n" +
+                "  workTime='" + workTime + "',\n" +
+                "  statusString='" + statusString + "',\n" +
+                "  status=" + status + ",\n" +
+                "  assignee=" + assignee + ",\n" +
+                "  assignees=" + assignees + ",\n" +
+                "  createdByUserId=" + createdByUserId + ",\n" +
+                "  priorityString='" + priorityString + "',\n" +
+                "  priority=" + priority + ",\n" +
+                "  attachments=" + attachments + ",\n" +
+                "  dueDate='" + dueDate + "',\n" +
+                "  completedAt='" + completedAt + "',\n" +
+                "  createdAt='" + createdAt + "',\n" +
+                "  updatedAt='" + updatedAt + "',\n" +
+                "  creator=" + creator + ",\n" +
+                "  isNew=" + isNew + "\n" +
+                "}";
     }
 }

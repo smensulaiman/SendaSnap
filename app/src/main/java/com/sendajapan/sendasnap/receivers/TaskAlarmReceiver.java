@@ -5,8 +5,10 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -43,6 +45,20 @@ public class TaskAlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        
+        // Check if notifications are enabled
+        if (!notificationManager.areNotificationsEnabled()) {
+            return;
+        }
+        
+        // For Android 13+ (API 33+), check POST_NOTIFICATIONS permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+        
         int notificationId;
         try {
             notificationId = NOTIFICATION_ID_BASE + (int) (Long.parseLong(taskId) % 1000);

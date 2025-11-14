@@ -1,19 +1,26 @@
-package com.sendajapan.sendasnap.domain.usecase;
+package com.sendajapan.sendasnap.viewmodel;
 
-import android.content.Context;
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+
 import com.sendajapan.sendasnap.data.repository.UserRepositoryImpl;
 import com.sendajapan.sendasnap.domain.repository.UserRepository;
 import com.sendajapan.sendasnap.models.UserData;
+
 import java.util.List;
 
-public class ListUsersUseCase {
+public class UserViewModel extends AndroidViewModel {
+
     private final UserRepository userRepository;
 
-    public ListUsersUseCase(Context context) {
-        this.userRepository = new UserRepositoryImpl(context);
+    public UserViewModel(@NonNull Application application) {
+        super(application);
+        this.userRepository = new UserRepositoryImpl(application);
     }
 
-    public void execute(UseCaseCallback<List<UserData>> callback) {
+    public void listUsers(UserCallback<List<UserData>> callback) {
         userRepository.list(new UserRepository.UserRepositoryCallback<List<UserData>>() {
             @Override
             public void onSuccess(List<UserData> result) {
@@ -27,7 +34,7 @@ public class ListUsersUseCase {
         });
     }
 
-    public interface UseCaseCallback<T> {
+    public interface UserCallback<T> {
         void onSuccess(T result);
         void onError(String message, int errorCode);
     }

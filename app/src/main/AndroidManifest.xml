@@ -79,13 +79,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SendaSnap" />
         
-        <!-- Task Details Activity -->
-        <activity
-            android:name=".activities.TaskDetailsActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.SendaSnap" />
-        
         <!-- Add Task Activity -->
         <activity
             android:name=".activities.schedule.AddScheduleActivity"

@@ -145,20 +145,20 @@ public class UserData implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return "UserData{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", emailVerifiedAt='" + emailVerifiedAt + '\'' +
-                ", role='" + role + '\'' +
-                ", phone='" + phone + '\'' +
-                ", avisId='" + avisId + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", avatarUrl='" + avatarUrl + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", loggedIn=" + loggedIn +
-                '}';
+        return "UserData{\n" +
+                "  id=" + id + ",\n" +
+                "  name='" + name + "',\n" +
+                "  email='" + email + "',\n" +
+                "  emailVerifiedAt='" + emailVerifiedAt + "',\n" +
+                "  role='" + role + "',\n" +
+                "  phone='" + phone + "',\n" +
+                "  avisId='" + avisId + "',\n" +
+                "  avatar='" + avatar + "',\n" +
+                "  avatarUrl='" + avatarUrl + "',\n" +
+                "  createdAt='" + createdAt + "',\n" +
+                "  updatedAt='" + updatedAt + "',\n" +
+                "  loggedIn=" + loggedIn + "\n" +
+                "}";
     }
 }
 

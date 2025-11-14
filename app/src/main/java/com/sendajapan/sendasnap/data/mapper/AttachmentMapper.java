@@ -17,6 +17,12 @@ public class AttachmentMapper {
         attachment.setFileName(normalizeString(dto.getFileName()));
         attachment.setFilePath(normalizeString(dto.getFilePath()));
         attachment.setFileType(normalizeString(dto.getFileType()));
+        attachment.setFileUrl(normalizeString(dto.getFileUrl()));
+        if (dto.getFileSize() != null) {
+            attachment.setFileSize(dto.getFileSize());
+        } else {
+            attachment.setFileSize(0);
+        }
         return attachment;
     }
 

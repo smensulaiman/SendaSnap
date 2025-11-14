@@ -36,5 +36,13 @@ public class PagedResult<T> {
                pagination.getLastPage() != null &&
                pagination.getCurrentPage() < pagination.getLastPage();
     }
+
+    @Override
+    public String toString() {
+        return "PagedResult{\n" +
+                "  items=" + items + ",\n" +
+                "  pagination=" + pagination + "\n" +
+                "}";
+    }
 }
 

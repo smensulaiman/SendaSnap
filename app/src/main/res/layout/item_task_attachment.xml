@@ -7,9 +7,7 @@
     android:gravity="center_vertical"
     android:padding="12dp"
     android:layout_marginBottom="8dp"
-    android:background="@color/primary_light"
-    android:clickable="true"
-    android:focusable="true">
+    android:background="@color/primary_light">
 
     <ImageView
         android:id="@+id/imgFileIcon"
@@ -48,6 +46,20 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAction"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:text="View"
+        android:textSize="@dimen/text_size_xsmall"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:iconSize="14dp" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRemoveFile"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
@@ -57,6 +69,7 @@
         android:text="Remove"
         android:textSize="@dimen/text_size_xsmall"
         android:textColor="@color/error"
+        android:visibility="gone"
         app:icon="@drawable/ic_delete"
         app:iconSize="14dp"
         app:iconTint="@color/error" />

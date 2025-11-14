@@ -97,9 +97,10 @@ public interface ApiService {
     // Update task with multipart (optional fields + attachments)
     // Note: assigned_to[] and attachments[] will be built as individual parts in
     // repository
+    // Using POST with _method=PUT for Laravel method spoofing (more reliable than PUT with multipart)
     @Multipart
-    @PUT("api/v1/tasks/{id}")
-    Call<ApiResponse<TaskResponseDto>> updateTask(@Path("id") Integer id, @Part List<MultipartBody.Part> parts);
+    @POST("api/v1/tasks/{id}")
+    Call<ApiResponse<TaskResponseDto>> updateTask(@Path("id") int id, @Part List<MultipartBody.Part> parts);
 
     // Delete task
     @DELETE("api/v1/tasks/{id}")

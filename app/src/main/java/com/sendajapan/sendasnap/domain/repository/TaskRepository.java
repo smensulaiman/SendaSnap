@@ -1,5 +1,7 @@
 package com.sendajapan.sendasnap.domain.repository;
 
+import androidx.annotation.NonNull;
+
 import com.sendajapan.sendasnap.data.dto.PagedResult;
 import com.sendajapan.sendasnap.models.Task;
 import java.io.File;
@@ -34,6 +36,20 @@ public interface TaskRepository {
         public String priority;
         public String dueDate;
         public List<Integer> assignedTo;
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "CreateTaskParams{\n" +
+                    "  title='" + title + "',\n" +
+                    "  description='" + description + "',\n" +
+                    "  workDate='" + workDate + "',\n" +
+                    "  workTime='" + workTime + "',\n" +
+                    "  priority='" + priority + "',\n" +
+                    "  dueDate='" + dueDate + "',\n" +
+                    "  assignedTo=" + assignedTo + "\n" +
+                    "}";
+        }
     }
 
     class UpdateTaskParams {
@@ -44,5 +60,19 @@ public interface TaskRepository {
         public String priority;
         public String dueDate;
         public List<Integer> assignedTo;
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "UpdateTaskParams{\n" +
+                    "  title='" + title + "',\n" +
+                    "  description='" + description + "',\n" +
+                    "  workDate='" + workDate + "',\n" +
+                    "  workTime='" + workTime + "',\n" +
+                    "  priority='" + priority + "',\n" +
+                    "  dueDate='" + dueDate + "',\n" +
+                    "  assignedTo=" + assignedTo + "\n" +
+                    "}";
+        }
     }
 }

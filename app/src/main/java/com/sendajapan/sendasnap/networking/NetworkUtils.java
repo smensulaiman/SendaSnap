@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 public class NetworkUtils extends LiveData<Boolean> {
+
     private static NetworkUtils instance;
     private final ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
