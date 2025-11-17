@@ -11,6 +11,7 @@ import com.sendajapan.sendasnap.models.LoginResponse;
 import com.sendajapan.sendasnap.models.TasksResponse;
 import com.sendajapan.sendasnap.models.UsersResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
+import com.sendajapan.sendasnap.models.VehicleImageUploadResponse;
 import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 
 import okhttp3.ResponseBody;
@@ -58,6 +59,13 @@ public interface ApiService {
     @POST("api/v1/vehicle/{id}/images")
     Call<ResponseBody> uploadVehicleImages(
             @Path("id") String vehicleId,
+            @Part List<MultipartBody.Part> images);
+
+    // Upload vehicle images (new endpoint)
+    @Multipart
+    @POST("api/v1/vehicles/upload-images")
+    Call<VehicleImageUploadResponse> uploadVehicleImagesNew(
+            @Part("vehicle_id") okhttp3.RequestBody vehicleId,
             @Part List<MultipartBody.Part> images);
 
     // Get all users

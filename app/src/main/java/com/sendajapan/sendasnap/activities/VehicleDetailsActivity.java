@@ -1,11 +1,11 @@
 package com.sendajapan.sendasnap.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.View;
 
@@ -31,12 +31,14 @@ import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+import com.sendajapan.sendasnap.utils.VehicleCache;
 import com.sendajapan.sendasnap.dialogs.LoadingDialog;
+import com.sendajapan.sendasnap.services.VehicleImageUploadService;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class VehicleDetailsActivity extends AppCompatActivity {
 
@@ -60,6 +62,9 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private String cameraImagePath;
 
     private LoadingDialog loadingDialog;
+    private VehicleImageUploadService imageUploadService;
+    private SharedPrefsManager prefsManager;
+    private VehicleCache vehicleCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,9 +96,12 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private void initHelpers() {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         apiService = RetrofitClient.getInstance(this).getApiService();
+        imageUploadService = new VehicleImageUploadService(this);
+        prefsManager = SharedPrefsManager.getInstance(this);
+        vehicleCache = VehicleCache.getInstance(this);
 
         loadingDialog = new LoadingDialog.Builder(VehicleDetailsActivity.this)
-                .setMessage("Uploading Data!")
+                .setMessage("Uploading Images")
                 .setSubtitle("Please wait while uploading images...")
                 .setCancelable(false)
                 .setShowProgressIndicator(true)
@@ -191,9 +199,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                             pendingImageAdapter.notifyItemInserted(pendingImagePaths.size() - 1);
                             updatePendingImagesVisibility();
 
-                            CookieBarToastHelper.showSuccess(this,
-                                    "Success", "Photo added successfully",
-                                    CookieBarToastHelper.SHORT_DURATION);
                         } else {
                             CookieBarToastHelper.showError(this, "Error", "Failed to save photo",
                                     CookieBarToastHelper.LONG_DURATION);
@@ -259,7 +264,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             // For Android 13+ (API 33+), we don't need storage permission for camera
-            permissions = new String[]{Manifest.permission.CAMERA};
+            permissions = new String[] { Manifest.permission.CAMERA };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
@@ -271,7 +276,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             }
         } else {
             // For older versions, we need both camera and storage permissions
-            permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            permissions = new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE };
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                     ||
                     ContextCompat.checkSelfPermission(this,
@@ -280,7 +285,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                         ActivityCompat.shouldShowRequestPermissionRationale(this,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     CookieBarToastHelper.showInfo(this, "Permission Required",
-                            "Camera and storage permissions are needed to take photos", CookieBarToastHelper.LONG_DURATION);
+                            "Camera and storage permissions are needed to take photos",
+                            CookieBarToastHelper.LONG_DURATION);
                 }
                 ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION_REQUEST);
                 return;
@@ -299,7 +305,8 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                             CookieBarToastHelper.LONG_DURATION);
                 }
             } else {
-                CookieBarToastHelper.showError(this, "Error", "Failed to create image file", CookieBarToastHelper.LONG_DURATION);
+                CookieBarToastHelper.showError(this, "Error", "Failed to create image file",
+                        CookieBarToastHelper.LONG_DURATION);
             }
         } catch (Exception e) {
             CookieBarToastHelper.showError(this, "Error", "Failed to open camera: " + e.getMessage(),
@@ -311,7 +318,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             // For Android 13+ (API 33+), use READ_MEDIA_IMAGES
-            permissions = new String[]{Manifest.permission.READ_MEDIA_IMAGES};
+            permissions = new String[] { Manifest.permission.READ_MEDIA_IMAGES };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES)) {
@@ -323,7 +330,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             }
         } else {
             // For older versions, use READ_EXTERNAL_STORAGE
-            permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+            permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
@@ -376,7 +383,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 return uri.getPath();
             } else if (uri.getScheme().equals("content")) {
                 // For FileProvider URIs, we need to get the actual file path
-                String[] projection = {MediaStore.Images.Media.DATA};
+                String[] projection = { MediaStore.Images.Media.DATA };
                 android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
                 if (cursor != null) {
                     int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -429,39 +436,112 @@ public class VehicleDetailsActivity extends AppCompatActivity {
 
     private void uploadPendingImages() {
         if (pendingImagePaths.isEmpty()) {
-            CookieBarToastHelper.showInfo(this, "No Photos", "No photos to upload", CookieBarToastHelper.SHORT_DURATION);
+            CookieBarToastHelper.showInfo(this, "No Photos", "No photos to upload",
+                    CookieBarToastHelper.SHORT_DURATION);
             return;
         }
 
+        if (vehicle == null || vehicle.getId() == null) {
+            CookieBarToastHelper.showError(this, "Error", "Vehicle information not available",
+                    CookieBarToastHelper.LONG_DURATION);
+            return;
+        }
+
+        // Get vehicle_id as integer
+        int vehicleId;
+        try {
+            vehicleId = Integer.parseInt(vehicle.getId());
+        } catch (NumberFormatException e) {
+            CookieBarToastHelper.showError(this, "Error", "Invalid vehicle ID", CookieBarToastHelper.LONG_DURATION);
+            return;
+        }
+
+        // Show loading dialog
         if (!loadingDialog.isShowing()) {
             loadingDialog.show();
         }
 
-        new Handler().postDelayed(() -> {
+        // Upload images
+        imageUploadService.uploadImages(vehicleId, new ArrayList<>(pendingImagePaths),
+                new VehicleImageUploadService.UploadCallback() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void onSuccess(Vehicle updatedVehicle) {
+                        runOnUiThread(() -> {
+                            // Dismiss loading dialog
+                            if (loadingDialog.isShowing()) {
+                                loadingDialog.dismiss();
+                            }
 
-            if (loadingDialog.isShowing()) {
-                loadingDialog.dismiss();
-            }
+                            // Update vehicle data if available
+                            if (updatedVehicle != null) {
+                                // Ensure vehicle_id is set correctly (response has vehicle_id as integer)
+                                // The Vehicle model should handle this via @SerializedName, but ensure it's set
+                                if (updatedVehicle.getId() == null || updatedVehicle.getId().isEmpty()) {
+                                    if (vehicle != null && vehicle.getId() != null) {
+                                        updatedVehicle.setId(vehicle.getId());
+                                    }
+                                }
 
-            List<String> currentServerImages = vehicle.getVehiclePhotos();
-            if (currentServerImages == null) {
-                currentServerImages = new ArrayList<>();
-            }
+                                // Save the complete updated vehicle to SharedPreferences
+                                prefsManager.addVehicleToCache(updatedVehicle);
 
-//            currentServerImages.addAll(pendingImagePaths);
-//            vehicle.setVehiclePhotos(currentServerImages);
-//
-//            vehicleImageAdapter.notifyDataSetChanged();
-//
-//            pendingImagePaths.clear();
-//            pendingImageAdapter.notifyDataSetChanged();
-//            updatePendingImagesVisibility();
+                                // Load the updated vehicle from SharedPreferences
+                                String vehicleId = updatedVehicle.getId();
+                                if (vehicleId == null || vehicleId.isEmpty()) {
+                                    if (vehicle != null) {
+                                        vehicleId = vehicle.getId();
+                                    }
+                                }
 
-            CookieBarToastHelper.showSuccessWithListener(VehicleDetailsActivity.this,
-                    "Success", "Photos uploaded successfully!",
-                    CookieBarToastHelper.SHORT_DURATION,
-                    i -> finish());
-        }, 2000);
+                                if (vehicleId != null && !vehicleId.isEmpty()) {
+                                    Vehicle cachedVehicle = vehicleCache.getVehicleById(vehicleId);
+                                    if (cachedVehicle != null) {
+                                        vehicle = cachedVehicle;
+                                    } else {
+                                        // Fallback to updated vehicle from response
+                                        vehicle = updatedVehicle;
+                                    }
+                                } else {
+                                    // Fallback to updated vehicle from response
+                                    vehicle = updatedVehicle;
+                                }
+                            }
+
+                            // Clear pending images
+                            pendingImagePaths.clear();
+                            pendingImageAdapter.notifyDataSetChanged();
+
+                            // Refresh UI with updated vehicle data
+                            populateVehicleData();
+                            setupImageGrids();
+
+                            // Update UI
+                            vehicleImageAdapter.notifyDataSetChanged();
+                            updatePendingImagesVisibility();
+
+                            // Show success message
+                            CookieBarToastHelper.showSuccess(VehicleDetailsActivity.this, "Success",
+                                    "Images uploaded successfully",
+                                    CookieBarToastHelper.SHORT_DURATION);
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage, int errorCode) {
+                        runOnUiThread(() -> {
+                            // Dismiss loading dialog
+                            if (loadingDialog.isShowing()) {
+                                loadingDialog.dismiss();
+                            }
+
+                            // Show error message
+                            CookieBarToastHelper.showError(VehicleDetailsActivity.this, "Upload Failed",
+                                    errorMessage,
+                                    CookieBarToastHelper.LONG_DURATION);
+                        });
+                    }
+                });
     }
 
     @Override
