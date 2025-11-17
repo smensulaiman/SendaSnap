@@ -484,28 +484,15 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                                 }
 
                                 // Save the complete updated vehicle to SharedPreferences
+                                // This updates the cache with the latest vehicle data including new images
                                 prefsManager.addVehicleToCache(updatedVehicle);
 
-                                // Load the updated vehicle from SharedPreferences
-                                String vehicleId = updatedVehicle.getId();
-                                if (vehicleId == null || vehicleId.isEmpty()) {
-                                    if (vehicle != null) {
-                                        vehicleId = vehicle.getId();
-                                    }
-                                }
+                                // Also update VehicleCache to ensure consistency
+                                vehicleCache.addVehicle(updatedVehicle);
 
-                                if (vehicleId != null && !vehicleId.isEmpty()) {
-                                    Vehicle cachedVehicle = vehicleCache.getVehicleById(vehicleId);
-                                    if (cachedVehicle != null) {
-                                        vehicle = cachedVehicle;
-                                    } else {
-                                        // Fallback to updated vehicle from response
-                                        vehicle = updatedVehicle;
-                                    }
-                                } else {
-                                    // Fallback to updated vehicle from response
-                                    vehicle = updatedVehicle;
-                                }
+                                // Use the updated vehicle directly from the response
+                                // It already has the latest images from the server
+                                vehicle = updatedVehicle;
                             }
 
                             // Clear pending images

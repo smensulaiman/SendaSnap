@@ -248,6 +248,15 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
             // Add to cache
             vehicleCache.addVehicle(vehicle);
 
+            // Get the latest vehicle from cache to ensure we have the most up-to-date data
+            // This is important in case the vehicle was updated in VehicleDetailsActivity
+            if (vehicle != null && vehicle.getId() != null) {
+                Vehicle latestVehicle = vehicleCache.getVehicleById(vehicle.getId());
+                if (latestVehicle != null) {
+                    vehicle = latestVehicle;
+                }
+            }
+
             // Navigate to detail page
             Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
             intent.putExtra("vehicle", vehicle);
@@ -318,9 +327,29 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     public void onVehicleClick(Vehicle vehicle) {
         hapticHelper.vibrateClick();
 
+        // Get the latest vehicle from SharedPrefsManager to ensure we have the most up-to-date data
+        // This is important because the vehicle object from the adapter might be stale
+        // if images were uploaded in VehicleDetailsActivity
+        if (vehicle != null && vehicle.getId() != null) {
+            Vehicle latestVehicle = vehicleCache.getVehicleById(vehicle.getId());
+            if (latestVehicle != null) {
+                vehicle = latestVehicle;
+            }
+        }
+
         Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
         intent.putExtra("vehicle", vehicle);
         startActivity(intent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh vehicle list when returning from VehicleDetailsActivity
+        // This ensures we show the latest images after uploads
+        if (isAdded() && binding != null) {
+            loadRecentVehicles();
+        }
     }
 
     @Override

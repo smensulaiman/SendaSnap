@@ -2,9 +2,12 @@ package com.sendajapan.sendasnap.activities;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -13,6 +16,8 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityMainBinding;
 import com.sendajapan.sendasnap.fragments.HomeFragment;
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupNetworkMonitoring();
         setupToolbarMenu();
+        setupBackPressHandler();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
@@ -192,6 +198,65 @@ public class MainActivity extends AppCompatActivity {
 
     private void showNoInternetToast() {
         CookieBarToastHelper.showNoInternet(this);
+    }
+
+    private void setupBackPressHandler() {
+        // Handle back button press to show exit confirmation
+        // This works for all fragments in MainActivity
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                showExitConfirmationDialog();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    private void showExitConfirmationDialog() {
+        hapticHelper.vibrateClick();
+        
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setTitle("Exit App?");
+        builder.setMessage("Are you sure you want to exit SendaSnap?");
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        
+        // Colorful exit button
+        builder.setPositiveButton("Exit", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            finishAffinity();
+        });
+        
+        // Cancel button
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            dialog.dismiss();
+        });
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        
+        // Style the buttons with colors - Make the exit button colorful
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            // Use MaterialButton backgroundTint if it's a MaterialButton
+            if (positiveButton instanceof MaterialButton) {
+                ((MaterialButton) positiveButton).setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(
+                        getResources().getColor(R.color.error, null)
+                    )
+                );
+            } else {
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
+            }
+            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
+            positiveButton.setAllCaps(false);
+        }
+        
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
+            negativeButton.setAllCaps(false);
+        }
     }
 
     @Override
