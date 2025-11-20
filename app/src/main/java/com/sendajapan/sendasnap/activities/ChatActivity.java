@@ -174,7 +174,8 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.btnAttachment.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            showAttachmentBottomSheet();
+            Toast.makeText(ChatActivity.this, "File attachment is under development", Toast.LENGTH_SHORT).show();
+//            showAttachmentBottomSheet();
         });
 
         binding.etMessage.setOnEditorActionListener((v, actionId, event) -> {

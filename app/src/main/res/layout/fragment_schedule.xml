@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="106dp">
+        android:paddingBottom="110dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -20,13 +20,20 @@
             android:orientation="vertical">
 
             <!-- Calendar View -->
-            <CalendarView
-                android:id="@+id/calendarView"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary_light"
-                android:theme="@style/CustomCalendarView"
-                android:layout_marginBottom="@dimen/dimen_8"/>
+                android:layout_marginHorizontal="@dimen/dimen_16"
+                android:layout_marginBottom="@dimen/dimen_8"
+                app:cardElevation="0dp">
+
+                <CalendarView
+                    android:id="@+id/calendarView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/CustomCalendarView"/>
+
+            </androidx.cardview.widget.CardView>
 
             <!-- Status Filter Chips -->
             <com.google.android.material.chip.ChipGroup
@@ -35,8 +42,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 app:singleSelection="true"
-                app:chipSpacingHorizontal="8dp"
-                app:chipSpacingVertical="-8dp"
+                app:chipSpacingHorizontal="10dp"
+                app:chipSpacingVertical="-4dp"
                 android:layout_marginHorizontal="@dimen/dimen_16">
 
                 <com.google.android.material.chip.Chip
@@ -50,8 +57,8 @@
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold"
                     android:minHeight="48dp"
-                    app:chipStrokeWidth="2dp"
-                    app:chipCornerRadius="24dp"
+                    app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="4dp"
                     app:chipStrokeColor="@color/black"
                     android:textColor="@color/black"/>
 
@@ -65,8 +72,8 @@
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold"
                     android:minHeight="48dp"
-                    app:chipStrokeWidth="2dp"
-                    app:chipCornerRadius="24dp"
+                    app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="4dp"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/warning_light"
                     app:chipStrokeColor="@color/warning_dark" />
@@ -81,8 +88,8 @@
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold"
                     android:minHeight="48dp"
-                    app:chipStrokeWidth="2dp"
-                    app:chipCornerRadius="24dp"
+                    app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="4dp"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/primary_light"
                     app:chipStrokeColor="@color/primary" />
@@ -97,8 +104,8 @@
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold"
                     android:minHeight="48dp"
-                    app:chipStrokeWidth="2dp"
-                    app:chipCornerRadius="24dp"
+                    app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="4dp"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/success_light"
                     app:chipStrokeColor="@color/success_dark" />
@@ -112,12 +119,11 @@
                     android:fontFamily="@font/montserrat_semi_bold"
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold"
-                    android:minHeight="48dp"
-                    app:chipStrokeWidth="2dp"
-                    app:chipCornerRadius="24dp"
+                    app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="4dp"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/error_light"
-                    app:chipStrokeColor="@color/error_dark" />
+                    app:chipStrokeColor="@color/error_dark"/>
 
             </com.google.android.material.chip.ChipGroup>
 
@@ -202,8 +208,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="106dp"
+        android:layout_marginBottom="110dp"
+        android:layout_marginEnd="@dimen/dimen_16"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/primary"
         app:tint="@color/white"

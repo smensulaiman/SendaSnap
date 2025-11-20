@@ -51,6 +51,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Task Info"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textColor="@color/text_black"
+                    android:textStyle="bold"/>
+
                 <!-- Enhanced Task Title -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -87,7 +95,6 @@
                     app:hintTextColor="@color/text_secondary"
                     app:startIconTint="@color/primary"
                     app:startIconContentDescription="Task description"
-                    app:helperText="Provide additional details about the task (optional)"
                     app:helperTextTextColor="@color/text_secondary"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -114,12 +121,20 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/dimen_16">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date and Time"
+                        android:fontFamily="@font/montserrat_semi_bold"
+                        android:textColor="@color/text_black"
+                        android:textStyle="bold"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_8"
                         android:hint="Select Date"
                         app:boxStrokeColor="@color/primary"
                         app:boxStrokeWidthFocused="2dp"
@@ -174,28 +189,20 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="@dimen/dimen_16"
-                android:background="@color/black" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginTop="@dimen/dimen_16">
 
-                <!-- Enhanced Assignee Selection -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="28dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
                         android:text="Task Assignees"
                         android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"
@@ -211,7 +218,6 @@
                         app:endIconMode="dropdown_menu"
                         app:endIconTint="@color/primary"
                         app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@drawable/ic_user_24"
                         app:startIconTint="@color/black"
                         app:startIconContentDescription="Select assignees"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
@@ -247,14 +253,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/badge_12"
+                    android:background="@drawable/badge_4"
+                    android:layout_marginTop="@dimen/dimen_8"
                     android:padding="@dimen/dimen_12"
                     android:backgroundTint="@color/primary_light">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
                         android:text="Task Status"
                         android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"/>
@@ -332,16 +338,15 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_8"
+                    android:layout_marginTop="@dimen/dimen_16"
                     android:orientation="vertical"
-                    android:background="@drawable/badge_12"
+                    android:background="@drawable/badge_4"
                     android:padding="@dimen/dimen_12"
                     android:backgroundTint="@color/success_light">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
                         android:text="Task Priority"
                         android:fontFamily="@font/montserrat_semi_bold"
                         android:textColor="@color/text_black"/>
@@ -408,9 +413,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@drawable/badge_12"
+                android:background="@drawable/badge_4"
                 android:padding="16dp"
-                android:layout_marginTop="@dimen/dimen_8"
+                android:layout_marginTop="@dimen/dimen_16"
                 android:backgroundTint="@color/warning_light">
 
                 <!-- Section Header -->

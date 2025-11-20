@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="140dp"
@@ -9,27 +8,25 @@
     android:clickable="true"
     android:focusable="true"
     app:cardBackgroundColor="@color/background_blur"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="0dp"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Status Indicator Bar -->
         <View
             android:id="@+id/statusIndicator"
             android:layout_width="4dp"
             android:layout_height="0dp"
+            android:layout_marginVertical="@dimen/dimen_16"
+            android:layout_marginStart="@dimen/dimen_16"
             android:background="@color/primary"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="@dimen/dimen_16"
-            android:layout_marginVertical="@dimen/dimen_16"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Task Title -->
         <TextView
             android:id="@+id/textTaskTitle"
             android:layout_width="0dp"
@@ -38,17 +35,16 @@
             android:ellipsize="end"
             android:fontFamily="@font/montserrat_medium"
             android:maxLines="2"
+            android:paddingEnd="@dimen/dimen_8"
             android:text="Task Title"
             android:textColor="@color/text_black"
             android:textSize="@dimen/text_size_small"
             android:textStyle="bold"
-            android:paddingEnd="@dimen/dimen_8"
             app:layout_constraintEnd_toStartOf="@+id/layoutStatusBadge"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toEndOf="@id/statusIndicator"
             app:layout_constraintTop_toTopOf="@+id/statusIndicator" />
 
-        <!-- Task Description -->
         <TextView
             android:id="@+id/textTaskDescription"
             android:layout_width="0dp"
@@ -65,7 +61,6 @@
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle"
             app:layout_constraintTop_toBottomOf="@id/textTaskTitle" />
 
-        <!-- Time and Assignees Row -->
         <LinearLayout
             android:id="@+id/layoutTimeRow"
             android:layout_width="wrap_content"
@@ -79,20 +74,18 @@
                 android:id="@+id/textTaskTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="9:00 AM"
                 android:fontFamily="@font/montserrat_regular"
+                android:text="9:00 AM"
                 android:textColor="@color/text_secondary" />
 
-            <!-- Overlapping Assignee Avatars Container -->
             <LinearLayout
                 android:id="@+id/layoutAssigneeAvatars"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
 
-            <!-- File Attachment Icon -->
             <ImageView
                 android:id="@+id/imgAttachment"
                 android:layout_width="16dp"
@@ -104,7 +97,6 @@
 
         </LinearLayout>
 
-        <!-- Created By Row -->
         <LinearLayout
             android:id="@+id/layoutCreatedBy"
             android:layout_width="wrap_content"
@@ -118,18 +110,18 @@
                 android:id="@+id/textCreatedByLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Created by"
+                android:layout_marginEnd="4dp"
                 android:fontFamily="@font/montserrat_regular"
-                android:textSize="@dimen/text_size_xsmall"
+                android:text="Created by"
                 android:textColor="@color/text_secondary"
-                android:layout_marginEnd="4dp" />
+                android:textSize="@dimen/text_size_xsmall" />
 
             <ImageView
                 android:id="@+id/imgCreatorAvatar"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_marginEnd="4dp"
-                android:scaleType="centerCrop"/>
+                android:scaleType="centerCrop" />
 
             <TextView
                 android:id="@+id/textCreatorName"
@@ -141,60 +133,57 @@
 
         </LinearLayout>
 
-        <!-- Status Chip with Badge Container -->
         <FrameLayout
             android:id="@+id/layoutStatusBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dimen_8"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="@dimen/dimen_8">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTaskStatus"
-                style="@style/Widget.Material3.Chip.Filter"
+                style="@style/Widget.Material3.Chip.Assist"
                 android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:minHeight="43dp"
-                android:layout_marginEnd="@dimen/dimen_4"
-                android:text="Pending"
+                android:layout_height="38dp"
                 android:fontFamily="@font/montserrat_semi_bold"
+                android:text="Pending"
+                android:textAllCaps="true"
                 android:textColor="@color/black"
                 android:textSize="@dimen/text_size_xsmall"
                 app:chipBackgroundColor="@color/white"
-                app:chipCornerRadius="8dp"
+                app:chipCornerRadius="4dp"
                 app:chipStrokeColor="@color/warning_dark"
-                app:chipStrokeWidth="1dp" />
+                app:chipStrokeWidth="1dp"
+                android:padding="2dp" />
 
-            <!-- Unread Message Badge -->
             <TextView
                 android:id="@+id/badgeUnreadCount"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/badge_background"
+                android:gravity="center"
                 android:text="4"
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_size_xxsmall"
                 android:textStyle="bold"
-                android:gravity="center"
-                android:background="@drawable/badge_background"
-                android:visibility="gone"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="2dp"
-                android:layout_marginEnd="2dp"/>
+                android:visibility="gone" />
 
         </FrameLayout>
 
-        <!-- Chevron -->
         <ImageView
             android:id="@+id/imgRightArrow"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:layout_marginEnd="@dimen/dimen_16"
             android:src="@drawable/ic_chevron_right"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/black"
-            android:layout_marginEnd="@dimen/dimen_16"/>
+            app:tint="@color/black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

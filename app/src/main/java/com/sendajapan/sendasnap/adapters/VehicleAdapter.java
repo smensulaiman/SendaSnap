@@ -65,6 +65,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         private TextView txtChassisNumber;
         private TextView txtVehicleId;
         private TextView txtBuyingPrice;
+        private TextView txtPhotoCount;
 
         public VehicleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -75,6 +76,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtChassisNumber = itemView.findViewById(R.id.txtChassisNumber);
             txtVehicleId = itemView.findViewById(R.id.txtVehicleId);
             txtBuyingPrice = itemView.findViewById(R.id.txtBuyingPrice);
+            txtPhotoCount = itemView.findViewById(R.id.txtPhotoCount);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -95,6 +97,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
             txtVehicleId.setText(vehicle.getId());
 
             txtBuyingPrice.setText("￥" + CurrencyFormatter.formatBuyingPrice(vehicle.getBuyingPrice()));
+            txtPhotoCount.setText(vehicle.getVehiclePhotos().size() +" Photo(s)");
         }
 
         private void loadVehicleImage(Vehicle vehicle) {

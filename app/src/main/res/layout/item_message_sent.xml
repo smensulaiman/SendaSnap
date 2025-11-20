@@ -5,10 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="@dimen/dimen_16"
     android:paddingTop="@dimen/dimen_8"
-    android:paddingEnd="@dimen/dimen_16"
-    android:paddingBottom="@dimen/dimen_8">
+    android:paddingEnd="@dimen/dimen_8">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSentMessage"
