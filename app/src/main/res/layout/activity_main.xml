@@ -29,32 +29,25 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Toolbar with smooth shadow and border -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/toolbarCard"
-            android:layout_width="0dp"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardPreventCornerOverlap="true"
-            app:cardCornerRadius="@dimen/dimen_0"
-            app:cardElevation="@dimen/dimen_16"
-            android:elevation="@dimen/dimen_16"
-            app:strokeColor="@color/primary"
-            app:cardBackgroundColor="@color/primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:background="@android:color/transparent"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:elevation="0dp"
-                app:title="SendaSnap"
-                app:titleTextAppearance="@style/TextAppearance.Montserrat.TitleLarge"
-                app:titleTextColor="@color/white"
-                app:navigationIconTint="@color/white"
-                app:menu="@menu/toolbar_menu" />
+                android:background="@android:color/transparent"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="@color/text_primary"
+                app:title="Home"
+                app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title"
+                app:titleTextColor="@color/text_primary" />
 
-        </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <!-- Fragment Container -->
         <androidx.fragment.app.FragmentContainerView
@@ -62,10 +55,10 @@
             android:name="com.sendajapan.sendasnap.fragments.HomeFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/toolbarCard"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/appBarLayout"/>
 
         <!-- Smooth Bottom Navigation -->
         <me.ibrahimsn.lib.SmoothBottomBar

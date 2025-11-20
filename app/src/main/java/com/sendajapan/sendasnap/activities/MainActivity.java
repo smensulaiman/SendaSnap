@@ -18,24 +18,25 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.databinding.ActivityMainBinding;
 import com.sendajapan.sendasnap.fragments.HomeFragment;
 import com.sendajapan.sendasnap.fragments.ProfileFragment;
 import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private NetworkUtils networkUtils;
     private HapticFeedbackHelper hapticHelper;
-    public DrawerController drawerController;
+    private NetworkUtils networkUtils;
+
     private boolean isNetworkToastShowing = false;
 
     @Override
@@ -46,23 +47,13 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            getWindow().setBackgroundBlurRadius(30);
-        }
-
         ViewCompat.setOnApplyWindowInsetsListener(binding.navigationView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, 0);
             return insets;
         });
 
-        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(false);
-        }
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         setupDrawer();
@@ -75,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             loadFragment(new HomeFragment());
         }
     }
-    
+
     private void setupToolbarMenu() {
         binding.toolbar.setOnMenuItemClickListener(item -> {
             hapticHelper.vibrateClick();
@@ -97,23 +88,20 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
     }
-    
+
     private void openNotifications() {
         Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
-    
+
     private void openSettings() {
-        // TODO: Implement settings activity
         Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
-    
+
     private void openHelp() {
-        // TODO: Implement help activity
         Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
-    
+
     private void openAbout() {
-        // TODO: Implement about dialog
         Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
 
@@ -124,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDrawer() {
         setSupportActionBar(binding.toolbar);
-        drawerController = new DrawerController(this,
+        new DrawerController(this,
                 binding.drawerLayout,
                 binding.navigationView,
                 binding.toolbar);
@@ -201,8 +189,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupBackPressHandler() {
-        // Handle back button press to show exit confirmation
-        // This works for all fragments in MainActivity
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -214,31 +200,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void showExitConfirmationDialog() {
         hapticHelper.vibrateClick();
-        
+
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Exit App?");
         builder.setMessage("Are you sure you want to exit SendaSnap?");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
-        
-        // Colorful exit button
+
         builder.setPositiveButton("Exit", (dialog, which) -> {
             hapticHelper.vibrateClick();
             finishAffinity();
         });
-        
-        // Cancel button
+
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             hapticHelper.vibrateClick();
             dialog.dismiss();
         });
-        
+
         AlertDialog dialog = builder.create();
         dialog.show();
-        
-        // Style the buttons with colors - Make the exit button colorful
+
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         if (positiveButton != null) {
-            // Use MaterialButton backgroundTint if it's a MaterialButton
             if (positiveButton instanceof MaterialButton) {
                 ((MaterialButton) positiveButton).setBackgroundTintList(
                     android.content.res.ColorStateList.valueOf(
@@ -251,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
             positiveButton.setAllCaps(false);
         }
-        
+
         Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
         if (negativeButton != null) {
             negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));

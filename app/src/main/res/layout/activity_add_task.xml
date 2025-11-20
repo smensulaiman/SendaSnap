@@ -360,10 +360,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Low"
-                            android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_bold"
                             android:textColor="@color/black"
-                            app:chipBackgroundColor="@color/warning_medium"
+                            app:chipBackgroundColor="@color/warning"
                             app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp"/>
@@ -375,10 +375,10 @@
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="Normal"
-                            android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_bold"
                             android:textColor="@color/black"
-                            app:chipBackgroundColor="@color/success_medium"
+                            app:chipBackgroundColor="@color/success"
                             app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp" />
@@ -389,10 +389,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="High"
-                            android:textSize="@dimen/text_size_small"
-                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:textSize="@dimen/text_size_medium"
+                            android:fontFamily="@font/montserrat_bold"
                             android:textColor="@color/black"
-                            app:chipBackgroundColor="@color/error_medium"
+                            app:chipBackgroundColor="@color/error"
                             app:chipStrokeColor="@color/black"
                             app:chipCornerRadius="24dp"
                             app:chipStrokeWidth="2dp" />
@@ -410,7 +410,7 @@
                 android:orientation="vertical"
                 android:background="@drawable/badge_12"
                 android:padding="16dp"
-                android:layout_marginTop="@dimen/dimen_16"
+                android:layout_marginTop="@dimen/dimen_8"
                 android:backgroundTint="@color/warning_light">
 
                 <!-- Section Header -->

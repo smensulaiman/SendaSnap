@@ -7,18 +7,17 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.MessageAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityChatBinding;
@@ -26,33 +25,36 @@ import com.sendajapan.sendasnap.databinding.BottomSheetImagePickerBinding;
 import com.sendajapan.sendasnap.models.Message;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.services.FirebaseStorageService;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.FirebaseUtils;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
-import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+
 import java.io.File;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
     private ActivityChatBinding binding;
-    private MessageAdapter messageAdapter;
     private ChatService chatService;
     private FirebaseStorageService storageService;
     private HapticFeedbackHelper hapticHelper;
-    
+    private MessageAdapter messageAdapter;
+
     private String chatId;
+    private String currentUserId;
+    private String otherUserEmail;
     private String otherUserId;
     private String otherUserName;
-    private String otherUserEmail;
-    private String currentUserId;
-    private boolean isGroupChat = false;
     private String taskId;
     private String taskTitle;
-    
-    private ActivityResultLauncher<Uri> cameraLauncher;
-    private ActivityResultLauncher<String> galleryLauncher;
+
+    private boolean isGroupChat = false;
+
     private ActivityResultLauncher<String> filePickerLauncher;
+    private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<String[]> permissionLauncher;
+    private ActivityResultLauncher<Uri> cameraLauncher;
+
     private Uri cameraImageUri;
     private String cameraImagePath;
 
@@ -63,15 +65,7 @@ public class ChatActivity extends AppCompatActivity {
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Set status bar and navigation bar colors
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         getIntentData();
@@ -90,16 +84,12 @@ public class ChatActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
     }
-    
-    /**
-     * Initialize current user's data in Firebase when they visit the chat activity
-     */
+
     private void initializeCurrentUser() {
         try {
             chatService.initializeUser(this);
         } catch (Exception e) {
             android.util.Log.e("ChatActivity", "Failed to initialize user in Firebase", e);
-            // Continue anyway - user initialization is not critical
         }
     }
 
@@ -119,7 +109,7 @@ public class ChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        
+
         if (isGroupChat && taskTitle != null) {
             binding.toolbar.setTitle(taskTitle);
         } else {
@@ -134,19 +124,18 @@ public class ChatActivity extends AppCompatActivity {
                 titleView.setSingleLine(false);
             }
         });
-        
+
         binding.toolbar.setNavigationOnClickListener(v -> {
             hapticHelper.vibrateClick();
             finish();
         });
     }
-    
+
     private android.widget.TextView findTitleTextView(android.view.ViewGroup parent) {
         for (int i = 0; i < parent.getChildCount(); i++) {
             android.view.View child = parent.getChildAt(i);
             if (child instanceof android.widget.TextView) {
                 android.widget.TextView textView = (android.widget.TextView) child;
-                // Check if this TextView matches the toolbar title
                 String toolbarTitle = binding.toolbar.getTitle() != null ? binding.toolbar.getTitle().toString() : "";
                 String textViewText = textView.getText() != null ? textView.getText().toString() : "";
                 if (textViewText.equals(toolbarTitle) && textView.getVisibility() == android.view.View.VISIBLE) {
@@ -165,14 +154,12 @@ public class ChatActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         messageAdapter = new MessageAdapter(currentUserId, isGroupChat);
         messageAdapter.setOnImageClickListener(imageUrl -> {
-            // Open full-screen image viewer (can be implemented later)
             Toast.makeText(this, "Image viewer coming soon", Toast.LENGTH_SHORT).show();
         });
         messageAdapter.setOnFileClickListener((fileUrl, fileName) -> {
-            // Download/open file (can be implemented later)
             Toast.makeText(this, "File download coming soon", Toast.LENGTH_SHORT).show();
         });
-        
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         binding.recyclerViewMessages.setLayoutManager(layoutManager);
@@ -184,13 +171,12 @@ public class ChatActivity extends AppCompatActivity {
             hapticHelper.vibrateClick();
             sendTextMessage();
         });
-        
+
         binding.btnAttachment.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
             showAttachmentBottomSheet();
         });
-        
-        // Send on Enter key
+
         binding.etMessage.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND) {
                 sendTextMessage();
@@ -198,8 +184,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             return false;
         });
-        
-        // Scroll to bottom when EditText gets focus
+
         binding.etMessage.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 binding.recyclerViewMessages.postDelayed(() -> scrollToBottom(), 100);
@@ -215,7 +200,7 @@ public class ChatActivity extends AppCompatActivity {
                         uploadImage(cameraImageUri);
                     }
                 });
-        
+
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -223,7 +208,7 @@ public class ChatActivity extends AppCompatActivity {
                         uploadImage(uri);
                     }
                 });
-        
+
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -231,7 +216,7 @@ public class ChatActivity extends AppCompatActivity {
                         uploadFile(uri);
                     }
                 });
-        
+
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 permissions -> {
@@ -242,33 +227,29 @@ public class ChatActivity extends AppCompatActivity {
                             break;
                         }
                     }
-                    if (allGranted) {
-                        // Retry action after permission granted
-                    }
                 });
     }
 
     private void sendTextMessage() {
-        String messageText = binding.etMessage.getText() != null ? 
+        String messageText = binding.etMessage.getText() != null ?
                 binding.etMessage.getText().toString().trim() : "";
-        
+
         if (TextUtils.isEmpty(messageText)) {
             return;
         }
-        
+
         binding.etMessage.setText("");
-        
+
         if (isGroupChat) {
             chatService.sendGroupMessage(chatId, messageText, new ChatService.MessageCallback() {
                 @Override
                 public void onSuccess(Message message) {
-                    // Message will be added via real-time listener
                     scrollToBottom();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                    CookieBarToastHelper.showError(ChatActivity.this, "Error",
                             "Failed to send message", CookieBarToastHelper.LONG_DURATION);
                 }
             });
@@ -276,13 +257,12 @@ public class ChatActivity extends AppCompatActivity {
             chatService.sendMessage(chatId, otherUserId, messageText, new ChatService.MessageCallback() {
                 @Override
                 public void onSuccess(Message message) {
-                    // Message will be added via real-time listener
                     scrollToBottom();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                    CookieBarToastHelper.showError(ChatActivity.this, "Error",
                             "Failed to send message", CookieBarToastHelper.LONG_DURATION);
                 }
             });
@@ -291,35 +271,35 @@ public class ChatActivity extends AppCompatActivity {
 
     private void showAttachmentBottomSheet() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
-        BottomSheetImagePickerBinding bottomSheetBinding = 
+        BottomSheetImagePickerBinding bottomSheetBinding =
                 BottomSheetImagePickerBinding.inflate(getLayoutInflater());
-        
+
         bottomSheetBinding.layoutCamera.setOnClickListener(v -> {
             bottomSheet.dismiss();
             openCamera();
         });
-        
+
         bottomSheetBinding.layoutGallery.setOnClickListener(v -> {
             bottomSheet.dismiss();
             openGallery();
         });
-        
+
         bottomSheetBinding.layoutFile.setOnClickListener(v -> {
             bottomSheet.dismiss();
             openFilePicker();
         });
-        
+
         bottomSheet.setContentView(bottomSheetBinding.getRoot());
         bottomSheet.show();
     }
 
     private void openCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(new String[]{Manifest.permission.CAMERA});
             return;
         }
-        
+
         try {
             File photoFile = new File(getExternalFilesDir(null), "chat_image_" + System.currentTimeMillis() + ".jpg");
             cameraImagePath = photoFile.getAbsolutePath();
@@ -332,12 +312,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void openGallery() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_IMAGES});
             return;
         }
-        
+
         galleryLauncher.launch("image/*");
     }
 
@@ -346,13 +326,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void uploadImage(Uri imageUri) {
-        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading image...", 
+        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading image...",
                 CookieBarToastHelper.SHORT_DURATION);
-        
+
         storageService.uploadImage(imageUri, chatId, new FirebaseStorageService.StorageCallback() {
             @Override
             public void onSuccess(String downloadUrl) {
-                chatService.sendImageMessage(chatId, otherUserId, downloadUrl, 
+                chatService.sendImageMessage(chatId, otherUserId, downloadUrl,
                         new ChatService.MessageCallback() {
                             @Override
                             public void onSuccess(Message message) {
@@ -361,7 +341,7 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Exception e) {
-                                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                                CookieBarToastHelper.showError(ChatActivity.this, "Error",
                                         "Failed to send image", CookieBarToastHelper.LONG_DURATION);
                             }
                         });
@@ -369,7 +349,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception exception) {
-                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                CookieBarToastHelper.showError(ChatActivity.this, "Error",
                         "Failed to upload image", CookieBarToastHelper.LONG_DURATION);
             }
         });
@@ -377,9 +357,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private void uploadFile(Uri fileUri) {
         String fileName = getFileName(fileUri);
-        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading file...", 
+        CookieBarToastHelper.showInfo(this, "Uploading", "Uploading file...",
                 CookieBarToastHelper.SHORT_DURATION);
-        
+
         storageService.uploadFile(fileUri, chatId, fileName, new FirebaseStorageService.StorageCallback() {
             @Override
             public void onSuccess(String downloadUrl) {
@@ -392,7 +372,7 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Exception e) {
-                                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                                CookieBarToastHelper.showError(ChatActivity.this, "Error",
                                         "Failed to send file", CookieBarToastHelper.LONG_DURATION);
                             }
                         });
@@ -400,7 +380,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception exception) {
-                CookieBarToastHelper.showError(ChatActivity.this, "Error", 
+                CookieBarToastHelper.showError(ChatActivity.this, "Error",
                         "Failed to upload file", CookieBarToastHelper.LONG_DURATION);
             }
         });
@@ -434,11 +414,10 @@ public class ChatActivity extends AppCompatActivity {
         chatService.getChatMessages(chatId, new ChatService.MessagesCallback() {
             @Override
             public void onSuccess(List<Message> messages) {
-                // Check if activity is still valid before updating UI
                 if (isFinishing() || binding == null || messageAdapter == null) {
                     return;
                 }
-                
+
                 try {
                     messageAdapter.updateMessages(messages);
                     scrollToBottom();
@@ -449,7 +428,6 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception e) {
-                // Handle error silently if activity is destroyed
                 if (!isFinishing() && binding != null) {
                     android.util.Log.e("ChatActivity", "Failed to load messages", e);
                 }
@@ -466,12 +444,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void scrollToBottom() {
-        // Check if activity is still valid and binding is initialized
         if (isFinishing() || binding == null) {
             return;
         }
-        
-        // Check isDestroyed() safely (available from API 17+)
+
         try {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 if (isDestroyed()) {
@@ -479,25 +455,22 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            // Ignore - isDestroyed() might not be available
         }
-        
+
         if (binding.recyclerViewMessages == null) {
             return;
         }
-        
+
         if (messageAdapter == null) {
             return;
         }
-        
+
         try {
             binding.recyclerViewMessages.post(() -> {
-                // Double-check after posting to UI thread
                 if (isFinishing() || binding == null || binding.recyclerViewMessages == null) {
                     return;
                 }
-                
-                // Check isDestroyed() safely
+
                 try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         if (isDestroyed()) {
@@ -505,9 +478,8 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     }
                 } catch (Exception e) {
-                    // Ignore
                 }
-                
+
                 if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
                     try {
                         binding.recyclerViewMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
@@ -534,4 +506,3 @@ public class ChatActivity extends AppCompatActivity {
         binding = null;
     }
 }
-

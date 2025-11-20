@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,14 +16,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.widget.LinearLayout;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
+import com.sendajapan.sendasnap.dialogs.LoadingDialog;
+import com.sendajapan.sendasnap.dialogs.VehicleSearchDialog;
 import com.sendajapan.sendasnap.models.ErrorResponse;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.models.VehicleSearchResponse;
@@ -33,8 +34,6 @@ import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
-import com.sendajapan.sendasnap.dialogs.LoadingDialog;
-import com.sendajapan.sendasnap.dialogs.VehicleSearchDialog;
 
 import java.util.List;
 
@@ -45,12 +44,12 @@ import retrofit2.Response;
 public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleClickListener {
 
     private FragmentHomeBinding binding;
+    private ApiService apiService;
+    private HapticFeedbackHelper hapticHelper;
+    private LoadingDialog loadingDialog;
+    private NetworkUtils networkUtils;
     private VehicleAdapter vehicleAdapter;
     private VehicleCache vehicleCache;
-    private HapticFeedbackHelper hapticHelper;
-    private ApiService apiService;
-    private NetworkUtils networkUtils;
-    private LoadingDialog loadingDialog;
 
     @Nullable
     @Override
@@ -66,8 +65,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         super.onViewCreated(view, savedInstanceState);
 
         initHelpers();
-
-        binding.txtWelcome.setText("Welcome, " + SharedPrefsManager.getInstance(getContext()).getUsername() + " san!");
 
         setupRecyclerView();
         setupClickListeners();
@@ -91,7 +88,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void setupClickListeners() {
         binding.btnViewAll.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-
         });
 
         binding.btnQuickSearch.setOnClickListener(v -> {
@@ -101,10 +97,8 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
 
         binding.btnViewStats.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            // TODO: Navigate to stats/analytics screen
             Toast.makeText(getContext(), "Stats feature coming soon!", Toast.LENGTH_SHORT).show();
         });
-
     }
 
     private void setupFAB() {
@@ -180,7 +174,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                                         "Vehicle details loaded successfully!",
                                         CookieBarToastHelper.LONG_DURATION);
                             } else {
-                                // Multiple vehicles - show results dialog
                                 showSearchResultsDialog(vehicles);
                             }
                         } else {
@@ -199,14 +192,13 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                     if (response.errorBody() != null) {
                         try {
                             String errorBodyStr = response.errorBody().string();
-                            Gson gson = new com.google.gson.Gson();
+                            Gson gson = new Gson();
                             ErrorResponse errorResponse = gson.fromJson(errorBodyStr,
-                                    com.sendajapan.sendasnap.models.ErrorResponse.class);
+                                    ErrorResponse.class);
                             if (errorResponse != null && errorResponse.getMessage() != null) {
                                 errorMessage = errorResponse.getMessage();
                             }
                         } catch (Exception e) {
-                            // Optionally log or handle parsing exception
                         }
                     }
                     CookieBarToastHelper.showError(requireContext(), "Error",
@@ -227,7 +219,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void showSearchResultsDialog(List<Vehicle> vehicles) {
-
         Dialog resultsDialog = new Dialog(requireContext());
         resultsDialog.setContentView(R.layout.dialog_vehicle_search_results);
         if (resultsDialog.getWindow() != null) {
@@ -235,21 +226,16 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                     ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        // Get views
         RecyclerView recyclerViewResults = resultsDialog.findViewById(R.id.recyclerViewResults);
         LinearLayout emptyState = resultsDialog.findViewById(R.id.layoutEmptyState);
         MaterialButton btnClose = resultsDialog.findViewById(R.id.btnClose);
 
-        // Setup RecyclerView
         VehicleAdapter resultsAdapter = new VehicleAdapter(vehicle -> {
             hapticHelper.vibrateClick();
             resultsDialog.dismiss();
 
-            // Add to cache
             vehicleCache.addVehicle(vehicle);
 
-            // Get the latest vehicle from cache to ensure we have the most up-to-date data
-            // This is important in case the vehicle was updated in VehicleDetailsActivity
             if (vehicle != null && vehicle.getId() != null) {
                 Vehicle latestVehicle = vehicleCache.getVehicleById(vehicle.getId());
                 if (latestVehicle != null) {
@@ -257,7 +243,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                 }
             }
 
-            // Navigate to detail page
             Intent intent = new Intent(requireContext(), VehicleDetailsActivity.class);
             intent.putExtra("vehicle", vehicle);
             startActivity(intent);
@@ -267,7 +252,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         recyclerViewResults.setAdapter(resultsAdapter);
         resultsAdapter.updateVehicles(vehicles);
 
-        // Show empty state if no vehicles
         if (vehicles.isEmpty()) {
             recyclerViewResults.setVisibility(View.GONE);
             emptyState.setVisibility(View.VISIBLE);
@@ -327,9 +311,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     public void onVehicleClick(Vehicle vehicle) {
         hapticHelper.vibrateClick();
 
-        // Get the latest vehicle from SharedPrefsManager to ensure we have the most up-to-date data
-        // This is important because the vehicle object from the adapter might be stale
-        // if images were uploaded in VehicleDetailsActivity
         if (vehicle != null && vehicle.getId() != null) {
             Vehicle latestVehicle = vehicleCache.getVehicleById(vehicle.getId());
             if (latestVehicle != null) {
@@ -345,8 +326,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh vehicle list when returning from VehicleDetailsActivity
-        // This ensures we show the latest images after uploads
         if (isAdded() && binding != null) {
             loadRecentVehicles();
         }

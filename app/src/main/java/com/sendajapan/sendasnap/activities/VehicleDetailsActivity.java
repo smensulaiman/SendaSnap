@@ -16,25 +16,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.PendingImageAdapter;
 import com.sendajapan.sendasnap.adapters.VehicleImageGridAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityVehicleDetailsBinding;
+import com.sendajapan.sendasnap.dialogs.LoadingDialog;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
-import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.services.VehicleImageUploadService;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
-import com.sendajapan.sendasnap.dialogs.LoadingDialog;
-import com.sendajapan.sendasnap.services.VehicleImageUploadService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,23 +46,22 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private ActivityVehicleDetailsBinding binding;
 
     private ApiService apiService;
+    private HapticFeedbackHelper hapticHelper;
+    private LoadingDialog loadingDialog;
+    private SharedPrefsManager prefsManager;
+    private VehicleCache vehicleCache;
+    private VehicleImageUploadService imageUploadService;
 
     private ActivityResultLauncher<Uri> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
 
-    private VehicleImageGridAdapter vehicleImageAdapter;
     private PendingImageAdapter pendingImageAdapter;
-    private HapticFeedbackHelper hapticHelper;
-    private final List<String> pendingImagePaths = new ArrayList<>();
+    private VehicleImageGridAdapter vehicleImageAdapter;
 
     private Vehicle vehicle;
     private Uri cameraImageUri;
     private String cameraImagePath;
-
-    private LoadingDialog loadingDialog;
-    private VehicleImageUploadService imageUploadService;
-    private SharedPrefsManager prefsManager;
-    private VehicleCache vehicleCache;
+    private final List<String> pendingImagePaths = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,15 +71,7 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         binding = ActivityVehicleDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Set status bar and navigation bar colors
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         getVehicleData();
@@ -140,19 +129,16 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         if (vehicle == null)
             return;
 
-        // Basic Information
         binding.txtMake.setText(vehicle.getMake() != null ? vehicle.getMake() : "N/A");
         binding.txtModel.setText(vehicle.getModel() != null ? vehicle.getModel() : "N/A");
         binding.txtYear.setText(vehicle.getYear() != null ? vehicle.getYear() : "N/A");
         binding.txtColor.setText(vehicle.getColor() != null ? vehicle.getColor() : "N/A");
         binding.txtChassis.setText(vehicle.getSerialNumber() != null ? vehicle.getSerialNumber() : "N/A");
 
-        // Purchase Information
         binding.txtBuyDate.setText(vehicle.getVehicleBuyDate() != null ? vehicle.getVehicleBuyDate() : "N/A");
         binding.txtPrice.setText(vehicle.getBuyingPrice() != null ? "￥" + vehicle.getBuyingPrice() : "N/A");
         binding.txtAuctionShip.setText(vehicle.getAuctionShipNumber() != null ? vehicle.getAuctionShipNumber() : "N/A");
 
-        // Shipping Information
         binding.txtExpectedYardDate
                 .setText(vehicle.getExpectedYardDate() != null ? vehicle.getExpectedYardDate() : "N/A");
         binding.txtRiksoFrom.setText(vehicle.getRiksoFrom() != null ? vehicle.getRiksoFrom() : "N/A");
@@ -161,7 +147,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     }
 
     private void setupImageGrids() {
-        // Setup vehicle images grid
         List<String> vehiclePhotos = vehicle.getVehiclePhotos();
         if (vehiclePhotos == null) {
             vehiclePhotos = new ArrayList<>();
@@ -172,13 +157,11 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         binding.recyclerViewVehicleImages.setLayoutManager(vehicleGridLayoutManager);
         binding.recyclerViewVehicleImages.setAdapter(vehicleImageAdapter);
 
-        // Setup pending images grid
         pendingImageAdapter = new PendingImageAdapter(pendingImagePaths);
         GridLayoutManager pendingGridLayoutManager = new GridLayoutManager(this, 3);
         binding.recyclerViewPendingImages.setLayoutManager(pendingGridLayoutManager);
         binding.recyclerViewPendingImages.setAdapter(pendingImageAdapter);
 
-        // Setup delete listener for pending images
         pendingImageAdapter.setOnDeleteClickListener(position -> {
             hapticHelper.vibrateClick();
             pendingImagePaths.remove(position);
@@ -188,12 +171,10 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     }
 
     private void setupImagePickers() {
-        // Camera launcher
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 result -> {
                     if (result && cameraImagePath != null) {
-                        // Use the stored file path directly
                         if (new File(cameraImagePath).exists()) {
                             pendingImagePaths.add(cameraImagePath);
                             pendingImageAdapter.notifyItemInserted(pendingImagePaths.size() - 1);
@@ -209,7 +190,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                     }
                 });
 
-        // Gallery launcher
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetMultipleContents(),
                 uris -> {
@@ -263,7 +243,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private void openCamera() {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // For Android 13+ (API 33+), we don't need storage permission for camera
             permissions = new String[] { Manifest.permission.CAMERA };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -275,7 +254,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            // For older versions, we need both camera and storage permissions
             permissions = new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE };
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                     ||
@@ -296,7 +274,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         try {
             cameraImageUri = createImageFile();
             if (cameraImageUri != null) {
-                // Test if camera app is available
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                     cameraLauncher.launch(cameraImageUri);
@@ -317,7 +294,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
     private void openGallery() {
         String[] permissions;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // For Android 13+ (API 33+), use READ_MEDIA_IMAGES
             permissions = new String[] { Manifest.permission.READ_MEDIA_IMAGES };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
@@ -329,7 +305,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            // For older versions, use READ_EXTERNAL_STORAGE
             permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -352,22 +327,18 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             String imageFileName = "JPEG_" + timeStamp + "_";
             File storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
 
-            // Create directory if it doesn't exist
             if (storageDir != null && !storageDir.exists()) {
                 storageDir.mkdirs();
             }
 
             File image = new File(storageDir, imageFileName + ".jpg");
 
-            // Create the file
             if (!image.exists()) {
                 image.createNewFile();
             }
 
-            // Store the file path for later use
             cameraImagePath = image.getAbsolutePath();
 
-            // Use FileProvider for better compatibility
             return FileProvider.getUriForFile(this,
                     getPackageName() + ".fileprovider", image);
         } catch (Exception e) {
@@ -382,7 +353,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             if (uri.getScheme().equals("file")) {
                 return uri.getPath();
             } else if (uri.getScheme().equals("content")) {
-                // For FileProvider URIs, we need to get the actual file path
                 String[] projection = { MediaStore.Images.Media.DATA };
                 android.database.Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
                 if (cursor != null) {
@@ -394,7 +364,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            // Fallback to URI path
             return uri.getPath();
         }
         return uri.getPath();
@@ -447,7 +416,6 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        // Get vehicle_id as integer
         int vehicleId;
         try {
             vehicleId = Integer.parseInt(vehicle.getId());
@@ -456,58 +424,41 @@ public class VehicleDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        // Show loading dialog
         if (!loadingDialog.isShowing()) {
             loadingDialog.show();
         }
 
-        // Upload images
         imageUploadService.uploadImages(vehicleId, new ArrayList<>(pendingImagePaths),
                 new VehicleImageUploadService.UploadCallback() {
                     @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void onSuccess(Vehicle updatedVehicle) {
                         runOnUiThread(() -> {
-                            // Dismiss loading dialog
                             if (loadingDialog.isShowing()) {
                                 loadingDialog.dismiss();
                             }
 
-                            // Update vehicle data if available
                             if (updatedVehicle != null) {
-                                // Ensure vehicle_id is set correctly (response has vehicle_id as integer)
-                                // The Vehicle model should handle this via @SerializedName, but ensure it's set
                                 if (updatedVehicle.getId() == null || updatedVehicle.getId().isEmpty()) {
                                     if (vehicle != null && vehicle.getId() != null) {
                                         updatedVehicle.setId(vehicle.getId());
                                     }
                                 }
 
-                                // Save the complete updated vehicle to SharedPreferences
-                                // This updates the cache with the latest vehicle data including new images
                                 prefsManager.addVehicleToCache(updatedVehicle);
-
-                                // Also update VehicleCache to ensure consistency
                                 vehicleCache.addVehicle(updatedVehicle);
-
-                                // Use the updated vehicle directly from the response
-                                // It already has the latest images from the server
                                 vehicle = updatedVehicle;
                             }
 
-                            // Clear pending images
                             pendingImagePaths.clear();
                             pendingImageAdapter.notifyDataSetChanged();
 
-                            // Refresh UI with updated vehicle data
                             populateVehicleData();
                             setupImageGrids();
 
-                            // Update UI
                             vehicleImageAdapter.notifyDataSetChanged();
                             updatePendingImagesVisibility();
 
-                            // Show success message
                             CookieBarToastHelper.showSuccess(VehicleDetailsActivity.this, "Success",
                                     "Images uploaded successfully",
                                     CookieBarToastHelper.SHORT_DURATION);
@@ -517,12 +468,10 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onError(String errorMessage, int errorCode) {
                         runOnUiThread(() -> {
-                            // Dismiss loading dialog
                             if (loadingDialog.isShowing()) {
                                 loadingDialog.dismiss();
                             }
 
-                            // Show error message
                             CookieBarToastHelper.showError(VehicleDetailsActivity.this, "Upload Failed",
                                     errorMessage,
                                     CookieBarToastHelper.LONG_DURATION);

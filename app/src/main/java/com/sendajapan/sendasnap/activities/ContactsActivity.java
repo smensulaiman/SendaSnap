@@ -5,27 +5,29 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.ContactAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityContactsBinding;
 import com.sendajapan.sendasnap.models.ChatUser;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContactsActivity extends AppCompatActivity {
 
     private ActivityContactsBinding binding;
-    private ContactAdapter contactAdapter;
     private ChatService chatService;
+    private ContactAdapter contactAdapter;
     private HapticFeedbackHelper hapticHelper;
+
     private List<ChatUser> allUsers;
     private List<ChatUser> filteredUsers;
 
@@ -36,15 +38,7 @@ public class ContactsActivity extends AppCompatActivity {
         binding = ActivityContactsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Set status bar and navigation bar colors
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         setupToolbar();
@@ -77,7 +71,7 @@ public class ContactsActivity extends AppCompatActivity {
             hapticHelper.vibrateClick();
             openChat(user);
         });
-        
+
         binding.recyclerViewContacts.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewContacts.setAdapter(contactAdapter);
     }
@@ -107,7 +101,7 @@ public class ContactsActivity extends AppCompatActivity {
                 allUsers.addAll(users);
                 filteredUsers.clear();
                 filteredUsers.addAll(users);
-                
+
                 if (filteredUsers.isEmpty()) {
                     showEmptyState();
                 } else {
@@ -125,7 +119,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     private void filterUsers(String query) {
         filteredUsers.clear();
-        
+
         if (query.isEmpty()) {
             filteredUsers.addAll(allUsers);
         } else {
@@ -137,13 +131,13 @@ public class ContactsActivity extends AppCompatActivity {
                 }
             }
         }
-        
+
         if (filteredUsers.isEmpty()) {
             showEmptyState();
         } else {
             hideEmptyState();
         }
-        
+
         contactAdapter.updateUsers(filteredUsers);
     }
 
@@ -176,9 +170,7 @@ public class ContactsActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Exception e) {
-                        // Handle error
                     }
                 });
     }
 }
-

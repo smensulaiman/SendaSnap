@@ -11,19 +11,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
 import com.sendajapan.sendasnap.activities.schedule.AddScheduleActivity;
 import com.sendajapan.sendasnap.activities.schedule.ScheduleDetailActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
-import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
-import androidx.lifecycle.ViewModelProvider;
 import com.sendajapan.sendasnap.data.dto.PagedResult;
-import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
+import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,17 +36,21 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private static final int ADD_TASK_REQUEST_CODE = 1001;
 
-    private final List<Task> allTasks = new ArrayList<>();
-    private final List<Task> filteredTasks = new ArrayList<>();
-
     private FragmentScheduleBinding binding;
-    private TaskAdapter taskAdapter;
     private SharedPrefsManager prefsManager;
+    private TaskAdapter taskAdapter;
     private TaskViewModel taskViewModel;
 
-    private String selectedDate;
     private Task.TaskStatus currentFilter = null;
+    private String selectedDate;
+
     private boolean isFirstLoad = true;
+    private boolean isPreventingDeselection = false;
+
+    private int lastCheckedChipId = -1;
+
+    private final List<Task> allTasks = new ArrayList<>();
+    private final List<Task> filteredTasks = new ArrayList<>();
 
     @Nullable
     @Override
@@ -62,7 +66,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
         taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(TaskViewModel.class);
-        
+
         setupRecyclerView();
         setupCalendar();
         setupFilterChips();
@@ -79,7 +83,6 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void setupCalendar() {
-
         binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(year, month, dayOfMonth);
@@ -94,11 +97,39 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void setupFilterChips() {
+        int initialCheckedId = binding.chipGroupStatus.getCheckedChipId();
+        if (initialCheckedId != View.NO_ID) {
+            lastCheckedChipId = initialCheckedId;
+        }
+
         binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (isPreventingDeselection) {
+                return;
+            }
+
             if (checkedIds.isEmpty()) {
+                if (lastCheckedChipId != -1) {
+                    isPreventingDeselection = true;
+                    Chip lastChip = group.findViewById(lastCheckedChipId);
+                    if (lastChip != null) {
+                        lastChip.post(() -> {
+                            lastChip.setChecked(true);
+                            isPreventingDeselection = false;
+                        });
+                    } else {
+                        isPreventingDeselection = false;
+                    }
+                    return;
+                }
                 currentFilter = null;
             } else {
-                Chip selectedChip = group.findViewById(checkedIds.get(0));
+                int newCheckedId = checkedIds.get(0);
+                if (newCheckedId == lastCheckedChipId) {
+                    return;
+                }
+                lastCheckedChipId = newCheckedId;
+
+                Chip selectedChip = group.findViewById(newCheckedId);
                 if (selectedChip != null) {
                     String chipText = selectedChip.getText().toString();
                     switch (chipText) {
@@ -113,6 +144,9 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
                             break;
                         case "Cancelled":
                             currentFilter = Task.TaskStatus.CANCELLED;
+                            break;
+                        case "All":
+                            currentFilter = null;
                             break;
                         default:
                             currentFilter = null;
@@ -129,14 +163,14 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     private void setupFAB() {
         UserData currentUser = prefsManager.getUser();
         boolean canCreateTask = false;
-        
+
         if (currentUser != null) {
             String role = currentUser.getRole();
             if (role != null && (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("manager"))) {
                 canCreateTask = true;
             }
         }
-        
+
         if (canCreateTask) {
             binding.fabAddTask.setVisibility(View.VISIBLE);
             binding.fabAddTask.setOnClickListener(v -> {
@@ -168,14 +202,12 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private void loadTasksFromApi() {
         if (selectedDate == null) {
-            // Set default to today if not set
             Calendar today = Calendar.getInstance();
             selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(today.getTime());
         }
 
         showShimmer();
 
-        // Use selectedDate as both from_date and to_date to get tasks for that specific date
         taskViewModel.listTasks(selectedDate, selectedDate, new TaskViewModel.TaskCallback<PagedResult<Task>>() {
             @Override
             public void onSuccess(PagedResult<Task> result) {
@@ -201,14 +233,12 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
                 hideShimmer();
                 allTasks.clear();
                 filterTasks();
-                
-                // Show error message with user-friendly text
+
                 String errorMessage = getErrorMessage(message, errorCode);
                 Toast.makeText(requireContext(), "Failed to load tasks: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 
     private String getErrorMessage(String message, int errorCode) {
         switch (errorCode) {
@@ -224,7 +254,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
                 return message != null ? message : "An error occurred. Please try again.";
         }
     }
-    
+
     private void showShimmer() {
         if (binding == null) return;
         binding.shimmerTasks.setVisibility(View.VISIBLE);
@@ -232,7 +262,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         binding.recyclerViewTasks.setVisibility(View.GONE);
         binding.layoutEmptyState.setVisibility(View.INVISIBLE);
     }
-    
+
     private void hideShimmer() {
         if (binding == null) return;
         binding.shimmerTasks.stopShimmer();
@@ -258,25 +288,19 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         updateEmptyState();
     }
 
-    /**
-     * Extract date in YYYY-MM-DD format from workDate string
-     * Handles both ISO format (2025-11-12T00:00:00.000000Z) and simple format (2025-11-12)
-     */
     private String extractDateFromWorkDate(String workDate) {
         if (workDate == null || workDate.isEmpty()) {
             return null;
         }
-        
-        // If it contains 'T', it's ISO format - extract date part
+
         if (workDate.contains("T")) {
-            return workDate.substring(0, 10); // Get "YYYY-MM-DD" part
+            return workDate.substring(0, 10);
         }
-        
-        // If it's already in YYYY-MM-DD format, return as is
+
         if (workDate.length() >= 10) {
             return workDate.substring(0, 10);
         }
-        
+
         return workDate;
     }
 
@@ -291,7 +315,6 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     }
 
     private void onTaskSaved(Task task) {
-        // Reload tasks from API to get the latest data
         loadTasksFromApi();
         Toast.makeText(getContext(), "Task added successfully", Toast.LENGTH_SHORT).show();
     }
@@ -318,15 +341,12 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     @Override
     public void onResume() {
         super.onResume();
-        // Refetch tasks from server when fragment becomes visible
-        // This ensures we have the latest data after returning from other activities
-        // Skip on first load since loadTasksFromApi() is already called in onViewCreated
         if (isAdded() && binding != null && !isFirstLoad) {
             loadTasksFromApi();
         }
         isFirstLoad = false;
     }
-    
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

@@ -18,21 +18,16 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.adapters.UserDropdownAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
-import androidx.lifecycle.ViewModelProvider;
-import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
-import com.sendajapan.sendasnap.viewmodel.UserViewModel;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -41,6 +36,8 @@ import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
+import com.sendajapan.sendasnap.viewmodel.UserViewModel;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -53,31 +50,39 @@ import java.util.Objects;
 public class AddScheduleActivity extends AppCompatActivity {
 
     private static final int FILE_PICKER_REQUEST_CODE = 1001;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     private ActivityAddTaskBinding binding;
+
+    private ApiManager apiManager;
     private HapticFeedbackHelper hapticHelper;
     private SharedPrefsManager prefsManager;
-    private UserData currentUser;
-    private ApiManager apiManager;
-
-    private final List<UserData> users = new ArrayList<>();
-    private final List<TaskAttachment> attachments = new ArrayList<>();
-    private final List<android.net.Uri> attachmentUris = new ArrayList<>();
-    private final Calendar selectedDate = Calendar.getInstance();
-    private final Calendar selectedTime = Calendar.getInstance();
-    private final List<UserData> selectedAssignees = new ArrayList<>();
-
-    private Task editingTask;
-    private boolean isEditMode = false;
-    private boolean isRestrictedEditMode = false;
-    private boolean replaceAttachments = false;
-    private PopupWindow userDropdownPopup;
-    private TaskAttachmentAdapter attachmentAdapter;
-    private boolean isShowingDropdown = false;
-    private UserDropdownAdapter userDropdownAdapter;
     private TaskViewModel taskViewModel;
     private UserViewModel userViewModel;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+    private PopupWindow userDropdownPopup;
+    private TaskAttachmentAdapter attachmentAdapter;
+    private UserDropdownAdapter userDropdownAdapter;
+
+    private Task editingTask;
+    private UserData currentUser;
+
+    private boolean isEditMode = false;
+    private boolean isPreventingPriorityDeselection = false;
+    private boolean isPreventingStatusDeselection = false;
+    private boolean isRestrictedEditMode = false;
+    private boolean isShowingDropdown = false;
+    private boolean replaceAttachments = false;
+
+    private int lastCheckedPriorityChipId = -1;
+    private int lastCheckedStatusChipId = -1;
+
+    private final Calendar selectedDate = Calendar.getInstance();
+    private final Calendar selectedTime = Calendar.getInstance();
+    private final List<TaskAttachment> attachments = new ArrayList<>();
+    private final List<UserData> selectedAssignees = new ArrayList<>();
+    private final List<UserData> users = new ArrayList<>();
+    private final List<Uri> attachmentUris = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,22 +92,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Set status bar and navigation bar colors
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        // Handle system UI insets properly
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        // Set status bar appearance
-        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(false);
-        }
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         setupToolbar();
@@ -111,6 +101,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         setupRecyclerView();
         setupListeners();
         setupInitialValues();
+        setupChipSelectionPrevention();
     }
 
     private void initHelpers() {
@@ -125,21 +116,17 @@ public class AddScheduleActivity extends AppCompatActivity {
     private void checkUserRole() {
         if (currentUser != null && isEditMode) {
             String role = currentUser.getRole();
-            // Check if user is not admin or manager
             if (role == null || (!role.equalsIgnoreCase("admin") && !role.equalsIgnoreCase("manager"))) {
                 isRestrictedEditMode = true;
-                // Disable all fields except status
                 disableFieldsExceptStatus();
             }
         }
     }
 
     private void checkEditMode() {
-        // Check if we're editing an existing task
         editingTask = (Task) getIntent().getSerializableExtra("task");
         if (editingTask != null) {
             isEditMode = true;
-            // Update toolbar title and button text for edit mode
             binding.toolbar.setTitle("Edit Schedule");
             binding.buttonSave.setText("Update");
         }
@@ -168,26 +155,18 @@ public class AddScheduleActivity extends AppCompatActivity {
             attachmentAdapter.notifyItemRangeChanged(position, attachments.size());
             updateFileDisplay();
         });
-        // Set action listener immediately after creating adapter
         setAttachmentActionListener();
-        binding.recyclerViewAttachments.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        binding.recyclerViewAttachments.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
-        // Set listener again after setting adapter to ensure it's not lost
         setAttachmentActionListener();
     }
 
     private void setAttachmentActionListener() {
         if (attachmentAdapter != null) {
-            android.util.Log.d("AddScheduleActivity", "Setting action listener on adapter");
             attachmentAdapter.setOnAttachmentActionListener((position, attachment) -> {
-                android.util.Log.d("AddScheduleActivity", "Action listener called for position: " + position);
                 hapticHelper.vibrateClick();
                 openAttachment(attachment);
             });
-            // Verify listener was set (can't access private field, but we can check via a test call)
-            android.util.Log.d("AddScheduleActivity", "Action listener set successfully");
-        } else {
-            android.util.Log.e("AddScheduleActivity", "attachmentAdapter is null when trying to set listener!");
         }
     }
 
@@ -195,25 +174,20 @@ public class AddScheduleActivity extends AppCompatActivity {
         binding.editTextDate.setOnClickListener(v -> showDatePicker());
         binding.editTextTime.setOnClickListener(v -> showTimePicker());
 
-        // Handle assignee field click to show custom dropdown
         binding.editTextAssignee.setOnClickListener(v -> {
             if (!isShowingDropdown) {
                 hapticHelper.vibrateClick();
-                // Hide keyboard
-                android.view.inputmethod.InputMethodManager imm = (InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 showUserDropdown();
             }
         });
-        
-        // Also handle focus to show dropdown
+
         binding.editTextAssignee.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && !isShowingDropdown) {
                 hapticHelper.vibrateClick();
-                // Hide keyboard
-                android.view.inputmethod.InputMethodManager imm = (InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                // Post to avoid immediate dismissal
                 v.post(() -> showUserDropdown());
             }
         });
@@ -241,7 +215,6 @@ public class AddScheduleActivity extends AppCompatActivity {
             setDefaultValues();
         }
 
-        // Fetch users from API
         fetchUsers();
 
         binding.editTextTitle.setOnFocusChangeListener((v, hasFocus) -> {
@@ -261,10 +234,8 @@ public class AddScheduleActivity extends AppCompatActivity {
             public void onSuccess(List<UserData> userList) {
                 users.clear();
                 users.addAll(userList);
-                
-                // If in edit mode, update selected users in dropdown
+
                 if (isEditMode && editingTask != null && userDropdownAdapter != null) {
-                    // Convert UserData list to names list for adapter
                     List<String> selectedNames = new ArrayList<>();
                     for (UserData user : selectedAssignees) {
                         if (user != null && user.getName() != null) {
@@ -277,8 +248,8 @@ public class AddScheduleActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message, int errorCode) {
-                Toast.makeText(AddScheduleActivity.this, 
-                        getErrorMessage("Failed to load users: " + message, errorCode), 
+                Toast.makeText(AddScheduleActivity.this,
+                        getErrorMessage("Failed to load users: " + message, errorCode),
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -305,7 +276,6 @@ public class AddScheduleActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(AddScheduleActivity.this));
 
         userDropdownAdapter = new UserDropdownAdapter(users);
-        // Convert UserData list to names list for adapter
         List<String> selectedNames = new ArrayList<>();
         for (UserData user : selectedAssignees) {
             if (user != null && user.getName() != null) {
@@ -316,10 +286,9 @@ public class AddScheduleActivity extends AppCompatActivity {
         userDropdownAdapter.setOnUserClickListener((user, isSelected) -> {
             hapticHelper.vibrateClick();
             if (isSelected) {
-                // Check if user already exists by ID
                 boolean exists = false;
                 for (UserData existing : selectedAssignees) {
-                    if (existing != null && user != null && 
+                    if (existing != null && user != null &&
                         existing.getId() == user.getId()) {
                         exists = true;
                         break;
@@ -329,8 +298,7 @@ public class AddScheduleActivity extends AppCompatActivity {
                     selectedAssignees.add(user);
                 }
             } else {
-                // Remove by ID
-                selectedAssignees.removeIf(u -> u != null && user != null && 
+                selectedAssignees.removeIf(u -> u != null && user != null &&
                     u.getId() == user.getId());
             }
 
@@ -365,17 +333,17 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void updateAssigneeChips() {
         binding.chipGroupAssignees.removeAllViews();
-        
+
         if (selectedAssignees.isEmpty()) {
             binding.editTextAssignee.setText("");
             binding.chipGroupAssignees.setVisibility(View.GONE);
         } else {
             binding.editTextAssignee.setText(selectedAssignees.size() + " assignee(s) selected");
             binding.chipGroupAssignees.setVisibility(View.VISIBLE);
-            
+
             for (UserData assignee : selectedAssignees) {
                 if (assignee == null) continue;
-                
+
                 Chip chip = new Chip(this);
                 chip.setText(assignee.getName() != null ? assignee.getName() : "");
                 chip.setCloseIconVisible(true);
@@ -385,7 +353,6 @@ public class AddScheduleActivity extends AppCompatActivity {
                     selectedAssignees.remove(assignee);
                     updateAssigneeChips();
                     if (userDropdownAdapter != null) {
-                        // Update adapter with names
                         List<String> selectedNames = new ArrayList<>();
                         for (UserData user : selectedAssignees) {
                             if (user != null && user.getName() != null) {
@@ -403,13 +370,11 @@ public class AddScheduleActivity extends AppCompatActivity {
     private void populateFieldsForEdit() {
         binding.editTextTitle.setText(editingTask.getTitle());
         binding.editTextDescription.setText(editingTask.getDescription());
-        
-        // Load assignees
+
         selectedAssignees.clear();
         if (editingTask.getAssignees() != null && !editingTask.getAssignees().isEmpty()) {
             selectedAssignees.addAll(editingTask.getAssignees());
         } else if (editingTask.getAssignee() != null) {
-            // Migrate from old single assignee field
             selectedAssignees.add(editingTask.getAssignee());
         }
 
@@ -437,7 +402,6 @@ public class AddScheduleActivity extends AppCompatActivity {
 
         setStatusChip(editingTask.getStatus());
 
-        // Set priority chip
         if (editingTask.getPriority() != null) {
             setPriorityChip(editingTask.getPriority());
         } else {
@@ -447,86 +411,165 @@ public class AddScheduleActivity extends AppCompatActivity {
         if (editingTask.getAttachments() != null) {
             attachments.clear();
             attachments.addAll(editingTask.getAttachments());
-            // Ensure listener is set after loading attachments
             setAttachmentActionListener();
             updateFileDisplay();
         }
     }
 
     private void setDefaultValues() {
-        // Set default date to today
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
         binding.editTextDate.setText(dateFormat.format(selectedDate.getTime()));
 
-        // Set default time to current time
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
 
-        // Set default status to Running
         setStatusChip(Task.TaskStatus.RUNNING);
-
-        // Set default priority to Medium
         setPriorityChip(Task.TaskPriority.NORMAL);
     }
 
     private void setStatusChip(Task.TaskStatus status) {
-        // Clear all chips first
+        isPreventingStatusDeselection = true;
         binding.chipGroupStatus.clearCheck();
 
-        // Set the appropriate chip based on status
+        int chipId = View.NO_ID;
         switch (status) {
             case RUNNING:
                 Chip runningChip = binding.chipGroupStatus.findViewById(R.id.chipRunning);
                 if (runningChip != null) {
                     runningChip.setChecked(true);
+                    chipId = R.id.chipRunning;
                 }
                 break;
             case PENDING:
                 Chip pendingChip = binding.chipGroupStatus.findViewById(R.id.chipPending);
                 if (pendingChip != null) {
                     pendingChip.setChecked(true);
+                    chipId = R.id.chipPending;
                 }
                 break;
             case COMPLETED:
                 Chip completedChip = binding.chipGroupStatus.findViewById(R.id.chipCompleted);
                 if (completedChip != null) {
                     completedChip.setChecked(true);
+                    chipId = R.id.chipCompleted;
                 }
                 break;
             case CANCELLED:
                 Chip cancelledChip = binding.chipGroupStatus.findViewById(R.id.chipCancelled);
                 if (cancelledChip != null) {
                     cancelledChip.setChecked(true);
+                    chipId = R.id.chipCancelled;
                 }
                 break;
         }
+
+        if (chipId != View.NO_ID) {
+            lastCheckedStatusChipId = chipId;
+        }
+        isPreventingStatusDeselection = false;
     }
 
     private void setPriorityChip(Task.TaskPriority priority) {
-        // Clear all chips first
+        isPreventingPriorityDeselection = true;
         binding.chipGroupPriority.clearCheck();
 
-        // Set the appropriate chip based on priority
+        int chipId = View.NO_ID;
         switch (priority) {
             case LOW:
                 Chip lowChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityLow);
                 if (lowChip != null) {
                     lowChip.setChecked(true);
+                    chipId = R.id.chipPriorityLow;
                 }
                 break;
             case NORMAL:
                 Chip mediumChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityNormal);
                 if (mediumChip != null) {
                     mediumChip.setChecked(true);
+                    chipId = R.id.chipPriorityNormal;
                 }
                 break;
             case HIGH:
                 Chip highChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityHigh);
                 if (highChip != null) {
                     highChip.setChecked(true);
+                    chipId = R.id.chipPriorityHigh;
                 }
                 break;
         }
+
+        if (chipId != View.NO_ID) {
+            lastCheckedPriorityChipId = chipId;
+        }
+        isPreventingPriorityDeselection = false;
+    }
+
+    private void setupChipSelectionPrevention() {
+        int initialStatusChipId = binding.chipGroupStatus.getCheckedChipId();
+        if (initialStatusChipId != View.NO_ID) {
+            lastCheckedStatusChipId = initialStatusChipId;
+        }
+
+        binding.chipGroupStatus.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (isPreventingStatusDeselection) {
+                return;
+            }
+
+            if (checkedIds.isEmpty()) {
+                if (lastCheckedStatusChipId != -1) {
+                    isPreventingStatusDeselection = true;
+                    Chip lastChip = group.findViewById(lastCheckedStatusChipId);
+                    if (lastChip != null) {
+                        lastChip.post(() -> {
+                            lastChip.setChecked(true);
+                            isPreventingStatusDeselection = false;
+                        });
+                    } else {
+                        isPreventingStatusDeselection = false;
+                    }
+                    return;
+                }
+            } else {
+                int newCheckedId = checkedIds.get(0);
+                if (newCheckedId == lastCheckedStatusChipId) {
+                    return;
+                }
+                lastCheckedStatusChipId = newCheckedId;
+            }
+        });
+
+        int initialPriorityChipId = binding.chipGroupPriority.getCheckedChipId();
+        if (initialPriorityChipId != View.NO_ID) {
+            lastCheckedPriorityChipId = initialPriorityChipId;
+        }
+
+        binding.chipGroupPriority.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (isPreventingPriorityDeselection) {
+                return;
+            }
+
+            if (checkedIds.isEmpty()) {
+                if (lastCheckedPriorityChipId != -1) {
+                    isPreventingPriorityDeselection = true;
+                    Chip lastChip = group.findViewById(lastCheckedPriorityChipId);
+                    if (lastChip != null) {
+                        lastChip.post(() -> {
+                            lastChip.setChecked(true);
+                            isPreventingPriorityDeselection = false;
+                        });
+                    } else {
+                        isPreventingPriorityDeselection = false;
+                    }
+                    return;
+                }
+            } else {
+                int newCheckedId = checkedIds.get(0);
+                if (newCheckedId == lastCheckedPriorityChipId) {
+                    return;
+                }
+                lastCheckedPriorityChipId = newCheckedId;
+            }
+        });
     }
 
     private void disableFieldsExceptStatus() {
@@ -537,7 +580,6 @@ public class AddScheduleActivity extends AppCompatActivity {
         binding.editTextTime.setEnabled(false);
         binding.buttonAddFile.setVisibility(View.GONE);
 
-        // Disable priority chips
         for (int i = 0; i < binding.chipGroupPriority.getChildCount(); i++) {
             View child = binding.chipGroupPriority.getChildAt(i);
             if (child instanceof Chip) {
@@ -545,8 +587,6 @@ public class AddScheduleActivity extends AppCompatActivity {
                 ((Chip) child).setEnabled(false);
             }
         }
-
-        // Keep status chips enabled
     }
 
     private void showDatePicker() {
@@ -607,20 +647,16 @@ public class AddScheduleActivity extends AppCompatActivity {
             return;
         }
 
-        // Validate file sizes
         if (!validateFileSizes()) {
             return;
         }
 
-        // Get selected priority
         Task.TaskPriority priority = getSelectedPriority();
         String priorityStr = priorityToString(priority);
 
-        // Format date and time
         String workDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.getTime());
         String workTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(selectedTime.getTime());
 
-        // Get assigned user IDs
         List<Integer> assignedTo = new ArrayList<>();
         for (UserData user : selectedAssignees) {
             if (user != null && user.getId() > 0) {
@@ -628,11 +664,9 @@ public class AddScheduleActivity extends AppCompatActivity {
             }
         }
 
-        // Convert attachment URIs to Files
-        List<java.io.File> files = convertUrisToFiles(attachmentUris);
+        List<File> files = convertUrisToFiles(attachmentUris);
 
         if (isEditMode && editingTask != null) {
-            // Update existing task
             TaskViewModel.UpdateTaskParams params = new TaskViewModel.UpdateTaskParams();
             if (!isRestrictedEditMode) {
                 params.title = title;
@@ -649,10 +683,8 @@ public class AddScheduleActivity extends AppCompatActivity {
                     new TaskViewModel.TaskCallback<Task>() {
                 @Override
                 public void onSuccess(Task updatedTask) {
-                    // Set alarm for the task
                     AlarmHelper.setTaskAlarm(AddScheduleActivity.this, updatedTask);
 
-                    // Show success cookiebar
                     CookieBarToastHelper.showSuccess(
                             AddScheduleActivity.this,
                             "Task Updated",
@@ -660,12 +692,10 @@ public class AddScheduleActivity extends AppCompatActivity {
                             CookieBarToastHelper.SHORT_DURATION
                     );
 
-                    // Return result to calling activity
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("task", updatedTask);
                     setResult(RESULT_OK, resultIntent);
-                    
-                    // Delay finish to allow cookiebar to be visible
+
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                         finish();
                     }, 500);
@@ -677,7 +707,6 @@ public class AddScheduleActivity extends AppCompatActivity {
                 }
             });
         } else {
-            // Create new task
             TaskViewModel.CreateTaskParams params = new TaskViewModel.CreateTaskParams();
             params.title = title;
             params.description = description;
@@ -689,10 +718,8 @@ public class AddScheduleActivity extends AppCompatActivity {
             taskViewModel.createTask(params, files, new TaskViewModel.TaskCallback<Task>() {
                 @Override
                 public void onSuccess(Task createdTask) {
-                    // Set alarm for the task
                     AlarmHelper.setTaskAlarm(AddScheduleActivity.this, createdTask);
 
-                    // Return result to calling activity
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("task", createdTask);
                     setResult(RESULT_OK, resultIntent);
@@ -708,12 +735,12 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private boolean validateFileSizes() {
-        for (android.net.Uri uri : attachmentUris) {
+        for (Uri uri : attachmentUris) {
             long fileSize = getFileSize(uri);
             if (fileSize > MAX_FILE_SIZE) {
                 String fileName = getFileName(uri);
-                Toast.makeText(this, 
-                        "File size exceeds 10MB limit: " + fileName, 
+                Toast.makeText(this,
+                        "File size exceeds 10MB limit: " + fileName,
                         Toast.LENGTH_LONG).show();
                 return false;
             }
@@ -721,29 +748,27 @@ public class AddScheduleActivity extends AppCompatActivity {
         return true;
     }
 
-    private List<java.io.File> convertUrisToFiles(List<android.net.Uri> uris) {
-        List<java.io.File> files = new ArrayList<>();
-        for (android.net.Uri uri : uris) {
+    private List<File> convertUrisToFiles(List<Uri> uris) {
+        List<File> files = new ArrayList<>();
+        for (Uri uri : uris) {
             try {
-                // Create a temporary file copy from URI
-                java.io.File tempFile = createTempFileFromUri(uri);
+                File tempFile = createTempFileFromUri(uri);
                 if (tempFile != null && tempFile.exists()) {
                     files.add(tempFile);
                 }
             } catch (Exception e) {
-                // Skip files that can't be converted
             }
         }
         return files;
     }
 
-    private java.io.File createTempFileFromUri(android.net.Uri uri) {
+    private File createTempFileFromUri(Uri uri) {
         try {
             java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
             if (inputStream == null) return null;
 
             String fileName = getFileName(uri);
-            java.io.File tempFile = new java.io.File(getCacheDir(), "upload_" + System.currentTimeMillis() + "_" + fileName);
+            File tempFile = new File(getCacheDir(), "upload_" + System.currentTimeMillis() + "_" + fileName);
             java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile);
 
             byte[] buffer = new byte[4096];
@@ -760,7 +785,6 @@ public class AddScheduleActivity extends AppCompatActivity {
         }
     }
 
-
     private String priorityToString(Task.TaskPriority priority) {
         switch (priority) {
             case LOW:
@@ -776,10 +800,8 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void showValidationErrors(String message, int errorCode) {
         String errorMessage = getErrorMessage(message, errorCode);
-        
-        // Show error on appropriate field if it's a validation error
+
         if (errorCode == 422) {
-            // Try to parse validation errors and show on specific fields
             if (message.contains("title")) {
                 binding.editTextTitle.setError("Title: " + message);
             } else if (message.contains("priority")) {
@@ -805,22 +827,6 @@ public class AddScheduleActivity extends AppCompatActivity {
             default:
                 return message != null ? message : "An error occurred. Please try again.";
         }
-    }
-
-    private Task.TaskStatus getSelectedStatus() {
-        int checkedId = binding.chipGroupStatus.getCheckedChipId();
-
-        if (checkedId == R.id.chipRunning) {
-            return Task.TaskStatus.RUNNING;
-        } else if (checkedId == R.id.chipPending) {
-            return Task.TaskStatus.PENDING;
-        } else if (checkedId == R.id.chipCompleted) {
-            return Task.TaskStatus.COMPLETED;
-        } else if (checkedId == R.id.chipCancelled) {
-            return Task.TaskStatus.CANCELLED;
-        }
-
-        return Task.TaskStatus.RUNNING;
     }
 
     private Task.TaskPriority getSelectedPriority() {
@@ -858,7 +864,6 @@ public class AddScheduleActivity extends AppCompatActivity {
         } else {
             binding.recyclerViewAttachments.setVisibility(View.VISIBLE);
             binding.textNoFiles.setVisibility(View.GONE);
-            // Ensure listener is set before notifying adapter
             if (attachmentAdapter != null) {
                 setAttachmentActionListener();
                 attachmentAdapter.notifyDataSetChanged();
@@ -880,24 +885,20 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void addFileFromUri(Uri fileUri) {
         try {
-            // Validate file size
             long fileSize = getFileSize(fileUri);
             if (fileSize > MAX_FILE_SIZE) {
                 String fileName = getFileName(fileUri);
-                Toast.makeText(this, 
-                        "File size exceeds 10MB limit: " + fileName, 
+                Toast.makeText(this,
+                        "File size exceeds 10MB limit: " + fileName,
                         Toast.LENGTH_LONG).show();
                 return;
             }
 
-            // Get file information
             String fileName = getFileName(fileUri);
             String mimeType = getContentResolver().getType(fileUri);
 
-            // Store URI for upload
             attachmentUris.add(fileUri);
 
-            // Create attachment for display
             TaskAttachment attachment = new TaskAttachment(
                     String.valueOf(System.currentTimeMillis()),
                     fileName,
@@ -959,45 +960,36 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private void openAttachment(TaskAttachment attachment) {
-        android.util.Log.d("AddScheduleActivity", "openAttachment called for: " + (attachment != null ? attachment.getFileName() : "null"));
-        
-        // Prefer file_url if available, otherwise use file_path
         String filePathOrUrl = attachment.getFileUrl();
         if (filePathOrUrl == null || filePathOrUrl.isEmpty()) {
             filePathOrUrl = attachment.getFilePath();
         }
-        
-        android.util.Log.d("AddScheduleActivity", "filePathOrUrl: " + filePathOrUrl);
-        
+
         if (filePathOrUrl == null || filePathOrUrl.isEmpty()) {
             Toast.makeText(this, "Invalid file path", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
-            // Check if it's a URL or server path
             boolean isUrl = filePathOrUrl.startsWith("http://") || filePathOrUrl.startsWith("https://");
             boolean isLocalUri = filePathOrUrl.startsWith("content://") || filePathOrUrl.startsWith("file://");
             boolean isServerPath = !isUrl && !isLocalUri;
 
             if (isUrl || isServerPath) {
-                // Server file - open in browser
                 String fileUrl = filePathOrUrl;
                 if (isServerPath) {
-                    // Construct full URL from relative path
                     if (filePathOrUrl.startsWith("/")) {
                         fileUrl = "https://snap.senda.fit" + filePathOrUrl;
                     } else {
                         fileUrl = "https://snap.senda.fit/storage/" + filePathOrUrl;
                     }
                 }
-                
+
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(android.net.Uri.parse(fileUrl));
+                intent.setData(Uri.parse(fileUrl));
                 startActivity(Intent.createChooser(intent, "Open file"));
             } else if (isLocalUri) {
-                // Local URI - open with appropriate app
-                android.net.Uri fileUri = android.net.Uri.parse(filePathOrUrl);
+                Uri fileUri = Uri.parse(filePathOrUrl);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 String mimeType = attachment.getMimeType();
                 if (mimeType == null || mimeType.isEmpty()) {
@@ -1010,10 +1002,9 @@ public class AddScheduleActivity extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(Intent.createChooser(intent, "Open file"));
             } else {
-                // Local file path
                 File file = new File(filePathOrUrl);
                 if (file.exists()) {
-                    android.net.Uri fileUri = androidx.core.content.FileProvider.getUriForFile(
+                    Uri fileUri = androidx.core.content.FileProvider.getUriForFile(
                             this,
                             getPackageName() + ".fileprovider",
                             file);

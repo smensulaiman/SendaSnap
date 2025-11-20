@@ -10,30 +10,26 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.ChatActivity;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
-import androidx.lifecycle.ViewModelProvider;
-import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
-import com.sendajapan.sendasnap.networking.ApiCallback;
 import com.sendajapan.sendasnap.networking.ApiManager;
+import com.sendajapan.sendasnap.networking.ApiCallback;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.utils.FirebaseUtils;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,17 +42,20 @@ import java.util.Set;
 public class ScheduleDetailActivity extends AppCompatActivity {
 
     private ActivityAddTaskBinding binding;
-    private HapticFeedbackHelper hapticHelper;
-    private Task task;
-    private TaskAttachmentAdapter attachmentAdapter;
-    private ChatService chatService;
     private ApiManager apiManager;
-    private MenuItem chatMenuItem;
-    private ValueEventListener unreadCountListener;
-    private List<UserData> allUsers = new ArrayList<>();
-    private TextView badgeTextView;
+    private ChatService chatService;
+    private HapticFeedbackHelper hapticHelper;
+    private TaskAttachmentAdapter attachmentAdapter;
     private TaskViewModel taskViewModel;
+
+    private MenuItem chatMenuItem;
+    private TextView badgeTextView;
+    private ValueEventListener unreadCountListener;
+
+    private Task task;
     private Integer taskId;
+
+    private List<UserData> allUsers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,22 +65,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Set status bar and navigation bar colors
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        // Handle system UI insets properly
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        // Set status bar appearance
-        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(false);
-        }
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         setupToolbar();
@@ -90,8 +74,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         populateFields();
         makeFieldsReadOnly();
         fetchUsers();
-        
-        // Load unread count after a short delay to ensure menu is fully initialized
+
         if (task != null) {
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 loadUnreadCount();
@@ -107,11 +90,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        java.util.List<TaskAttachment> attachmentList = (task != null && task.getAttachments() != null) 
-                ? task.getAttachments() 
-                : new java.util.ArrayList<>();
-        attachmentAdapter = new TaskAttachmentAdapter(attachmentList, false); // No remove button in detail view
-        binding.recyclerViewAttachments.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        List<TaskAttachment> attachmentList = (task != null && task.getAttachments() != null)
+                ? task.getAttachments()
+                : new ArrayList<>();
+        attachmentAdapter = new TaskAttachmentAdapter(attachmentList, false);
+        binding.recyclerViewAttachments.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
     }
 
@@ -120,7 +103,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         if (task != null) {
             taskId = task.getId();
         } else {
-            // Try to load by ID if task object not passed
             taskId = getIntent().getIntExtra("taskId", -1);
             if (taskId == -1) {
                 finish();
@@ -132,7 +114,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
     private void loadTaskFromApi() {
         if (taskId == null) return;
-        
+
         taskViewModel.getTask(taskId, new TaskViewModel.TaskCallback<Task>() {
             @Override
             public void onSuccess(Task loadedTask) {
@@ -142,7 +124,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message, int errorCode) {
-                Toast.makeText(ScheduleDetailActivity.this, 
+                Toast.makeText(ScheduleDetailActivity.this,
                         getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
                 if (errorCode == 404) {
                     finish();
@@ -150,7 +132,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private String getErrorMessage(String message, int errorCode) {
         switch (errorCode) {
@@ -220,7 +201,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message, int errorCode) {
-                Toast.makeText(ScheduleDetailActivity.this, 
+                Toast.makeText(ScheduleDetailActivity.this,
                         getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
             }
         });
@@ -251,7 +232,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message, int errorCode) {
-                Toast.makeText(ScheduleDetailActivity.this, 
+                Toast.makeText(ScheduleDetailActivity.this,
                         getErrorMessage(message, errorCode), Toast.LENGTH_SHORT).show();
             }
         });
@@ -280,11 +261,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
         binding.editTextTitle.setText(task.getTitle());
         binding.editTextDescription.setText(task.getDescription());
-        
-        // Display assignees
+
         displayAssignees();
 
-        // Format and display date
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
@@ -295,18 +274,14 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             binding.editTextDate.setText(task.getWorkDate());
         }
 
-        // Format and display time
         binding.editTextTime.setText(task.getWorkTime());
 
-        // Set status chip
         setStatusChip(task.getStatus());
 
-        // Set priority chip if available
         if (task.getPriority() != null) {
             setPriorityChip(task.getPriority());
         }
 
-        // Display attachments
         if (task.getAttachments() != null && !task.getAttachments().isEmpty()) {
             attachmentAdapter = new TaskAttachmentAdapter(task.getAttachments(), false);
             binding.recyclerViewAttachments.setAdapter(attachmentAdapter);
@@ -317,7 +292,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             binding.textNoFiles.setVisibility(View.VISIBLE);
         }
 
-        // Hide action buttons
         binding.buttonCancel.setVisibility(View.GONE);
         binding.buttonSave.setVisibility(View.GONE);
         binding.buttonAddFile.setVisibility(View.GONE);
@@ -354,9 +328,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     private void setPriorityChip(Task.TaskPriority priority) {
-
         binding.chipGroupPriority.clearCheck();
-        
+
         switch (priority) {
             case LOW:
                 Chip lowChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityLow);
@@ -379,15 +352,14 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         }
     }
 
-
     private void displayAssignees() {
         binding.chipGroupAssignees.removeAllViews();
-        
+
         List<UserData> assignees = task.getAssignees();
         if (assignees != null && !assignees.isEmpty()) {
             binding.editTextAssignee.setText(assignees.size() + " assignee(s)");
             binding.chipGroupAssignees.setVisibility(View.VISIBLE);
-            
+
             for (UserData assignee : assignees) {
                 if (assignee == null) continue;
                 Chip chip = new Chip(this);
@@ -397,7 +369,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 binding.chipGroupAssignees.addView(chip);
             }
         } else if (task.getAssignee() != null) {
-            // Fallback to old single assignee field
             UserData assignee = task.getAssignee();
             binding.editTextAssignee.setText(assignee.getName() != null ? assignee.getName() : "");
             Chip chip = new Chip(this);
@@ -419,15 +390,13 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         binding.editTextDate.setEnabled(false);
         binding.editTextTime.setEnabled(false);
 
-        // Disable all chips
         for (int i = 0; i < binding.chipGroupStatus.getChildCount(); i++) {
             View child = binding.chipGroupStatus.getChildAt(i);
             if (child instanceof Chip) {
                 ((Chip) child).setClickable(false);
             }
         }
-        
-        // Disable priority chips if they exist
+
         if (binding.chipGroupPriority != null) {
             for (int i = 0; i < binding.chipGroupPriority.getChildCount(); i++) {
                 View child = binding.chipGroupPriority.getChildAt(i);
@@ -444,26 +413,21 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             public void onSuccess(List<UserData> userList) {
                 allUsers.clear();
                 allUsers.addAll(userList);
-                // Load unread count after users are fetched
                 loadUnreadCount();
             }
 
             @Override
             public void onError(String message, int errorCode) {
-                // Silently fail, users might not be critical for viewing task
             }
         });
     }
 
     private void setupChatIcon() {
         if (chatMenuItem != null) {
-            // Create badge view
             View actionView = getLayoutInflater().inflate(R.layout.menu_chat_badge, null);
             chatMenuItem.setActionView(actionView);
             badgeTextView = actionView.findViewById(R.id.badge_text);
             if (badgeTextView == null) {
-                android.util.Log.w("ScheduleDetailActivity", "badge_text not found in layout, creating programmatically");
-                // Fallback: create badge programmatically
                 badgeTextView = new TextView(this);
                 badgeTextView.setId(R.id.badge_text);
                 badgeTextView.setBackgroundResource(R.drawable.badge_background);
@@ -475,18 +439,13 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 badgeTextView.setGravity(android.view.Gravity.CENTER);
                 badgeTextView.setVisibility(View.GONE);
             } else {
-                android.util.Log.d("ScheduleDetailActivity", "Badge TextView found and initialized");
-                // Ensure badge is initially hidden
                 badgeTextView.setVisibility(View.GONE);
             }
-            
-            // Set click listener on action view since setActionView disables default menu item click
+
             actionView.setOnClickListener(v -> {
                 hapticHelper.vibrateClick();
                 openTaskChat();
             });
-        } else {
-            android.util.Log.w("ScheduleDetailActivity", "chatMenuItem is null in setupChatIcon");
         }
     }
 
@@ -497,14 +456,12 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private List<String> getTaskParticipants() {
         Set<String> participantIds = new HashSet<>();
         String currentUserId = FirebaseUtils.getCurrentUserId(this);
-        
-        // Add creator if exists - first try task.getCreator(), then lookup by ID
+
         UserData creator = task.getCreator();
         if (creator != null && creator.getEmail() != null && !creator.getEmail().isEmpty()) {
             String userId = FirebaseUtils.sanitizeEmailForKey(creator.getEmail());
             participantIds.add(userId);
         } else {
-            // Fallback: find creator by ID in allUsers
             int creatorId = task.getCreatedByUserId();
             if (creatorId > 0 && allUsers != null && !allUsers.isEmpty()) {
                 for (UserData user : allUsers) {
@@ -516,13 +473,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
             }
         }
-        
-        // Add current user if not already added
+
         if (!currentUserId.isEmpty()) {
             participantIds.add(currentUserId);
         }
-        
-        // Get assignee user IDs directly from UserData objects
+
         List<UserData> assignees = task.getAssignees();
         if (assignees != null && !assignees.isEmpty()) {
             for (UserData assignee : assignees) {
@@ -532,31 +487,25 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
             }
         } else if (task.getAssignee() != null) {
-            // Fallback to old single assignee field
             UserData assignee = task.getAssignee();
             if (assignee.getEmail() != null && !assignee.getEmail().isEmpty()) {
                 String userId = FirebaseUtils.sanitizeEmailForKey(assignee.getEmail());
                 participantIds.add(userId);
             }
         }
-        
+
         return new ArrayList<>(participantIds);
     }
-    
-    /**
-     * Get task participants as UserData objects for Firebase initialization
-     */
+
     private List<UserData> getTaskParticipantsAsUserData() {
         List<UserData> participants = new ArrayList<>();
         Set<String> addedEmails = new HashSet<>();
-        
-        // Add creator if exists - first try task.getCreator(), then lookup by ID
+
         UserData creator = task.getCreator();
         if (creator != null && creator.getEmail() != null && !creator.getEmail().isEmpty()) {
             participants.add(creator);
             addedEmails.add(creator.getEmail().toLowerCase());
         } else {
-            // Fallback: find creator by ID in allUsers
             int creatorId = task.getCreatedByUserId();
             if (creatorId > 0 && allUsers != null && !allUsers.isEmpty()) {
                 for (UserData user : allUsers) {
@@ -571,8 +520,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
             }
         }
-        
-        // Get assignee user data directly from UserData objects
+
         List<UserData> assignees = task.getAssignees();
         if (assignees != null && !assignees.isEmpty()) {
             for (UserData assignee : assignees) {
@@ -585,7 +533,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
             }
         } else if (task.getAssignee() != null) {
-            // Fallback to old single assignee field
             UserData assignee = task.getAssignee();
             if (assignee.getEmail() != null && !assignee.getEmail().isEmpty()) {
                 String emailLower = assignee.getEmail().toLowerCase();
@@ -595,8 +542,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
             }
         }
-        
-        // Add current user if not already added
+
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(this);
         UserData currentUser = prefsManager.getUser();
         if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
@@ -606,75 +552,59 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 addedEmails.add(emailLower);
             }
         }
-        
+
         return participants;
     }
 
     private void loadUnreadCount() {
         if (task == null) {
-            android.util.Log.w("ScheduleDetailActivity", "loadUnreadCount: task is null");
             return;
         }
-        
+
         String chatId = getTaskChatId();
         String currentUserId = FirebaseUtils.getCurrentUserId(this);
-        
+
         if (currentUserId.isEmpty()) {
-            android.util.Log.w("ScheduleDetailActivity", "loadUnreadCount: currentUserId is empty");
             return;
         }
-        
-        android.util.Log.d("ScheduleDetailActivity", "loadUnreadCount called for chat: " + chatId + ", badgeTextView: " + (badgeTextView != null ? "exists" : "null"));
-        
-        // Remove existing listener if any
+
         if (unreadCountListener != null) {
             chatService.removeUnreadCountListener(chatId, currentUserId, unreadCountListener);
             unreadCountListener = null;
         }
-        
-        // First get current count immediately
+
         chatService.getGroupChatUnreadCount(chatId, currentUserId, new ChatService.UnreadCountCallback() {
             @Override
             public void onSuccess(int unreadCount) {
-                android.util.Log.d("ScheduleDetailActivity", "Initial unread count: " + unreadCount);
                 updateBadge(unreadCount);
             }
 
             @Override
             public void onFailure(Exception e) {
-                android.util.Log.e("ScheduleDetailActivity", "Failed to get initial unread count", e);
             }
         });
-        
-        // Add persistent listener for real-time updates
+
         unreadCountListener = chatService.addUnreadCountListener(chatId, currentUserId, new ChatService.UnreadCountCallback() {
             @Override
             public void onSuccess(int unreadCount) {
-                android.util.Log.d("ScheduleDetailActivity", "Listener fired with unread count: " + unreadCount);
                 updateBadge(unreadCount);
             }
 
             @Override
             public void onFailure(Exception e) {
-                android.util.Log.e("ScheduleDetailActivity", "Listener failed", e);
             }
         });
     }
 
     private void updateBadge(int unreadCount) {
-        android.util.Log.d("ScheduleDetailActivity", "updateBadge called with count: " + unreadCount + ", badgeTextView: " + (badgeTextView != null ? "exists" : "null"));
-        
-        // Run on UI thread to ensure badge updates correctly
         runOnUiThread(() -> {
-            // Try to get badge if it's null
             if (badgeTextView == null && chatMenuItem != null) {
                 View actionView = chatMenuItem.getActionView();
                 if (actionView != null) {
                     badgeTextView = actionView.findViewById(R.id.badge_text);
-                    android.util.Log.d("ScheduleDetailActivity", "Re-fetched badgeTextView: " + (badgeTextView != null ? "found" : "still null"));
                 }
             }
-            
+
             if (badgeTextView != null) {
                 if (unreadCount > 0) {
                     String badgeText = String.valueOf(unreadCount > 99 ? "99+" : unreadCount);
@@ -682,13 +612,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     badgeTextView.setVisibility(View.VISIBLE);
                     badgeTextView.invalidate();
                     badgeTextView.requestLayout();
-                    android.util.Log.d("ScheduleDetailActivity", "Badge updated and made visible with count: " + unreadCount + ", text: " + badgeText);
                 } else {
                     badgeTextView.setVisibility(View.GONE);
-                    android.util.Log.d("ScheduleDetailActivity", "Badge hidden (count is 0)");
                 }
-            } else {
-                android.util.Log.e("ScheduleDetailActivity", "badgeTextView is still null after reinitialization attempt!");
             }
         });
     }
@@ -698,15 +624,14 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         List<UserData> participants = getTaskParticipantsAsUserData();
         if (participants.isEmpty()) {
             Toast.makeText(this, "No participants found for this task", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         String chatId = getTaskChatId();
-        // Use the method that accepts UserData objects to initialize all participants in Firebase
         chatService.createOrGetGroupChatWithParticipants(String.valueOf(task.getId()), task.getTitle(), participants, new ChatService.GroupChatCallback() {
             @Override
             public void onSuccess(com.sendajapan.sendasnap.models.Chat chat) {
@@ -728,23 +653,19 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh unread count when activity resumes
         if (task != null) {
             loadUnreadCount();
         }
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
-        // Keep listener active even when paused to catch updates
-        // We'll only remove it in onDestroy
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Remove Firebase listeners
         if (unreadCountListener != null && task != null) {
             String chatId = getTaskChatId();
             String currentUserId = FirebaseUtils.getCurrentUserId(this);
@@ -756,4 +677,3 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         binding = null;
     }
 }
-
