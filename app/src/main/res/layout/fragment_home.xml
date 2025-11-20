@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,10 +15,10 @@
         <!-- Quick Actions Section with Futuristic AI Background -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="140dp"
+            android:layout_height="180dp"
+            app:cardBackgroundColor="@color/status_bar_color"
             app:cardCornerRadius="8dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@color/status_bar_color">
+            app:strokeWidth="0dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -29,36 +28,76 @@
                     android:id="@+id/imgWave"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/porche"
+                    android:alpha="0.9"
                     android:scaleType="centerCrop"
-                    android:alpha="0.9"/>
+                    android:src="@drawable/porche" />
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/bg_gray_800_50"/>
+                    android:background="@color/bg_gray_800_50" />
 
                 <ImageView
                     android:id="@+id/imgLogo"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/logo_senda_snap"
-                    app:tint="@color/white"
-                    android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
-                    android:padding="@dimen/dimen_8"/>
+                    android:layout_alignParentEnd="true"
+                    android:padding="@dimen/dimen_8"
+                    android:src="@drawable/logo_senda_snap"
+                    app:tint="@color/white" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
                     android:layout_gravity="center_vertical"
-                    android:padding="20dp">
+                    android:orientation="vertical"
+                    android:padding="@dimen/dimen_16">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/imgProfile"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/avater_placeholder" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/dimen_4">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/montserrat_bold"
+                                android:text="Name"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/text_size_medium"
+                                android:includeFontPadding="false"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/montserrat_semi_bold"
+                                android:text="Role"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/text_size_small"
+                                android:includeFontPadding="false"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginVertical="@dimen/dimen_8"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -70,9 +109,8 @@
                             app:tint="@color/white" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:text="Quick Actions"
                             android:textColor="@color/white"
@@ -94,12 +132,12 @@
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:text="Quick Search"
                             android:fontFamily="@font/montserrat_bold"
+                            android:text="Quick Search"
                             android:textColor="@color/white"
                             android:textSize="@dimen/text_size_small"
                             app:cornerRadius="24dp"
-                            app:strokeColor="@color/white"/>
+                            app:strokeColor="@color/white" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnViewStats"
@@ -108,12 +146,12 @@
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:text="History"
                             android:fontFamily="@font/montserrat_semi_bold"
+                            android:text="History"
                             android:textColor="@color/warning"
                             android:textSize="@dimen/text_size_small"
                             app:cornerRadius="24dp"
-                            app:strokeColor="@color/warning"/>
+                            app:strokeColor="@color/warning" />
 
                     </LinearLayout>
 
@@ -127,9 +165,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="@dimen/dimen_8"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/dimen_8">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -154,9 +192,9 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat_semi_bold"
                     android:text="View All"
+                    android:textColor="@color/primary"
                     android:textSize="@dimen/text_size_small"
-                    android:visibility="gone"
-                    android:textColor="@color/primary"/>
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -166,9 +204,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:shimmer_duration="1000"
                 app:shimmer_auto_start="true"
                 app:shimmer_base_alpha="0.7"
+                app:shimmer_duration="1000"
                 app:shimmer_highlight_alpha="0.9">
 
                 <LinearLayout
@@ -177,9 +215,13 @@
                     android:orientation="vertical">
 
                     <include layout="@layout/shimmer_item_vehicle" />
+
                     <include layout="@layout/shimmer_item_vehicle" />
+
                     <include layout="@layout/shimmer_item_vehicle" />
+
                     <include layout="@layout/shimmer_item_vehicle" />
+
                     <include layout="@layout/shimmer_item_vehicle" />
 
                 </LinearLayout>
@@ -191,10 +233,10 @@
                 android:id="@+id/recyclerViewVehicles"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_vehicle"
+                android:clipToPadding="false"
                 android:paddingBottom="110dp"
-                android:clipToPadding="false"/>
+                tools:itemCount="5"
+                tools:listitem="@layout/item_vehicle" />
 
             <!-- Empty State -->
             <LinearLayout
@@ -243,8 +285,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="110dp"
         android:layout_marginEnd="@dimen/dimen_16"
+        android:layout_marginBottom="110dp"
         android:src="@drawable/ic_search"
         app:backgroundTint="@color/primary"
         app:elevation="8dp"
