@@ -42,16 +42,47 @@ android {
     
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     applicationVariants.all { variant ->
+        // Configure APK naming
         variant.outputs.all { output ->
-            def appName = "SendaSnap"
+            def appName = "senda_snap"
+            def variantName = variant.name
             def versionName = variant.versionName
             def date = new Date().format('yy_MM_dd', TimeZone.getTimeZone("UTC"))
-            def outputFileName = "${appName}_${versionName}_${date}.apk"
+            def outputFileName = "${appName}_${variantName}_${versionName}_${date}.apk"
             outputFileName = outputFileName.replace(" ", "_")
             output.outputFileName = outputFileName
+        }
+        
+        // Configure AAB naming - rename after all bundle tasks are complete
+        def renameBundleTask = tasks.register("rename${variant.name.capitalize()}Bundle") {
+            doLast {
+                def bundleFile = file("${project.buildDir}/outputs/bundle/${variant.name}/app-${variant.name}.aab")
+                if (bundleFile.exists()) {
+                    def appName = "senda_snap"
+                    def variantName = variant.name
+                    def versionName = variant.versionName
+                    def date = new Date().format('yy_MM_dd', TimeZone.getTimeZone("UTC"))
+                    def newName = "${appName}_${variantName}_${versionName}_${date}.aab".replace(" ", "_")
+                    def newFile = file("${project.buildDir}/outputs/bundle/${variant.name}/${newName}")
+                    bundleFile.renameTo(newFile)
+                    println "Renamed AAB to: ${newName}"
+                }
+            }
+        }
+        // Rename after the IDE listing file task completes (which is the last task that needs the original file)
+        try {
+            tasks.named("produce${variant.name.capitalize()}BundleIdeListingFile").configure {
+                finalizedBy(renameBundleTask)
+            }
+        } catch (Exception e) {
+            // Fallback if task doesn't exist
+            tasks.named("bundle${variant.name.capitalize()}").configure {
+                finalizedBy(renameBundleTask)
+            }
         }
     }
 }
