@@ -58,12 +58,21 @@ public class LoginActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(0, 0, 0, systemBars.bottom);
             return insets;
         });
 
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+
+        androidx.core.view.WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
+        }
+
         initHelpers();
         setupClickListeners();
+        startTextureAnimations();
     }
 
     private void initHelpers() {
@@ -78,6 +87,18 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnLogin.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
             performLogin();
+        });
+    }
+
+    private void startTextureAnimations() {
+        binding.imgTextureTop.post(() -> {
+            android.view.animation.Animation slideInTop = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.slide_in_top);
+            binding.imgTextureTop.startAnimation(slideInTop);
+        });
+
+        binding.imgTextureBottom.post(() -> {
+            android.view.animation.Animation slideInBottom = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
+            binding.imgTextureBottom.startAnimation(slideInBottom);
         });
     }
 

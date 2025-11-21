@@ -30,6 +30,8 @@ import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
+import com.bumptech.glide.Glide;
+import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -69,6 +71,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         setupRecyclerView();
         setupClickListeners();
         setupFAB();
+        loadUserProfile();
         loadRecentVehicles();
     }
 
@@ -106,6 +109,56 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
             hapticHelper.vibrateClick();
             showSearchDialog();
         });
+    }
+
+    private void loadUserProfile() {
+        SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(requireContext());
+        UserData currentUser = prefsManager.getUser();
+        
+        if (currentUser != null) {
+            // Set user name
+            if (binding.txtUserName != null) {
+                String userName = currentUser.getName();
+                if (userName != null && !userName.isEmpty()) {
+                    binding.txtUserName.setText(userName + " san");
+                } else {
+                    binding.txtUserName.setText("User");
+                }
+            }
+            
+            // Set user role
+            if (binding.txtUserRole != null) {
+                String userRole = currentUser.getRole();
+                if (userRole != null && !userRole.isEmpty()) {
+                    // Capitalize first letter
+                    String capitalizedRole = userRole.substring(0, 1).toUpperCase() + 
+                                            userRole.substring(1).toLowerCase();
+                    binding.txtUserRole.setText(capitalizedRole);
+                } else {
+                    binding.txtUserRole.setText("User");
+                }
+            }
+            
+            // Load user avatar
+            if (binding.imgProfile != null) {
+                String avatarUrl = currentUser.getAvatarUrl() != null ? currentUser.getAvatarUrl() : currentUser.getAvatar();
+                
+                if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
+                    Glide.with(requireContext())
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.avater_placeholder)
+                            .error(R.drawable.avater_placeholder)
+                            .circleCrop()
+                            .into(binding.imgProfile);
+                } else {
+                    binding.imgProfile.setImageResource(R.drawable.avater_placeholder);
+                }
+            }
+        }
+    }
+
+    private boolean isValidUrl(String url) {
+        return url != null && (url.startsWith("http://") || url.startsWith("https://"));
     }
 
     private void showSearchDialog() {

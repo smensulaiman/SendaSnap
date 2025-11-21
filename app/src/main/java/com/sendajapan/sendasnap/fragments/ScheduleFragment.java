@@ -10,20 +10,36 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.sendajapan.sendasnap.activities.schedule.AddScheduleActivity;
 import com.sendajapan.sendasnap.activities.schedule.ScheduleDetailActivity;
 import com.sendajapan.sendasnap.adapters.TaskAdapter;
 import com.sendajapan.sendasnap.data.dto.PagedResult;
+import com.sendajapan.sendasnap.data.dto.StatusUpdateRequest;
+import com.sendajapan.sendasnap.data.dto.TaskResponseDto;
+import com.sendajapan.sendasnap.data.mapper.TaskMapper;
+import com.sendajapan.sendasnap.databinding.DialogTaskStatusBinding;
 import com.sendajapan.sendasnap.databinding.FragmentScheduleBinding;
+import com.sendajapan.sendasnap.dialogs.LoadingDialog;
+import com.sendajapan.sendasnap.models.ApiResponse;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.UserData;
+import com.sendajapan.sendasnap.networking.ApiService;
+import com.sendajapan.sendasnap.networking.RetrofitClient;
+import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,7 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClickListener {
+public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClickListener, TaskAdapter.OnTaskLongClickListener {
 
     private static final int ADD_TASK_REQUEST_CODE = 1001;
 
@@ -40,6 +56,8 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
     private SharedPrefsManager prefsManager;
     private TaskAdapter taskAdapter;
     private TaskViewModel taskViewModel;
+    private ApiService apiService;
+    private LoadingDialog loadingDialog;
 
     private Task.TaskStatus currentFilter = null;
     private String selectedDate;
@@ -66,6 +84,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
         prefsManager = SharedPrefsManager.getInstance(requireContext());
         taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(TaskViewModel.class);
+        apiService = RetrofitClient.getInstance(requireContext()).getApiService();
 
         setupRecyclerView();
         setupCalendar();
@@ -78,6 +97,7 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
 
     private void setupRecyclerView() {
         taskAdapter = new TaskAdapter(filteredTasks, this);
+        taskAdapter.setOnTaskLongClickListener(this);
         binding.recyclerViewTasks.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewTasks.setAdapter(taskAdapter);
     }
@@ -324,6 +344,179 @@ public class ScheduleFragment extends Fragment implements TaskAdapter.OnTaskClic
         Intent intent = new Intent(getContext(), ScheduleDetailActivity.class);
         intent.putExtra("task", task);
         startActivity(intent);
+    }
+
+    @Override
+    public void onTaskLongClick(Task task) {
+        showTaskStatusDialog(task);
+    }
+
+    private void showTaskStatusDialog(Task task) {
+        DialogTaskStatusBinding dialogBinding = DialogTaskStatusBinding.inflate(getLayoutInflater());
+        
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(requireContext());
+        dialogBuilder.setView(dialogBinding.getRoot());
+        dialogBuilder.setCancelable(true);
+        
+        AlertDialog dialog = dialogBuilder.create();
+        
+        dialogBinding.btnStatusPending.setOnClickListener(v -> {
+            updateTaskStatus(task, "pending", dialog);
+        });
+        
+        dialogBinding.btnStatusRunning.setOnClickListener(v -> {
+            updateTaskStatus(task, "running", dialog);
+        });
+        
+        dialogBinding.btnStatusCompleted.setOnClickListener(v -> {
+            updateTaskStatus(task, "completed", dialog);
+        });
+        
+        dialogBinding.btnStatusCancelled.setOnClickListener(v -> {
+            updateTaskStatus(task, "cancelled", dialog);
+        });
+        
+        dialogBinding.btnDelete.setOnClickListener(v -> {
+            dialog.dismiss();
+            showDeleteConfirmationDialog(task);
+        });
+        
+        dialogBinding.btnClose.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+        
+        dialog.show();
+    }
+
+    private void updateTaskStatus(Task task, String status, AlertDialog dialog) {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            return;
+        }
+
+        loadingDialog = new LoadingDialog.Builder(requireContext())
+                .setMessage("Updating task status...")
+                .setCancelable(false)
+                .setShowProgressIndicator(true)
+                .build();
+        loadingDialog.show();
+
+        StatusUpdateRequest request = new StatusUpdateRequest(status);
+        Call<ApiResponse<TaskResponseDto>> call =
+                apiService.updateTaskStatus(task.getId(), request);
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<TaskResponseDto>> call,
+                                   Response<ApiResponse<TaskResponseDto>> response) {
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    TaskResponseDto taskResponseDto = response.body().getData();
+                    if (taskResponseDto.getTask() != null) {
+                        Task updatedTask = TaskMapper.toDomain(taskResponseDto.getTask());
+
+                        updateTaskInList(updatedTask);
+                        dialog.dismiss();
+
+                        CookieBarToastHelper.showSuccess(requireContext(), "Success",
+                                "Task status updated successfully", CookieBarToastHelper.SHORT_DURATION);
+                    } else {
+                        CookieBarToastHelper.showError(requireContext(), "Error",
+                                "Invalid response from server", CookieBarToastHelper.LONG_DURATION);
+                    }
+                } else {
+                    String errorMessage = "Failed to update task status";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage = response.errorBody().string();
+                        } catch (Exception e) {
+                            errorMessage = "Failed to update task status";
+                        }
+                    }
+                    CookieBarToastHelper.showError(requireContext(), "Error", errorMessage, CookieBarToastHelper.LONG_DURATION);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<TaskResponseDto>> call, @NonNull Throwable t) {
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+
+                CookieBarToastHelper.showError(requireContext(), "Error",
+                        "Network error. Please check your connection and try again.", CookieBarToastHelper.LONG_DURATION);
+            }
+        });
+    }
+
+
+    private void updateTaskInList(Task updatedTask) {
+        for (int i = 0; i < allTasks.size(); i++) {
+            if (allTasks.get(i).getId() == updatedTask.getId()) {
+                allTasks.set(i, updatedTask);
+                break;
+            }
+        }
+        filterTasks();
+    }
+
+    private void showDeleteConfirmationDialog(Task task) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to delete this task? This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    deleteTask(task);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteTask(Task task) {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            return;
+        }
+
+        loadingDialog = new LoadingDialog.Builder(requireContext())
+                .setMessage("Deleting task...")
+                .setCancelable(false)
+                .setShowProgressIndicator(true)
+                .build();
+        loadingDialog.show();
+
+        Call<ApiResponse<ResponseBody>> call = 
+                apiService.deleteTask(task.getId());
+
+        call.enqueue(new Callback<ApiResponse<ResponseBody>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ResponseBody>> call,
+                                 Response<ApiResponse<ResponseBody>> response) {
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+
+                if (response.isSuccessful()) {
+                    allTasks.removeIf(t -> t.getId() == task.getId());
+                    filterTasks();
+                    CookieBarToastHelper.showSuccess(requireContext(), "Success",
+                            "Task deleted successfully", CookieBarToastHelper.SHORT_DURATION);
+                } else {
+                    String errorMessage = "Failed to delete task";
+                    CookieBarToastHelper.showError(requireContext(), "Error", errorMessage, CookieBarToastHelper.LONG_DURATION);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ResponseBody>> call, Throwable t) {
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+                
+                CookieBarToastHelper.showError(requireContext(), "Error",
+                        "Network error. Please check your connection and try again.", CookieBarToastHelper.LONG_DURATION);
+            }
+        });
     }
 
     @Override

@@ -66,6 +66,7 @@
                     android:hint="Task Title"
                     app:boxStrokeColor="@color/primary"
                     app:hintTextColor="@color/text_secondary"
+                    android:layout_marginTop="@dimen/dimen_4"
                     app:boxStrokeWidthFocused="2dp"
                     app:startIconTint="@color/primary"
                     app:startIconContentDescription="Task title"

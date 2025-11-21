@@ -18,29 +18,35 @@
 
     <ImageView
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:importantForAccessibility="no"
+        android:alpha="0.85"/>
+
+    <ImageView
+        android:id="@+id/imgTextureTop"
+        android:layout_width="match_parent"
         android:layout_height="300dp"
         android:alpha="0.25"
         android:rotation="180"
         android:importantForAccessibility="no"
         android:scaleType="fitEnd"
+        android:layout_marginTop="-100dp"
         android:src="@drawable/wave"
+        app:tint="@color/primary"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/imgTextureBottom"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:alpha="0.35"
         android:importantForAccessibility="no"
         android:scaleType="fitEnd"
+        android:layout_marginBottom="-100dp"
         android:src="@drawable/wave"
+        app:tint="@color/primary"
         app:layout_constraintBottom_toBottomOf="parent" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:importantForAccessibility="no"
-        android:alpha="0.75"/>
 
     <!-- Logo -->
     <androidx.appcompat.widget.AppCompatImageView

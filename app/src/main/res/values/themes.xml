@@ -62,7 +62,7 @@
     
     <!-- Splash screen theme -->
     <style name="Theme.SendaSnap.Splash" parent="Theme.SendaSnap">
-        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowBackground">@color/white</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>

@@ -9,6 +9,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -31,7 +33,6 @@ import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
-import com.sendajapan.sendasnap.networking.ApiManager;
 import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
@@ -54,7 +55,6 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private ActivityAddTaskBinding binding;
 
-    private ApiManager apiManager;
     private HapticFeedbackHelper hapticHelper;
     private SharedPrefsManager prefsManager;
     private TaskViewModel taskViewModel;
@@ -108,7 +108,6 @@ public class AddScheduleActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         prefsManager = SharedPrefsManager.getInstance(this);
         currentUser = prefsManager.getUser();
-        apiManager = ApiManager.getInstance(this);
         taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(TaskViewModel.class);
         userViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(UserViewModel.class);
     }
@@ -143,6 +142,25 @@ public class AddScheduleActivity extends AppCompatActivity {
             hapticHelper.vibrateClick();
             finish();
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (isEditMode) {
+            getMenuInflater().inflate(R.menu.menu_add_schedule, menu);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_save) {
+            hapticHelper.vibrateClick();
+            saveTask();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setupRecyclerView() {
@@ -392,11 +410,11 @@ public class AddScheduleActivity extends AppCompatActivity {
 
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            SimpleDateFormat displayFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
             selectedTime.setTime(inputFormat.parse(editingTask.getWorkTime()));
             binding.editTextTime.setText(displayFormat.format(selectedTime.getTime()));
         } catch (Exception e) {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
             binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
         }
 
@@ -420,7 +438,7 @@ public class AddScheduleActivity extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
         binding.editTextDate.setText(dateFormat.format(selectedDate.getTime()));
 
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
         binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
 
         setStatusChip(Task.TaskStatus.RUNNING);
@@ -620,12 +638,12 @@ public class AddScheduleActivity extends AppCompatActivity {
                 (view, hourOfDay, minute) -> {
                     selectedTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     selectedTime.set(Calendar.MINUTE, minute);
-                    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm", Locale.getDefault());
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
                     binding.editTextTime.setText(timeFormat.format(selectedTime.getTime()));
                 },
                 selectedTime.get(Calendar.HOUR_OF_DAY),
                 selectedTime.get(Calendar.MINUTE),
-                false);
+                true);
 
         timePickerDialog.setOnShowListener(dialog -> {
             timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE)

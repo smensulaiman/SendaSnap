@@ -108,18 +108,24 @@ public class UserDropdownAdapter extends RecyclerView.Adapter<UserDropdownAdapte
                 txtUserRole.setText(user.getRole() != null ? capitalizeFirst(user.getRole()) : "");
                 checkBoxSelected.setChecked(isSelected);
 
-                // Load avatar image
-                if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                // Load avatar image - prefer avatarUrl, fallback to avatar
+                String avatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getAvatar();
+                
+                if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
                     Glide.with(itemView.getContext())
-                            .load(user.getAvatar())
-                            .placeholder(R.drawable.ic_user_24)
-                            .error(R.drawable.ic_user_24)
+                            .load(avatarUrl)
+                            .placeholder(R.drawable.avater_placeholder)
+                            .error(R.drawable.avater_placeholder)
                             .circleCrop()
                             .into(imgUserAvatar);
                 } else {
-                    imgUserAvatar.setImageResource(R.drawable.ic_user_24);
+                    imgUserAvatar.setImageResource(R.drawable.avater_placeholder);
                 }
             }
+        }
+
+        private boolean isValidUrl(String url) {
+            return url != null && (url.startsWith("http://") || url.startsWith("https://"));
         }
 
         private String capitalizeFirst(String str) {

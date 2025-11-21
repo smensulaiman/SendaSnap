@@ -19,7 +19,7 @@ import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.ChatActivity;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
-import com.sendajapan.sendasnap.databinding.ActivityAddTaskBinding;
+import com.sendajapan.sendasnap.databinding.ActivityScheduleDetailBinding;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -41,7 +41,7 @@ import java.util.Set;
 
 public class ScheduleDetailActivity extends AppCompatActivity {
 
-    private ActivityAddTaskBinding binding;
+    private ActivityScheduleDetailBinding binding;
     private ApiManager apiManager;
     private ChatService chatService;
     private HapticFeedbackHelper hapticHelper;
@@ -51,6 +51,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private MenuItem chatMenuItem;
     private TextView badgeTextView;
     private ValueEventListener unreadCountListener;
+    private View chatActionView;
+    private boolean isChatOpening = false;
 
     private Task task;
     private Integer taskId;
@@ -62,7 +64,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
+        binding = ActivityScheduleDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         MyApplication.applyWindowInsets(binding.getRoot());
@@ -178,8 +180,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             openEditMode();
             return true;
         } else if (itemId == R.id.action_chat) {
-            hapticHelper.vibrateClick();
-            openTaskChat();
+            if (!isChatOpening) {
+                hapticHelper.vibrateClick();
+                openTaskChat();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -259,8 +263,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private void populateFields() {
         if (task == null) return;
 
-        binding.editTextTitle.setText(task.getTitle());
-        binding.editTextDescription.setText(task.getDescription());
+        binding.editTextTitle.setText(task.getTitle() != null ? task.getTitle() : "");
+        binding.editTextDescription.setText(task.getDescription() != null ? task.getDescription() : "");
 
         displayAssignees();
 
@@ -291,10 +295,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             binding.recyclerViewAttachments.setVisibility(View.GONE);
             binding.textNoFiles.setVisibility(View.VISIBLE);
         }
-
-        binding.buttonCancel.setVisibility(View.GONE);
-        binding.buttonSave.setVisibility(View.GONE);
-        binding.buttonAddFile.setVisibility(View.GONE);
     }
 
     private void setStatusChip(Task.TaskStatus status) {
@@ -384,12 +384,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     private void makeFieldsReadOnly() {
-        binding.editTextTitle.setEnabled(false);
-        binding.editTextDescription.setEnabled(false);
-        binding.editTextAssignee.setEnabled(false);
-        binding.editTextDate.setEnabled(false);
-        binding.editTextTime.setEnabled(false);
-
+        // Fields are already read-only TextViews in the detail layout
+        // Just disable chip interactions
         for (int i = 0; i < binding.chipGroupStatus.getChildCount(); i++) {
             View child = binding.chipGroupStatus.getChildAt(i);
             if (child instanceof Chip) {
@@ -424,9 +420,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
     private void setupChatIcon() {
         if (chatMenuItem != null) {
-            View actionView = getLayoutInflater().inflate(R.layout.menu_chat_badge, null);
-            chatMenuItem.setActionView(actionView);
-            badgeTextView = actionView.findViewById(R.id.badge_text);
+            chatActionView = getLayoutInflater().inflate(R.layout.menu_chat_badge, null);
+            chatMenuItem.setActionView(chatActionView);
+            badgeTextView = chatActionView.findViewById(R.id.badge_text);
             if (badgeTextView == null) {
                 badgeTextView = new TextView(this);
                 badgeTextView.setId(R.id.badge_text);
@@ -442,9 +438,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 badgeTextView.setVisibility(View.GONE);
             }
 
-            actionView.setOnClickListener(v -> {
-                hapticHelper.vibrateClick();
-                openTaskChat();
+            chatActionView.setOnClickListener(v -> {
+                if (!isChatOpening) {
+                    hapticHelper.vibrateClick();
+                    openTaskChat();
+                }
             });
         }
     }
@@ -620,6 +618,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     private void openTaskChat() {
+        if (isChatOpening) {
+            return;
+        }
+
         if (task == null) {
             Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show();
             return;
@@ -631,20 +633,34 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             return;
         }
 
+        isChatOpening = true;
+        if (chatActionView != null) {
+            chatActionView.setEnabled(false);
+        }
+
         String chatId = getTaskChatId();
         chatService.createOrGetGroupChatWithParticipants(String.valueOf(task.getId()), task.getTitle(), participants, new ChatService.GroupChatCallback() {
             @Override
             public void onSuccess(com.sendajapan.sendasnap.models.Chat chat) {
+                isChatOpening = false;
+                if (chatActionView != null) {
+                    chatActionView.setEnabled(true);
+                }
                 Intent intent = new Intent(ScheduleDetailActivity.this, ChatActivity.class);
                 intent.putExtra("chatId", chat.getChatId());
                 intent.putExtra("isGroupChat", true);
                 intent.putExtra("taskId", String.valueOf(task.getId()));
                 intent.putExtra("taskTitle", task.getTitle());
+                intent.putExtra("participants", (java.io.Serializable) participants);
                 startActivity(intent);
             }
 
             @Override
             public void onFailure(Exception e) {
+                isChatOpening = false;
+                if (chatActionView != null) {
+                    chatActionView.setEnabled(true);
+                }
                 Toast.makeText(ScheduleDetailActivity.this, "Failed to open chat: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

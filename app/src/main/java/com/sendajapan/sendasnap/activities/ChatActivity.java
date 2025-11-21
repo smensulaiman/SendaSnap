@@ -6,6 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -14,8 +19,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
@@ -23,6 +32,7 @@ import com.sendajapan.sendasnap.adapters.MessageAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityChatBinding;
 import com.sendajapan.sendasnap.databinding.BottomSheetImagePickerBinding;
 import com.sendajapan.sendasnap.models.Message;
+import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.services.FirebaseStorageService;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
@@ -30,6 +40,8 @@ import com.sendajapan.sendasnap.utils.FirebaseUtils;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 
 import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
@@ -49,6 +61,7 @@ public class ChatActivity extends AppCompatActivity {
     private String taskTitle;
 
     private boolean isGroupChat = false;
+    private List<UserData> participants = new ArrayList<>();
 
     private ActivityResultLauncher<String> filePickerLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
@@ -70,6 +83,8 @@ public class ChatActivity extends AppCompatActivity {
         initHelpers();
         getIntentData();
         setupToolbar();
+        setupKeyboardHandling();
+        setupMemberAvatars();
         setupRecyclerView();
         setupClickListeners();
         setupActivityResultLaunchers();
@@ -93,6 +108,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void getIntentData() {
         chatId = getIntent().getStringExtra("chatId");
         isGroupChat = getIntent().getBooleanExtra("isGroupChat", false);
@@ -101,6 +117,16 @@ public class ChatActivity extends AppCompatActivity {
         otherUserId = getIntent().getStringExtra("otherUserId");
         otherUserName = getIntent().getStringExtra("otherUserName");
         otherUserEmail = getIntent().getStringExtra("otherUserEmail");
+
+        Serializable participantsSerializable = getIntent().getSerializableExtra("participants");
+        if (participantsSerializable instanceof List) {
+            try {
+                participants = (List<UserData>) participantsSerializable;
+            } catch (ClassCastException e) {
+                android.util.Log.e("ChatActivity", "Failed to cast participants list", e);
+                participants = new ArrayList<>();
+            }
+        }
     }
 
     private void setupToolbar() {
@@ -117,7 +143,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         binding.toolbar.post(() -> {
-            android.widget.TextView titleView = findTitleTextView(binding.toolbar);
+            TextView titleView = findTitleTextView(binding.toolbar);
             if (titleView != null) {
                 titleView.setMaxLines(2);
                 titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -131,24 +157,108 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private android.widget.TextView findTitleTextView(android.view.ViewGroup parent) {
+    private TextView findTitleTextView(ViewGroup parent) {
         for (int i = 0; i < parent.getChildCount(); i++) {
-            android.view.View child = parent.getChildAt(i);
-            if (child instanceof android.widget.TextView) {
-                android.widget.TextView textView = (android.widget.TextView) child;
+            View child = parent.getChildAt(i);
+            if (child instanceof TextView) {
+                TextView textView = (TextView) child;
                 String toolbarTitle = binding.toolbar.getTitle() != null ? binding.toolbar.getTitle().toString() : "";
                 String textViewText = textView.getText() != null ? textView.getText().toString() : "";
-                if (textViewText.equals(toolbarTitle) && textView.getVisibility() == android.view.View.VISIBLE) {
+                if (textViewText.equals(toolbarTitle) && textView.getVisibility() == View.VISIBLE) {
                     return textView;
                 }
-            } else if (child instanceof android.view.ViewGroup) {
-                android.widget.TextView found = findTitleTextView((android.view.ViewGroup) child);
+            } else if (child instanceof ViewGroup) {
+                TextView found = findTitleTextView((ViewGroup) child);
                 if (found != null) {
                     return found;
                 }
             }
         }
         return null;
+    }
+
+    private void setupKeyboardHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.cardInput, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+            if (insets.bottom > 0) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
+                        .getLayoutParams();
+                params.bottomMargin = insets.bottom;
+                binding.cardInput.setLayoutParams(params);
+            } else {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
+                        .getLayoutParams();
+                int defaultMargin = (int) (16 * getResources().getDisplayMetrics().density);
+                params.bottomMargin = defaultMargin;
+                binding.cardInput.setLayoutParams(params);
+            }
+            return windowInsets;
+        });
+    }
+
+    private void setupMemberAvatars() {
+        if (!isGroupChat || participants == null || participants.isEmpty()) {
+            binding.layoutMemberAvatars.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.layoutMemberAvatars.setVisibility(View.VISIBLE);
+        binding.layoutMemberAvatars.removeAllViews();
+
+        int avatarSize = (int) (32 * getResources().getDisplayMetrics().density);
+        int overlapOffset = (int) (-12 * getResources().getDisplayMetrics().density);
+        int maxAvatars = 5;
+
+        int displayCount = Math.min(participants.size(), maxAvatars);
+
+        for (int i = 0; i < displayCount; i++) {
+            UserData user = participants.get(i);
+            ImageView avatarView = new ImageView(this);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
+            if (i > 0) {
+                params.setMargins(overlapOffset, 0, 0, 0);
+            }
+            avatarView.setLayoutParams(params);
+
+            avatarView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            avatarView.setBackgroundResource(R.drawable.avater_placeholder);
+
+            String avatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getAvatar();
+            if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
+                Glide.with(this)
+                        .load(avatarUrl)
+                        .placeholder(R.drawable.avater_placeholder)
+                        .error(R.drawable.avater_placeholder)
+                        .circleCrop()
+                        .into(avatarView);
+            } else {
+                Glide.with(this)
+                        .load(R.drawable.avater_placeholder)
+                        .circleCrop()
+                        .into(avatarView);
+            }
+
+            binding.layoutMemberAvatars.addView(avatarView);
+        }
+
+        if (participants.size() > maxAvatars) {
+            TextView moreTextView = new TextView(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
+            params.setMargins(overlapOffset, 0, 0, 0);
+            moreTextView.setLayoutParams(params);
+            moreTextView.setText("+" + (participants.size() - maxAvatars));
+            moreTextView.setTextSize(10);
+            moreTextView.setTextColor(getColor(R.color.white));
+            moreTextView.setGravity(android.view.Gravity.CENTER);
+            moreTextView.setBackgroundResource(R.drawable.avater_placeholder);
+            moreTextView.setBackgroundTintList(getColorStateList(R.color.primary));
+            binding.layoutMemberAvatars.addView(moreTextView);
+        }
+    }
+
+    private boolean isValidUrl(String url) {
+        return url != null && (url.startsWith("http://") || url.startsWith("https://"));
     }
 
     private void setupRecyclerView() {
@@ -175,7 +285,6 @@ public class ChatActivity extends AppCompatActivity {
         binding.btnAttachment.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
             Toast.makeText(ChatActivity.this, "File attachment is under development", Toast.LENGTH_SHORT).show();
-//            showAttachmentBottomSheet();
         });
 
         binding.etMessage.setOnEditorActionListener((v, actionId, event) -> {
@@ -232,8 +341,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendTextMessage() {
-        String messageText = binding.etMessage.getText() != null ?
-                binding.etMessage.getText().toString().trim() : "";
+        String messageText = binding.etMessage.getText() != null ? binding.etMessage.getText().toString().trim() : "";
 
         if (TextUtils.isEmpty(messageText)) {
             return;
@@ -272,8 +380,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void showAttachmentBottomSheet() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
-        BottomSheetImagePickerBinding bottomSheetBinding =
-                BottomSheetImagePickerBinding.inflate(getLayoutInflater());
+        BottomSheetImagePickerBinding bottomSheetBinding = BottomSheetImagePickerBinding.inflate(getLayoutInflater());
 
         bottomSheetBinding.layoutCamera.setOnClickListener(v -> {
             bottomSheet.dismiss();
@@ -295,9 +402,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            permissionLauncher.launch(new String[]{Manifest.permission.CAMERA});
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(new String[] { Manifest.permission.CAMERA });
             return;
         }
 
@@ -313,9 +419,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void openGallery() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-                != PackageManager.PERMISSION_GRANTED) {
-            permissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_IMAGES});
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(new String[] { Manifest.permission.READ_MEDIA_IMAGES });
             return;
         }
 
@@ -421,6 +527,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 try {
                     messageAdapter.updateMessages(messages);
+                    updateEmptyState(messages.isEmpty());
                     scrollToBottom();
                 } catch (Exception e) {
                     android.util.Log.e("ChatActivity", "Error updating messages", e);
@@ -431,9 +538,24 @@ public class ChatActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 if (!isFinishing() && binding != null) {
                     android.util.Log.e("ChatActivity", "Failed to load messages", e);
+                    updateEmptyState(true);
                 }
             }
         });
+    }
+
+    private void updateEmptyState(boolean isEmpty) {
+        if (binding == null) {
+            return;
+        }
+
+        if (isEmpty) {
+            binding.layoutEmptyState.setVisibility(View.VISIBLE);
+            binding.recyclerViewMessages.setVisibility(View.GONE);
+        } else {
+            binding.layoutEmptyState.setVisibility(View.GONE);
+            binding.recyclerViewMessages.setVisibility(View.VISIBLE);
+        }
     }
 
     private void markMessagesAsSeen() {

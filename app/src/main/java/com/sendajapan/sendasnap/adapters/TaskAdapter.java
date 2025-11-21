@@ -44,11 +44,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         void onTaskClick(Task task);
     }
 
+    public interface OnTaskLongClickListener {
+        void onTaskLongClick(Task task);
+    }
+
+    private OnTaskLongClickListener longClickListener;
+
     public TaskAdapter(List<Task> tasks, OnTaskClickListener listener) {
         this.tasks = tasks;
         this.listener = listener;
         this.chatService = ChatService.getInstance();
         this.currentUserId = FirebaseUtils.getCurrentUserId(null);
+    }
+
+    public void setOnTaskLongClickListener(OnTaskLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
     }
 
     @NonNull
@@ -113,6 +123,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 if (listener != null) {
                     listener.onTaskClick(tasks.get(getAdapterPosition()));
                 }
+            });
+
+            itemView.setOnLongClickListener(v -> {
+                if (longClickListener != null) {
+                    longClickListener.onTaskLongClick(tasks.get(getAdapterPosition()));
+                    return true;
+                }
+                return false;
             });
         }
 
