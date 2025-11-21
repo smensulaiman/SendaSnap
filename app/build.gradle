@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace 'com.sendajapan.sendasnap'
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.sendajapan.sendasnap"
@@ -19,18 +17,42 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            storeFile file('../key/app-key')
+            storePassword 'g@r@msh@'
+            keyAlias 'g@'
+            keyPassword 'g@r@msh@'
         }
     }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    
     buildFeatures {
         viewBinding true
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def appName = "SendaSnap"
+            def versionName = variant.versionName
+            def date = new Date().format('yy_MM_dd', TimeZone.getTimeZone("UTC"))
+            def outputFileName = "${appName}_${versionName}_${date}.apk"
+            outputFileName = outputFileName.replace(" ", "_")
+            output.outputFileName = outputFileName
+        }
     }
 }
 

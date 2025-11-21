@@ -21,7 +21,6 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
-import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -112,7 +111,7 @@ public interface ApiService {
 
     // Delete task
     @DELETE("api/v1/tasks/{id}")
-    Call<ApiResponse<ResponseBody>> deleteTask(@Path("id") Integer id);
+    Call<ApiResponse<Object>> deleteTask(@Path("id") Integer id);
 
     // Update task status
     @POST("api/v1/tasks/{id}/status")

@@ -294,13 +294,13 @@ public class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public void delete(Integer id, TaskRepositoryCallback<Void> callback) {
-        Call<ApiResponse<ResponseBody>> call = apiService.deleteTask(id);
-        call.enqueue(new Callback<ApiResponse<ResponseBody>>() {
+        Call<ApiResponse<Object>> call = apiService.deleteTask(id);
+        call.enqueue(new Callback<ApiResponse<Object>>() {
             @Override
-            public void onResponse(Call<ApiResponse<ResponseBody>> call,
-                                   Response<ApiResponse<ResponseBody>> response) {
+            public void onResponse(Call<ApiResponse<Object>> call,
+                                   Response<ApiResponse<Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<ResponseBody> apiResponse = response.body();
+                    ApiResponse<Object> apiResponse = response.body();
 
                     if (apiResponse.getSuccess() != null && apiResponse.getSuccess()) {
                         callback.onSuccess(null);
@@ -320,7 +320,7 @@ public class TaskRepositoryImpl implements TaskRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<ResponseBody>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<Object>> call, Throwable t) {
                 String errorMessage = "Network error. Please check your connection and try again.";
                 if (t.getMessage() != null) {
                     errorMessage = t.getMessage();

@@ -3,6 +3,8 @@ package com.sendajapan.sendasnap.networking;
 import android.content.Context;
 import android.util.Log;
 
+import com.sendajapan.sendasnap.BuildConfig;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -20,19 +22,22 @@ public class RetrofitClient {
 
         AuthInterceptor authInterceptor = new AuthInterceptor(context.getApplicationContext());
 
-        // Setup logging interceptor
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> {
-            Log.d("OkHttp", message);
-        });
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                 .addInterceptor(authInterceptor)
-                .addInterceptor(loggingInterceptor)
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
+                .writeTimeout(60, TimeUnit.SECONDS);
+
+        // Only enable logging in debug builds for security
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> {
+                Log.d("OkHttp", message);
+            });
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            clientBuilder.addInterceptor(loggingInterceptor);
+        }
+
+        OkHttpClient okHttpClient = clientBuilder.build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
