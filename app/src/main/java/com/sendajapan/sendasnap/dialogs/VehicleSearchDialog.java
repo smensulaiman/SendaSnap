@@ -23,6 +23,7 @@ public class VehicleSearchDialog {
     }
 
     public static class Builder {
+
         private final Context context;
         private OnSearchListener searchListener;
         private boolean cancelable = true;

@@ -19,4 +19,17 @@
         app:layout_constraintTop_toTopOf="parent"
         android:src="@drawable/logo_senda_snap"/>
 
+    <TextView
+        android:id="@+id/txtVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="v_1.0"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:textSize="@dimen/text_size_xsmall"
+        android:textColor="@color/gray_600"
+        android:layout_marginBottom="@dimen/dimen_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

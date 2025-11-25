@@ -39,6 +39,16 @@
     @retrofit2.http.* <methods>;
 }
 
+# Keep all Retrofit service interfaces
+-keep interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# Keep classes used as Retrofit request/response bodies
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
 # OkHttp
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
@@ -46,9 +56,31 @@
 -dontwarn okio.**
 
 # Keep all model classes (for Gson and Retrofit)
--keep class com.sendajapan.sendasnap.models.** { *; }
--keep class com.sendajapan.sendasnap.data.model.** { *; }
--keep class com.sendajapan.sendasnap.data.dto.** { *; }
+# Keep all fields, constructors, and methods in model classes
+-keep class com.sendajapan.sendasnap.models.** { 
+    <fields>;
+    <init>(...);
+    <methods>;
+}
+-keep class com.sendajapan.sendasnap.data.model.** { 
+    <fields>;
+    <init>(...);
+    <methods>;
+}
+-keep class com.sendajapan.sendasnap.data.dto.** { 
+    <fields>;
+    <init>(...);
+    <methods>;
+}
+
+# Keep classes with @SerializedName annotations (Gson models)
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep generic types used with Retrofit (e.g., ApiResponse<T>)
+-keep class com.sendajapan.sendasnap.models.ApiResponse { *; }
+-keep class com.sendajapan.sendasnap.models.ApiResponse$* { *; }
 
 # Glide
 -keep public class * implements com.bumptech.glide.module.GlideModule

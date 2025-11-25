@@ -8,7 +8,7 @@
         android:icon="@drawable/ic_notifications"
         android:title="Notifications"
         app:showAsAction="ifRoom"
-        app:iconTint="@color/white" />
+        app:iconTint="@color/text_primary" />
 
     <!-- Three Dot Menu -->
     <item
@@ -16,24 +16,18 @@
         android:icon="@drawable/ic_more_vert"
         android:title="More"
         app:showAsAction="always"
-        app:iconTint="@color/white">
+        app:iconTint="@color/text_primary">
         
         <menu>
-            <!-- Submenu items -->
-            <item
-                android:id="@+id/action_settings"
-                android:title="Settings"
-                android:icon="@drawable/ic_settings" />
-            
-            <item
-                android:id="@+id/action_help"
-                android:title="Help &amp; Support"
-                android:icon="@drawable/ic_help" />
-            
             <item
                 android:id="@+id/action_about"
                 android:title="About"
                 android:icon="@drawable/ic_info" />
+            
+            <item
+                android:id="@+id/action_logout"
+                android:title="Logout"
+                android:icon="@drawable/ic_logout" />
         </menu>
         
     </item>

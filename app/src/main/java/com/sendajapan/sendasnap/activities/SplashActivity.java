@@ -17,8 +17,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.sendajapan.sendasnap.BuildConfig;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
+import com.sendajapan.sendasnap.databinding.ActivitySplashBinding;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 @SuppressLint("CustomSplashScreen")
@@ -26,10 +28,15 @@ public class SplashActivity extends AppCompatActivity {
 
     private static final int SPLASH_DELAY = 2000;
 
+    private ActivitySplashBinding binding;
+
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(R.layout.activity_splash);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -37,6 +44,12 @@ public class SplashActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        if (!BuildConfig.DEBUG) {
+            binding.txtVersion.setText(BuildConfig.VERSION_NAME);
+        } else {
+            binding.txtVersion.setVisibility(View.GONE);
+        }
 
         startLogoAnimation();
 

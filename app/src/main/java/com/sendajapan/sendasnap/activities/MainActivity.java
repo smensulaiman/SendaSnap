@@ -1,6 +1,6 @@
 package com.sendajapan.sendasnap.activities;
 
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -59,38 +58,99 @@ public class MainActivity extends AppCompatActivity {
         setupDrawer();
         setupBottomNavigation();
         setupNetworkMonitoring();
-        setupToolbarMenu();
         setupBackPressHandler();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
+        } else {
+            // Ensure menu is updated when activity is recreated
+            invalidateOptionsMenu();
         }
     }
 
-    private void setupToolbarMenu() {
-        binding.toolbar.setOnMenuItemClickListener(item -> {
-            hapticHelper.vibrateClick();
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
 
-            int itemId = item.getItemId();
-            if (itemId == R.id.action_notifications) {
-                openNotifications();
-                return true;
-            } else if (itemId == R.id.action_settings) {
-                openSettings();
-                return true;
-            } else if (itemId == R.id.action_help) {
-                openHelp();
-                return true;
-            } else if (itemId == R.id.action_about) {
-                openAbout();
-                return true;
-            }
-            return false;
-        });
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        hapticHelper.vibrateClick();
+
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_notifications) {
+            openNotifications();
+            return true;
+        } else if (itemId == R.id.action_about) {
+            openAbout();
+            return true;
+        } else if (itemId == R.id.action_logout) {
+            handleLogout();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void openNotifications() {
         Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void handleLogout() {
+        // Show confirmation dialog
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure you want to logout?");
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+
+        builder.setPositiveButton("Logout", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            performLogout();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            if (positiveButton instanceof MaterialButton) {
+                ((MaterialButton) positiveButton).setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(
+                                getResources().getColor(R.color.error, null)
+                        )
+                );
+            } else {
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
+            }
+            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
+            positiveButton.setAllCaps(false);
+        }
+
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
+            negativeButton.setAllCaps(false);
+        }
+    }
+
+    private void performLogout() {
+        // Clear user session/preferences
+        com.sendajapan.sendasnap.utils.SharedPrefsManager prefsManager =
+                com.sendajapan.sendasnap.utils.SharedPrefsManager.getInstance(this);
+        prefsManager.logout();
+
+        // Navigate to LoginActivity
+        Intent intent = new Intent(this, com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
+        // Finish current activity
+        finish();
     }
 
     private void openSettings() {
@@ -112,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDrawer() {
         setSupportActionBar(binding.toolbar);
+        // Ensure menu is created after setting support action bar
+        supportInvalidateOptionsMenu();
         new DrawerController(this,
                 binding.drawerLayout,
                 binding.navigationView,
@@ -155,11 +217,38 @@ public class MainActivity extends AppCompatActivity {
     private void updateToolbarTitle(Fragment fragment) {
         if (fragment instanceof HomeFragment) {
             binding.toolbar.setTitle("Home");
+            // Show menu items for HomeFragment
+            invalidateOptionsMenu();
         } else if (fragment instanceof ScheduleFragment) {
             binding.toolbar.setTitle("Work Schedule");
+            // Hide menu items for other fragments
+            invalidateOptionsMenu();
         } else if (fragment instanceof ProfileFragment) {
             binding.toolbar.setTitle("Profile");
+            // Hide menu items for other fragments
+            invalidateOptionsMenu();
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(android.view.Menu menu) {
+        // Get current fragment
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+
+        // Default: show menu items (for HomeFragment)
+        boolean showMenu = currentFragment == null || currentFragment instanceof HomeFragment;
+
+        android.view.MenuItem notificationsItem = menu.findItem(R.id.action_notifications);
+        android.view.MenuItem moreItem = menu.findItem(R.id.action_more);
+
+        if (notificationsItem != null) {
+            notificationsItem.setVisible(showMenu);
+        }
+        if (moreItem != null) {
+            moreItem.setVisible(showMenu);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     public void switchToProfileTab() {
@@ -223,9 +312,9 @@ public class MainActivity extends AppCompatActivity {
         if (positiveButton != null) {
             if (positiveButton instanceof MaterialButton) {
                 ((MaterialButton) positiveButton).setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                        getResources().getColor(R.color.error, null)
-                    )
+                        android.content.res.ColorStateList.valueOf(
+                                getResources().getColor(R.color.error, null)
+                        )
                 );
             } else {
                 positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));

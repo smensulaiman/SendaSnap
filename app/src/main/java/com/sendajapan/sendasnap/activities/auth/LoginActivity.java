@@ -1,8 +1,8 @@
 package com.sendajapan.sendasnap.activities.auth;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -35,6 +35,8 @@ import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import org.aviran.cookiebar2.CookieBar;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -48,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private HapticFeedbackHelper hapticHelper;
     private ApiService apiService;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +76,16 @@ public class LoginActivity extends AppCompatActivity {
         initHelpers();
         setupClickListeners();
         startTextureAnimations();
+
+
+        @SuppressLint("SimpleDateFormat") String year = new SimpleDateFormat("yyyy").format(new Date());
+        binding.txtFooter.setText("© " + year + " SendaSnap. All rights reserved.");
+
+        binding.txtFooter.setOnLongClickListener(view -> {
+            binding.etUsername.setText("acj.shiroyama@gmail.com");
+            binding.etPassword.setText("acjl7861");
+            return false;
+        });
     }
 
     private void initHelpers() {
@@ -280,9 +293,6 @@ public class LoginActivity extends AppCompatActivity {
             binding.etUsername.setText(savedEmail);
             binding.etPassword.setText(savedPassword);
             binding.cbRememberMe.setChecked(true);
-        } else {
-            binding.etUsername.setText("acj.shiroyama@gmail.com");
-            binding.etPassword.setText("acjl7861");
         }
     }
 
