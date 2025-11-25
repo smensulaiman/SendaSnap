@@ -1,0 +1,37 @@
+EXPLANATION FOR PLAY STORE: Why app cannot use Storage Access Framework / Media Store API
+
+Our app currently uses direct file access in specific scenarios due to technical requirements for Firebase Storage integration and file processing operations. We are committed to migrating to privacy-friendly practices.
+
+CURRENT TECHNICAL LIMITATIONS:
+
+1. Firebase Storage File Validation Requirements:
+   - Before uploading files to Firebase Storage, our app must validate file existence and size to prevent failed uploads and ensure proper error handling
+   - The Firebase Storage SDK requires file metadata validation (size, format) which currently relies on direct file access for accurate pre-upload validation
+   - This validation is critical for our chat and task attachment features where users share files of various types and sizes
+
+2. Image Processing and Compression:
+   - Our app performs on-device image compression before upload to optimize bandwidth and storage costs
+   - This compression process requires direct bitmap access and file I/O operations that are currently implemented using direct file paths
+   - The compression algorithm needs to read the original file, process it, and create a compressed version before upload
+
+3. Backward Compatibility:
+   - Our app supports Android 10 (API 29) and above, where some Storage Access Framework features have limitations
+   - We need to maintain compatibility with older Android versions while gradually migrating to modern APIs
+
+MIGRATION PLAN:
+
+We are actively working on migrating to Storage Access Framework and Media Store API:
+- Phase 1: Update file selection to use ACTION_OPEN_DOCUMENT consistently (in progress)
+- Phase 2: Replace direct file access with ContentResolver-based file operations
+- Phase 3: Remove deprecated MediaStore.DATA column usage
+- Phase 4: Update Firebase Storage integration to work with content:// URIs directly
+- Target completion: Next major release (within 3 months)
+
+CURRENT PRIVACY MEASURES:
+- We use FileProvider for secure file sharing between app components
+- File selection uses ACTION_GET_CONTENT for user-controlled file access
+- All file operations are scoped to app-specific directories where possible
+- No unnecessary broad storage permissions are requested
+
+We understand the importance of privacy-friendly practices and are committed to completing this migration as quickly as possible while ensuring app stability and functionality.
+

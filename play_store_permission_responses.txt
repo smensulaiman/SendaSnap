@@ -1,0 +1,16 @@
+PERMISSION EXPLANATIONS FOR PLAY STORE (250 characters each)
+=============================================================
+
+android.permission.READ_MEDIA_IMAGES (250 characters):
+-------------------------------------------------------
+Users select images from gallery to share in team chat messages and attach vehicle photos for documentation. Required for core collaboration features where team members share visual information about vehicles and tasks.
+
+Character count: 219
+
+
+android.permission.READ_MEDIA_VIDEO (250 characters):
+------------------------------------------------------
+Allows users to select and share video files through the file picker in chat conversations and task attachments. Enables comprehensive multimedia file sharing essential for team collaboration and vehicle documentation workflows.
+
+Character count: 228
+

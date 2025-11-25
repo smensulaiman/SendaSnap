@@ -1,0 +1,682 @@
+{
+  "app_name": "SendaSnap",
+  "version": "1.0",
+  "last_updated": "2024",
+  "manual": {
+    "introduction": {
+      "title": "Welcome to SendaSnap",
+      "description": "SendaSnap is a comprehensive mobile application designed for vehicle management, task scheduling, and team collaboration. This manual will guide you through all features and help you get the most out of the app.",
+      "target_audience": [
+        "Fleet managers and vehicle administrators",
+        "Automotive professionals",
+        "Task coordinators and project managers",
+        "Team leaders and supervisors"
+      ]
+    },
+    "getting_started": {
+      "title": "Getting Started",
+      "sections": [
+        {
+          "section_title": "Installation & Requirements",
+          "content": [
+            {
+              "step": 1,
+              "title": "System Requirements",
+              "details": [
+                "Android 10 (API level 29) or higher",
+                "Internet connection for syncing data",
+                "Camera access for photo capture (optional)",
+                "Storage permission for saving files (optional)"
+              ]
+            },
+            {
+              "step": 2,
+              "title": "Installing the App",
+              "details": [
+                "Download SendaSnap from the Google Play Store",
+                "Follow the installation prompts",
+                "Grant necessary permissions when requested",
+                "Launch the app to begin"
+              ]
+            }
+          ]
+        },
+        {
+          "section_title": "First Time Setup",
+          "content": [
+            {
+              "step": 1,
+              "title": "Creating an Account",
+              "details": [
+                "Open the app and tap 'Sign Up' or 'Create Account'",
+                "Enter your email address and create a secure password",
+                "Fill in your personal information (name, etc.)",
+                "Accept the terms and conditions",
+                "Tap 'Register' to create your account"
+              ]
+            },
+            {
+              "step": 2,
+              "title": "Logging In",
+              "details": [
+                "Open the app",
+                "Enter your email address and password",
+                "Optionally check 'Remember Me' to stay logged in",
+                "Tap 'Login' to access your account"
+              ]
+            },
+            {
+              "step": 3,
+              "title": "Granting Permissions",
+              "details": [
+                "Camera Permission: Required for capturing vehicle photos",
+                "Storage Permission: Required for accessing gallery images and saving files",
+                "Notifications: Required for receiving task reminders and chat messages",
+                "Grant permissions when prompted for the best experience"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "navigation": {
+      "title": "App Navigation",
+      "sections": [
+        {
+          "section_title": "Bottom Navigation Bar",
+          "content": [
+            {
+              "icon": "Home",
+              "name": "Home",
+              "description": "Access vehicle search, recent vehicles, and quick actions"
+            },
+            {
+              "icon": "Schedule",
+              "name": "Schedule",
+              "description": "View and manage tasks, schedules, and assignments"
+            },
+            {
+              "icon": "Profile",
+              "name": "Profile",
+              "description": "Access your profile, settings, and account information"
+            }
+          ]
+        },
+        {
+          "section_title": "Top Toolbar",
+          "content": [
+            {
+              "icon": "Notifications",
+              "name": "Notifications",
+              "description": "View all notifications for tasks and messages"
+            },
+            {
+              "icon": "About",
+              "name": "About",
+              "description": "View app information and version details"
+            },
+            {
+              "icon": "Logout",
+              "name": "Logout",
+              "description": "Sign out of your account"
+            }
+          ]
+        },
+        {
+          "section_title": "Navigation Drawer",
+          "content": [
+            {
+              "item": "Home",
+              "description": "Return to home screen"
+            },
+            {
+              "item": "Schedule",
+              "description": "Go to schedule management"
+            },
+            {
+              "item": "Profile",
+              "description": "Access profile settings"
+            },
+            {
+              "item": "History",
+              "description": "View search history and recent activity"
+            }
+          ]
+        }
+      ]
+    },
+    "features": {
+      "title": "Features Guide",
+      "sections": [
+        {
+          "feature_name": "Vehicle Search & Management",
+          "icon": "🚗",
+          "sections": [
+            {
+              "section_title": "Searching for Vehicles",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Access Vehicle Search",
+                  "description": "From the Home screen, locate the search bar at the top"
+                },
+                {
+                  "step": 2,
+                  "title": "Enter Search Criteria",
+                  "description": "Type the chassis number or other vehicle identifier in the search field"
+                },
+                {
+                  "step": 3,
+                  "title": "View Results",
+                  "description": "Tap on a vehicle from the search results to view detailed information"
+                },
+                {
+                  "step": 4,
+                  "title": "Search History",
+                  "description": "Previously searched vehicles appear in the recent vehicles section for quick access"
+                }
+              ]
+            },
+            {
+              "section_title": "Vehicle Details",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "View Vehicle Information",
+                  "description": "After selecting a vehicle, view comprehensive details including specifications, history, and related information"
+                },
+                {
+                  "step": 2,
+                  "title": "Add Vehicle Photos",
+                  "description": "Tap the camera icon to capture or select photos for vehicle documentation"
+                },
+                {
+                  "step": 3,
+                  "title": "Photo Options",
+                  "description": "Choose to take a new photo with camera or select from gallery. Photos are automatically saved and associated with the vehicle"
+                }
+              ]
+            },
+            {
+              "section_title": "Recent Vehicles",
+              "description": "Access your recently viewed vehicles from the Home screen. Tap any vehicle to view its details again."
+            }
+          ]
+        },
+        {
+          "feature_name": "Task & Schedule Management",
+          "icon": "📅",
+          "sections": [
+            {
+              "section_title": "Creating a Schedule",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Navigate to Schedule",
+                  "description": "Tap the 'Schedule' tab in the bottom navigation bar"
+                },
+                {
+                  "step": 2,
+                  "title": "Add New Schedule",
+                  "description": "Tap the '+' or 'Add Schedule' button to create a new schedule"
+                },
+                {
+                  "step": 3,
+                  "title": "Fill Schedule Details",
+                  "description": "Enter schedule title, description, date, time, and other relevant information"
+                },
+                {
+                  "step": 4,
+                  "title": "Assign Team Members",
+                  "description": "Select team members who should be assigned to this schedule"
+                },
+                {
+                  "step": 5,
+                  "title": "Add Attachments",
+                  "description": "Optionally attach files, images, or documents related to the schedule"
+                },
+                {
+                  "step": 6,
+                  "title": "Set Priority",
+                  "description": "Choose priority level (High, Normal, Low) for the schedule"
+                },
+                {
+                  "step": 7,
+                  "title": "Save Schedule",
+                  "description": "Tap 'Save' or 'Create' to save the schedule. Team members will be notified"
+                }
+              ]
+            },
+            {
+              "section_title": "Viewing Schedules",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Schedule List",
+                  "description": "View all your schedules in the Schedule tab, organized by date"
+                },
+                {
+                  "step": 2,
+                  "title": "Filter Schedules",
+                  "description": "Filter schedules by status (Pending, In Progress, Completed), priority, or date range"
+                },
+                {
+                  "step": 3,
+                  "title": "Schedule Details",
+                  "description": "Tap on any schedule to view full details, assigned members, attachments, and chat discussions"
+                }
+              ]
+            },
+            {
+              "section_title": "Managing Tasks",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Update Task Status",
+                  "description": "From schedule details, update task progress and mark tasks as complete"
+                },
+                {
+                  "step": 2,
+                  "title": "Edit Tasks",
+                  "description": "Tap the edit icon to modify task details, assignments, or priority"
+                },
+                {
+                  "step": 3,
+                  "title": "Delete Tasks",
+                  "description": "Swipe left or use the delete option to remove tasks (if you have permission)"
+                }
+              ]
+            },
+            {
+              "section_title": "Task Notifications",
+              "description": "Receive push notifications for task assignments, reminders, and updates. Notifications appear in the app and as system notifications."
+            }
+          ]
+        },
+        {
+          "feature_name": "Team Communication (Chat)",
+          "icon": "💬",
+          "sections": [
+            {
+              "section_title": "Starting a Chat",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Access Chat",
+                  "description": "From a schedule detail page, tap the chat icon or message button to start a group chat"
+                },
+                {
+                  "step": 2,
+                  "title": "Individual Chat",
+                  "description": "Access contacts or team members list to start one-on-one conversations"
+                },
+                {
+                  "step": 3,
+                  "title": "Group Chat",
+                  "description": "Group chats are automatically created for schedules, including all assigned team members"
+                }
+              ]
+            },
+            {
+              "section_title": "Sending Messages",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Text Messages",
+                  "description": "Type your message in the input field at the bottom and tap the send button"
+                },
+                {
+                  "step": 2,
+                  "title": "Send Images",
+                  "description": "Tap the attachment icon, select 'Gallery' or 'Camera', choose or capture an image, and send"
+                },
+                {
+                  "step": 3,
+                  "title": "Send Files",
+                  "description": "Tap the attachment icon, select 'File', choose a file from your device, and send"
+                },
+                {
+                  "step": 4,
+                  "title": "View Sent Messages",
+                  "description": "All sent messages appear in the chat with timestamps. Images and files are displayed inline"
+                }
+              ]
+            },
+            {
+              "section_title": "Chat Features",
+              "features": [
+                {
+                  "feature": "Real-time Messaging",
+                  "description": "Messages are delivered instantly to all participants"
+                },
+                {
+                  "feature": "Unread Message Indicators",
+                  "description": "Unread messages are highlighted with badges and notifications"
+                },
+                {
+                  "feature": "Chat History",
+                  "description": "All chat messages are saved and accessible for future reference"
+                },
+                {
+                  "feature": "Message Notifications",
+                  "description": "Receive push notifications when new messages arrive, even when the app is closed"
+                }
+              ]
+            },
+            {
+              "section_title": "Managing Attachments",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "View Attachments",
+                  "description": "Tap on any image or file in the chat to view or download it"
+                },
+                {
+                  "step": 2,
+                  "title": "Image Compression",
+                  "description": "Images are automatically compressed before upload to save bandwidth"
+                },
+                {
+                  "step": 3,
+                  "title": "File Size Limits",
+                  "description": "Images: Maximum 5MB, Files: Maximum 10MB. Larger files will be rejected"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "feature_name": "Profile & Settings",
+          "icon": "👤",
+          "sections": [
+            {
+              "section_title": "Viewing Your Profile",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Access Profile",
+                  "description": "Tap the 'Profile' tab in the bottom navigation bar"
+                },
+                {
+                  "step": 2,
+                  "title": "Profile Information",
+                  "description": "View your name, email, and other account details"
+                }
+              ]
+            },
+            {
+              "section_title": "Account Management",
+              "options": [
+                {
+                  "option": "Edit Profile",
+                  "description": "Update your personal information and profile details"
+                },
+                {
+                  "option": "Change Password",
+                  "description": "Update your account password for security"
+                },
+                {
+                  "option": "Logout",
+                  "description": "Sign out of your account. Use the logout option in the toolbar menu"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "feature_name": "Search History",
+          "icon": "🔍",
+          "sections": [
+            {
+              "section_title": "Viewing History",
+              "steps": [
+                {
+                  "step": 1,
+                  "title": "Access History",
+                  "description": "Navigate to History from the navigation drawer or home screen"
+                },
+                {
+                  "step": 2,
+                  "title": "Recent Searches",
+                  "description": "View your recent vehicle searches with timestamps"
+                },
+                {
+                  "step": 3,
+                  "title": "Quick Access",
+                  "description": "Tap on any history item to quickly access that vehicle again"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "tips_and_tricks": {
+      "title": "Tips & Tricks",
+      "tips": [
+        {
+          "tip": "Quick Vehicle Access",
+          "description": "Use the recent vehicles section on the home screen for quick access to frequently viewed vehicles"
+        },
+        {
+          "tip": "Efficient Task Management",
+          "description": "Set task priorities to help organize your workflow. High priority tasks appear first"
+        },
+        {
+          "tip": "Photo Documentation",
+          "description": "Take photos directly from the vehicle details screen for instant documentation without leaving the app"
+        },
+        {
+          "tip": "Group Collaboration",
+          "description": "Use group chats for schedule discussions to keep all team members informed in one place"
+        },
+        {
+          "tip": "Notification Management",
+          "description": "Check the notifications icon in the toolbar to see all your task and message notifications in one place"
+        },
+        {
+          "tip": "Haptic Feedback",
+          "description": "The app provides haptic feedback for better interaction. Feel the vibration when tapping buttons"
+        },
+        {
+          "tip": "Offline Access",
+          "description": "Recently viewed vehicles and cached data are available offline. Full functionality requires internet connection"
+        }
+      ]
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "common_issues": [
+        {
+          "issue": "Cannot Login",
+          "solutions": [
+            "Verify your email and password are correct",
+            "Check your internet connection",
+            "Try resetting your password if forgotten",
+            "Ensure the app is updated to the latest version"
+          ]
+        },
+        {
+          "issue": "Vehicle Search Not Working",
+          "solutions": [
+            "Check your internet connection",
+            "Verify you entered the correct chassis number or identifier",
+            "Try refreshing the search",
+            "Clear app cache if the issue persists"
+          ]
+        },
+        {
+          "issue": "Images Not Uploading",
+          "solutions": [
+            "Check your internet connection",
+            "Ensure image size is under 5MB",
+            "Grant storage permission if prompted",
+            "Try compressing the image before uploading"
+          ]
+        },
+        {
+          "issue": "Chat Messages Not Sending",
+          "solutions": [
+            "Check your internet connection",
+            "Verify you have permission to send messages in the chat",
+            "Try closing and reopening the chat",
+            "Restart the app if the issue persists"
+          ]
+        },
+        {
+          "issue": "Notifications Not Appearing",
+          "solutions": [
+            "Check notification permissions in app settings",
+            "Verify device notification settings are enabled",
+            "Check if 'Do Not Disturb' mode is active",
+            "Restart the app to refresh notification service"
+          ]
+        },
+        {
+          "issue": "App Crashes or Freezes",
+          "solutions": [
+            "Close and restart the app",
+            "Clear app cache from device settings",
+            "Update to the latest version of the app",
+            "Restart your device if the problem continues",
+            "Contact support if the issue persists"
+          ]
+        },
+        {
+          "issue": "Files Cannot Be Attached",
+          "solutions": [
+            "Ensure file size is under 10MB",
+            "Grant storage permission if prompted",
+            "Check that the file format is supported",
+            "Try selecting the file again"
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": [
+        {
+          "question": "How do I reset my password?",
+          "answer": "Use the 'Forgot Password' option on the login screen. Enter your email address and follow the instructions sent to your email."
+        },
+        {
+          "question": "Can I use the app offline?",
+          "answer": "Limited offline functionality is available for recently viewed vehicles and cached data. Full features require an internet connection."
+        },
+        {
+          "question": "How many team members can be in a group chat?",
+          "answer": "Group chats can include all team members assigned to a schedule. There is no specific limit, but performance may vary with very large groups."
+        },
+        {
+          "question": "What file types can I attach?",
+          "answer": "You can attach images (JPG, PNG) and various file types. Images are limited to 5MB and other files to 10MB."
+        },
+        {
+          "question": "How do I delete a schedule or task?",
+          "answer": "Open the schedule details, tap the edit/delete option. Note that deletion may require appropriate permissions."
+        },
+        {
+          "question": "Can I change my email address?",
+          "answer": "Email changes should be done through your account settings in the Profile section, if available, or contact support."
+        },
+        {
+          "question": "Why are my images compressed?",
+          "answer": "Images are automatically compressed before upload to optimize bandwidth usage and reduce storage costs while maintaining acceptable quality."
+        },
+        {
+          "question": "How do I report a bug or issue?",
+          "answer": "Contact support through the app's About section or use the contact information provided in the app settings."
+        },
+        {
+          "question": "Can I customize notifications?",
+          "answer": "Notification settings can be adjusted through your device settings. App-specific notification preferences may be available in future updates."
+        },
+        {
+          "question": "Is my data secure?",
+          "answer": "Yes, SendaSnap uses industry-standard encryption and security measures to protect your information. All data is securely stored and transmitted."
+        }
+      ]
+    },
+    "support": {
+      "title": "Support & Contact",
+      "sections": [
+        {
+          "section_title": "Getting Help",
+          "content": [
+            "Access the 'About' section from the toolbar menu for app information",
+            "Check this user manual for detailed feature explanations",
+            "Review the FAQ section for common questions",
+            "Contact support through the app or support page"
+          ]
+        },
+        {
+          "section_title": "Reporting Issues",
+          "content": [
+            "Document the issue with screenshots if possible",
+            "Note the steps that led to the problem",
+            "Include your device model and Android version",
+            "Contact support with all relevant information"
+          ]
+        },
+        {
+          "section_title": "Feedback",
+          "content": [
+            "We welcome your feedback and suggestions",
+            "Use the app's feedback mechanism if available",
+            "Your input helps us improve SendaSnap"
+          ]
+        }
+      ]
+    },
+    "appendix": {
+      "title": "Appendix",
+      "sections": [
+        {
+          "section_title": "Keyboard Shortcuts",
+          "content": "Not applicable - Mobile app"
+        },
+        {
+          "section_title": "Glossary",
+          "terms": [
+            {
+              "term": "Chassis Number",
+              "definition": "A unique identifier for a vehicle, used for searching and identification"
+            },
+            {
+              "term": "Schedule",
+              "definition": "A task or work assignment with associated details, dates, and team members"
+            },
+            {
+              "term": "Group Chat",
+              "definition": "A chat conversation involving multiple team members, typically associated with a schedule"
+            },
+            {
+              "term": "Haptic Feedback",
+              "definition": "Vibration feedback provided by the device when interacting with app elements"
+            }
+          ]
+        },
+        {
+          "section_title": "Version History",
+          "versions": [
+            {
+              "version": "1.0",
+              "date": "Initial Release",
+              "features": [
+                "Vehicle search and management",
+                "Task and schedule management",
+                "Real-time group chat",
+                "User authentication",
+                "Recent vehicle history",
+                "Camera integration",
+                "Push notifications"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
