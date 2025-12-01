@@ -46,6 +46,7 @@ import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private static final String TAG = "ChatActivity";
     private ActivityChatBinding binding;
     private ChatService chatService;
     private FirebaseStorageService storageService;
@@ -75,6 +76,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -98,13 +100,17 @@ public class ChatActivity extends AppCompatActivity {
         storageService = FirebaseStorageService.getInstance();
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
+
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            android.util.Log.w(TAG, "Current user ID is null or empty");
+        }
     }
 
     private void initializeCurrentUser() {
         try {
             chatService.initializeUser(this);
         } catch (Exception e) {
-            android.util.Log.e("ChatActivity", "Failed to initialize user in Firebase", e);
+            android.util.Log.e(TAG, "Failed to initialize user in Firebase", e);
         }
     }
 
@@ -123,7 +129,7 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 participants = (List<UserData>) participantsSerializable;
             } catch (ClassCastException e) {
-                android.util.Log.e("ChatActivity", "Failed to cast participants list", e);
+                android.util.Log.e(TAG, "Failed to cast participants list", e);
                 participants = new ArrayList<>();
             }
         }
@@ -180,18 +186,18 @@ public class ChatActivity extends AppCompatActivity {
     private void setupKeyboardHandling() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.cardInput, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
-            if (insets.bottom > 0) {
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
-                        .getLayoutParams();
-                params.bottomMargin = insets.bottom;
-                binding.cardInput.setLayoutParams(params);
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
+                    .getLayoutParams();
+            if (insets.bottom > 200) {
+                params.bottomMargin = insets.bottom - 80;
+                Toast.makeText(this, "" + insets.bottom, Toast.LENGTH_SHORT).show();
             } else {
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
-                        .getLayoutParams();
-                int defaultMargin = (int) (16 * getResources().getDisplayMetrics().density);
-                params.bottomMargin = defaultMargin;
-                binding.cardInput.setLayoutParams(params);
+                params.bottomMargin = (int) (8 * getResources().getDisplayMetrics().density);
             }
+
+            binding.cardInput.setLayoutParams(params);
+
             return windowInsets;
         });
     }
@@ -205,8 +211,8 @@ public class ChatActivity extends AppCompatActivity {
         binding.layoutMemberAvatars.setVisibility(View.VISIBLE);
         binding.layoutMemberAvatars.removeAllViews();
 
-        int avatarSize = (int) (24 * getResources().getDisplayMetrics().density);
-        int overlapOffset = (int) (-12 * getResources().getDisplayMetrics().density);
+        int avatarSize = (int) (18 * getResources().getDisplayMetrics().density);
+        int overlapOffset = (int) (-4 * getResources().getDisplayMetrics().density);
         int maxAvatars = 5;
 
         int displayCount = Math.min(participants.size(), maxAvatars);
@@ -284,7 +290,7 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.btnAttachment.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
-            Toast.makeText(ChatActivity.this, "File attachment is under development", Toast.LENGTH_SHORT).show();
+            showAttachmentBottomSheet();
         });
 
         binding.etMessage.setOnEditorActionListener((v, actionId, event) -> {
@@ -530,14 +536,14 @@ public class ChatActivity extends AppCompatActivity {
                     updateEmptyState(messages.isEmpty());
                     scrollToBottom();
                 } catch (Exception e) {
-                    android.util.Log.e("ChatActivity", "Error updating messages", e);
+                    android.util.Log.e(TAG, "Error updating messages", e);
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
                 if (!isFinishing() && binding != null) {
-                    android.util.Log.e("ChatActivity", "Failed to load messages", e);
+                    android.util.Log.e(TAG, "Failed to load messages", e);
                     updateEmptyState(true);
                 }
             }
@@ -567,53 +573,26 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void scrollToBottom() {
-        if (isFinishing() || binding == null) {
+        if (isFinishing() || binding == null || binding.recyclerViewMessages == null || messageAdapter == null) {
             return;
         }
 
-        try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                if (isDestroyed()) {
-                    return;
-                }
+        binding.recyclerViewMessages.post(() -> {
+            if (isFinishing() || binding == null || binding.recyclerViewMessages == null || messageAdapter == null) {
+                return;
             }
-        } catch (Exception e) {
-        }
 
-        if (binding.recyclerViewMessages == null) {
-            return;
-        }
+            int itemCount = messageAdapter.getItemCount();
+            if (itemCount <= 0) {
+                return;
+            }
 
-        if (messageAdapter == null) {
-            return;
-        }
-
-        try {
-            binding.recyclerViewMessages.post(() -> {
-                if (isFinishing() || binding == null || binding.recyclerViewMessages == null) {
-                    return;
-                }
-
-                try {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        if (isDestroyed()) {
-                            return;
-                        }
-                    }
-                } catch (Exception e) {
-                }
-
-                if (messageAdapter != null && messageAdapter.getItemCount() > 0) {
-                    try {
-                        binding.recyclerViewMessages.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
-                    } catch (Exception e) {
-                        android.util.Log.e("ChatActivity", "Error scrolling to bottom", e);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            android.util.Log.e("ChatActivity", "Error posting scroll to bottom", e);
-        }
+            try {
+                binding.recyclerViewMessages.smoothScrollToPosition(itemCount - 1);
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Error scrolling to bottom", e);
+            }
+        });
     }
 
     @Override

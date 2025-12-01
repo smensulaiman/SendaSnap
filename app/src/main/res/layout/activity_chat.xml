@@ -5,9 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background"
-    android:fitsSystemWindows="false"
-    android:clipToPadding="false">
+    android:background="@drawable/professional_gradient"
+    android:fitsSystemWindows="true">
 
     <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -25,11 +24,10 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:title="Create Work Schedule"
-            app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.TitleSmall"
+            app:title="Chat Title"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleMedium"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="@color/text_primary"/>
+            app:navigationIconTint="@color/black"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -40,7 +38,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginHorizontal="@dimen/dimen_16"
-        android:padding="@dimen/dimen_4"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout"
         app:layout_constraintStart_toStartOf="parent"
@@ -136,6 +133,7 @@
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
                 android:padding="0dp"
+                android:visibility="gone"
                 app:icon="@drawable/ic_attach_file"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"

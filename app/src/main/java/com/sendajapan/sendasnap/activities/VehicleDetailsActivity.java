@@ -2,6 +2,7 @@ package com.sendajapan.sendasnap.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.PendingImageAdapter;
@@ -489,18 +491,19 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void showImagePreview(List<String> imageUrls, int startPosition) {
         if (imageUrls == null || imageUrls.isEmpty()) {
             return;
         }
 
-        android.app.Dialog previewDialog = new android.app.Dialog(this,
+        Dialog previewDialog = new Dialog(this,
                 android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         View previewView = getLayoutInflater().inflate(R.layout.dialog_image_preview, null);
         previewDialog.setContentView(previewView);
 
         ImageView imgPreviewFull = previewView.findViewById(R.id.imgPreviewFull);
-        com.google.android.material.floatingactionbutton.FloatingActionButton fabClosePreview = previewView
+        FloatingActionButton fabClosePreview = previewView
                 .findViewById(R.id.fabClosePreview);
         TextView txtImageCounter = previewView.findViewById(R.id.txtImageCounter);
 
