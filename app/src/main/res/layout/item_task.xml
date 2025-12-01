@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="140dp"
     android:layout_marginHorizontal="16dp"
@@ -37,8 +38,9 @@
             android:maxLines="2"
             android:paddingEnd="@dimen/dimen_8"
             android:text="Task Title"
+            android:includeFontPadding="false"
             android:textColor="@color/text_black"
-            android:textSize="@dimen/text_size_small"
+            android:textSize="@dimen/text_size_medium"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/layoutStatusBadge"
             app:layout_constraintHorizontal_chainStyle="packed"
@@ -53,6 +55,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/montserrat_semi_bold"
             android:maxLines="3"
+            android:includeFontPadding="false"
             android:text="Task description goes here\ndfjhdfjhdsjkhf\nhdsafkjdshfkdj\nkjdhfjksdhfkhds"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_xsmall"
@@ -67,7 +70,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/layoutCreatedBy"
+            app:layout_constraintBottom_toBottomOf="@+id/statusIndicator"
             app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
 
             <TextView
@@ -75,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_regular"
+                android:includeFontPadding="false"
                 android:text="9:00 AM"
                 android:textColor="@color/text_secondary" />
 
@@ -104,7 +108,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="@+id/statusIndicator"
-            app:layout_constraintStart_toStartOf="@+id/textTaskTitle">
+            app:layout_constraintEnd_toEndOf="@+id/imgRightArrow">
 
             <TextView
                 android:id="@+id/textCreatedByLabel"
@@ -113,13 +117,14 @@
                 android:layout_marginEnd="4dp"
                 android:fontFamily="@font/montserrat_regular"
                 android:text="Created by"
+                android:includeFontPadding="false"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_xsmall" />
 
             <ImageView
                 android:id="@+id/imgCreatorAvatar"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_marginEnd="4dp"
                 android:scaleType="centerCrop" />
 
@@ -128,7 +133,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sulaiman"
-                android:textAppearance="@style/TextAppearance.Montserrat.BodySmall"
+                android:includeFontPadding="false"
+                android:textSize="@dimen/text_size_xsmall"
                 android:textColor="@color/text_secondary" />
 
         </LinearLayout>
@@ -146,11 +152,11 @@
                 style="@style/Widget.Material3.Chip.Assist"
                 android:layout_width="match_parent"
                 android:layout_height="38dp"
-                android:fontFamily="@font/montserrat_semi_bold"
+                android:fontFamily="@font/montserrat_bold"
                 android:text="Pending"
                 android:textAllCaps="true"
                 android:textColor="@color/black"
-                android:textSize="@dimen/text_size_xsmall"
+                android:textSize="@dimen/text_size_small"
                 app:chipBackgroundColor="@color/white"
                 app:chipCornerRadius="4dp"
                 app:chipStrokeColor="@color/warning_dark"

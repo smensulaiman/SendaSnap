@@ -70,14 +70,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        // Menu is now handled by HomeFragment
+        // Only inflate menu if no fragment is handling it
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (currentFragment == null || !(currentFragment instanceof HomeFragment)) {
+            getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        // Let fragments handle their own menu items first
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (currentFragment != null && currentFragment.onOptionsItemSelected(item)) {
+            return true;
+        }
+        
+        // Fallback to activity handling if fragment didn't handle it
         hapticHelper.vibrateClick();
-
         int itemId = item.getItemId();
         if (itemId == R.id.action_notifications) {
             openNotifications();
@@ -93,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openNotifications() {
-        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Notifications coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void handleLogout() {
@@ -235,8 +246,8 @@ public class MainActivity extends AppCompatActivity {
         // Get current fragment
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
-        // Default: show menu items (for HomeFragment)
-        boolean showMenu = currentFragment == null || currentFragment instanceof HomeFragment;
+        // HomeFragment now manages its own menu, so hide menu items for other fragments
+        boolean showMenu = currentFragment instanceof HomeFragment;
 
         android.view.MenuItem notificationsItem = menu.findItem(R.id.action_notifications);
         android.view.MenuItem moreItem = menu.findItem(R.id.action_more);

@@ -16,7 +16,7 @@
 
 SendaSnap is a powerful, all-in-one mobile application designed for professionals who need efficient vehicle management, task scheduling, and seamless team collaboration. Whether you're managing a fleet, tracking vehicle information, or coordinating team tasks, SendaSnap provides everything you need in one intuitive platform.
 
-### 🚗 KEY FEATURES
+### KEY FEATURES
 
 **Vehicle Search & Management**
 • Quick vehicle search by chassis number or other identifiers

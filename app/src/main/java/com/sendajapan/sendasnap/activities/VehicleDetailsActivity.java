@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
@@ -153,6 +156,12 @@ public class VehicleDetailsActivity extends AppCompatActivity {
         }
 
         vehicleImageAdapter = new VehicleImageGridAdapter(vehiclePhotos);
+        // Create final reference for lambda
+        final List<String> finalVehiclePhotos = vehiclePhotos;
+        vehicleImageAdapter.setOnImageClickListener((imageUrl, position) -> {
+            hapticHelper.vibrateClick();
+            showImagePreview(finalVehiclePhotos, position);
+        });
         GridLayoutManager vehicleGridLayoutManager = new GridLayoutManager(this, 3);
         binding.recyclerViewVehicleImages.setLayoutManager(vehicleGridLayoutManager);
         binding.recyclerViewVehicleImages.setAdapter(vehicleImageAdapter);
@@ -478,6 +487,132 @@ public class VehicleDetailsActivity extends AppCompatActivity {
                         });
                     }
                 });
+    }
+
+    private void showImagePreview(List<String> imageUrls, int startPosition) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+
+        android.app.Dialog previewDialog = new android.app.Dialog(this,
+                android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        View previewView = getLayoutInflater().inflate(R.layout.dialog_image_preview, null);
+        previewDialog.setContentView(previewView);
+
+        ImageView imgPreviewFull = previewView.findViewById(R.id.imgPreviewFull);
+        com.google.android.material.floatingactionbutton.FloatingActionButton fabClosePreview = previewView
+                .findViewById(R.id.fabClosePreview);
+        TextView txtImageCounter = previewView.findViewById(R.id.txtImageCounter);
+
+        // Use array to store current position so it can be modified in inner class
+        final int[] currentPosition = { startPosition };
+
+        // Show counter if multiple images
+        if (imageUrls.size() > 1) {
+            txtImageCounter.setVisibility(View.VISIBLE);
+            updateImageCounter(txtImageCounter, currentPosition[0] + 1, imageUrls.size());
+        } else {
+            txtImageCounter.setVisibility(View.GONE);
+        }
+
+        // Load current image
+        String currentImageUrl = imageUrls.get(currentPosition[0]);
+        if (currentImageUrl != null && !currentImageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(currentImageUrl)
+                    .placeholder(R.drawable.car_placeholder)
+                    .error(R.drawable.car_placeholder)
+                    .into(imgPreviewFull);
+        } else {
+            imgPreviewFull.setImageResource(R.drawable.car_placeholder);
+        }
+
+        // Close button
+        fabClosePreview.setOnClickListener(v -> {
+            hapticHelper.vibrateClick();
+            previewDialog.dismiss();
+        });
+
+        // Swipe to change images (if multiple images)
+        if (imageUrls.size() > 1) {
+            imgPreviewFull.setOnTouchListener(new SwipeGestureListener() {
+                @Override
+                public void onSwipeLeft() {
+                    // Next image
+                    currentPosition[0] = (currentPosition[0] + 1) % imageUrls.size();
+                    String nextImageUrl = imageUrls.get(currentPosition[0]);
+                    if (nextImageUrl != null && !nextImageUrl.isEmpty()) {
+                        Glide.with(VehicleDetailsActivity.this)
+                                .load(nextImageUrl)
+                                .placeholder(R.drawable.car_placeholder)
+                                .error(R.drawable.car_placeholder)
+                                .into(imgPreviewFull);
+                    }
+                    updateImageCounter(txtImageCounter, currentPosition[0] + 1, imageUrls.size());
+                }
+
+                @Override
+                public void onSwipeRight() {
+                    // Previous image
+                    currentPosition[0] = (currentPosition[0] - 1 + imageUrls.size()) % imageUrls.size();
+                    String prevImageUrl = imageUrls.get(currentPosition[0]);
+                    if (prevImageUrl != null && !prevImageUrl.isEmpty()) {
+                        Glide.with(VehicleDetailsActivity.this)
+                                .load(prevImageUrl)
+                                .placeholder(R.drawable.car_placeholder)
+                                .error(R.drawable.car_placeholder)
+                                .into(imgPreviewFull);
+                    }
+                    updateImageCounter(txtImageCounter, currentPosition[0] + 1, imageUrls.size());
+                }
+            });
+        }
+
+        previewDialog.show();
+    }
+
+    private void updateImageCounter(TextView counterView, int current, int total) {
+        counterView.setText(current + " / " + total);
+    }
+
+    // Simple swipe gesture listener
+    private abstract class SwipeGestureListener implements View.OnTouchListener {
+        private float startX;
+        private float startY;
+        private static final int SWIPE_THRESHOLD = 100;
+        private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+        @Override
+        public boolean onTouch(View v, android.view.MotionEvent event) {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    startX = event.getX();
+                    startY = event.getY();
+                    return true;
+                case android.view.MotionEvent.ACTION_UP:
+                    float endX = event.getX();
+                    float endY = event.getY();
+                    float diffX = endX - startX;
+                    float diffY = endY - startY;
+
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+                            if (diffX > 0) {
+                                onSwipeRight();
+                            } else {
+                                onSwipeLeft();
+                            }
+                            return true;
+                        }
+                    }
+                    return false;
+            }
+            return false;
+        }
+
+        public abstract void onSwipeLeft();
+
+        public abstract void onSwipeRight();
     }
 
     @Override

@@ -51,7 +51,8 @@ import java.util.Objects;
 public class AddScheduleActivity extends AppCompatActivity {
 
     private static final int FILE_PICKER_REQUEST_CODE = 1001;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for files
+    private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB for images
 
     private ActivityAddTaskBinding binding;
 
@@ -168,10 +169,17 @@ public class AddScheduleActivity extends AppCompatActivity {
         attachmentAdapter.setContext(this);
         attachmentAdapter.setOnAttachmentRemoveListener((position, attachment) -> {
             hapticHelper.vibrateClick();
-            attachments.remove(position);
-            attachmentAdapter.notifyItemRemoved(position);
-            attachmentAdapter.notifyItemRangeChanged(position, attachments.size());
-            updateFileDisplay();
+            if (position >= 0 && position < attachments.size()) {
+                TaskAttachment removedAttachment = attachments.remove(position);
+                // Also remove from attachmentUris if it exists
+                if (removedAttachment != null && removedAttachment.getFileUrl() != null) {
+                    String fileUrl = removedAttachment.getFileUrl();
+                    attachmentUris.removeIf(uri -> uri.toString().equals(fileUrl));
+                }
+                attachmentAdapter.notifyItemRemoved(position);
+                attachmentAdapter.notifyItemRangeChanged(position, attachments.size());
+                updateFileDisplay();
+            }
         });
         setAttachmentActionListener();
         binding.recyclerViewAttachments.setLayoutManager(new LinearLayoutManager(this));
@@ -753,17 +761,50 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private boolean validateFileSizes() {
+        // Only validate new local files (from attachmentUris), not already uploaded files
         for (Uri uri : attachmentUris) {
+            if (uri == null) continue;
+            
+            // Skip if it's already a server URL (http/https)
+            String uriString = uri.toString();
+            if (uriString.startsWith("http://") || uriString.startsWith("https://")) {
+                continue; // Already uploaded, skip validation
+            }
+            
             long fileSize = getFileSize(uri);
-            if (fileSize > MAX_FILE_SIZE) {
+            if (fileSize <= 0) {
+                // If we can't determine size, show warning but allow (might be a server file)
+                continue;
+            }
+            
+            // Determine if it's an image from MIME type
+            String mimeType = getContentResolver().getType(uri);
+            if (mimeType == null || mimeType.isEmpty()) {
+                // Try to determine from URI or file name
                 String fileName = getFileName(uri);
+                String extension = getFileExtension(fileName);
+                mimeType = getMimeTypeFromExtension(extension);
+            }
+            
+            boolean isImage = mimeType != null && mimeType.startsWith("image/");
+            long maxSize = isImage ? MAX_IMAGE_SIZE : MAX_FILE_SIZE;
+            
+            if (fileSize > maxSize) {
+                String fileName = getFileName(uri);
+                String sizeLimit = isImage ? "5MB" : "10MB";
                 Toast.makeText(this,
-                        "File size exceeds 10MB limit: " + fileName,
+                        "File size exceeds " + sizeLimit + " limit: " + fileName + " (" + formatFileSize(fileSize) + ")",
                         Toast.LENGTH_LONG).show();
                 return false;
             }
         }
         return true;
+    }
+    
+    private String formatFileSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format("%.2f KB", bytes / 1024.0);
+        return String.format("%.2f MB", bytes / (1024.0 * 1024.0));
     }
 
     private List<File> convertUrisToFiles(List<Uri> uris) {
@@ -903,17 +944,38 @@ public class AddScheduleActivity extends AppCompatActivity {
 
     private void addFileFromUri(Uri fileUri) {
         try {
+            String fileName = getFileName(fileUri);
+            String mimeType = getContentResolver().getType(fileUri);
+            if (mimeType == null || mimeType.isEmpty()) {
+                // Try to determine from file extension
+                String extension = getFileExtension(fileName);
+                mimeType = getMimeTypeFromExtension(extension);
+            }
+            
             long fileSize = getFileSize(fileUri);
-            if (fileSize > MAX_FILE_SIZE) {
-                String fileName = getFileName(fileUri);
+            if (fileSize <= 0) {
+                // Try alternative method to get file size
+                fileSize = getFileSizeAlternative(fileUri);
+            }
+            
+            if (fileSize <= 0) {
                 Toast.makeText(this,
-                        "File size exceeds 10MB limit: " + fileName,
+                        "Could not determine file size: " + fileName,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Check if it's an image
+            boolean isImage = mimeType != null && mimeType.startsWith("image/");
+            long maxSize = isImage ? MAX_IMAGE_SIZE : MAX_FILE_SIZE;
+            
+            if (fileSize > maxSize) {
+                String sizeLimit = isImage ? "5MB" : "10MB";
+                Toast.makeText(this,
+                        "File size exceeds " + sizeLimit + " limit: " + fileName + " (" + formatFileSize(fileSize) + ")",
                         Toast.LENGTH_LONG).show();
                 return;
             }
-
-            String fileName = getFileName(fileUri);
-            String mimeType = getContentResolver().getType(fileUri);
 
             attachmentUris.add(fileUri);
 
@@ -933,6 +995,32 @@ public class AddScheduleActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Toast.makeText(this, "Error adding file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private String getMimeTypeFromExtension(String extension) {
+        if (extension == null || extension.isEmpty()) return "*/*";
+        
+        switch (extension.toLowerCase()) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "webp":
+                return "image/webp";
+            case "pdf":
+                return "application/pdf";
+            case "doc":
+            case "docx":
+                return "application/msword";
+            case "xls":
+            case "xlsx":
+                return "application/vnd.ms-excel";
+            default:
+                return "*/*";
         }
     }
 
@@ -960,20 +1048,83 @@ public class AddScheduleActivity extends AppCompatActivity {
     }
 
     private long getFileSize(Uri uri) {
+        if (uri == null) return 0;
+        
         try {
-            android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            // Method 1: Try MediaStore first (works for media files)
+            android.database.Cursor cursor = getContentResolver().query(
+                    uri, 
+                    new String[]{android.provider.MediaStore.MediaColumns.SIZE}, 
+                    null, 
+                    null, 
+                    null
+            );
             if (cursor != null && cursor.moveToFirst()) {
                 int sizeIndex = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.SIZE);
                 if (sizeIndex != -1) {
                     long size = cursor.getLong(sizeIndex);
                     cursor.close();
-                    return size;
+                    if (size > 0) {
+                        return size;
+                    }
+                } else {
+                    cursor.close();
                 }
-                cursor.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // Fall through to alternative method
         }
+        
+        // Method 2: Try alternative method
+        return getFileSizeAlternative(uri);
+    }
+    
+    private long getFileSizeAlternative(Uri uri) {
+        if (uri == null) return 0;
+        
+        try {
+            // For file:// URIs, try direct file access
+            if ("file".equals(uri.getScheme())) {
+                try {
+                    File file = new File(uri.getPath());
+                    if (file.exists() && file.isFile()) {
+                        return file.length();
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+            
+            // For content:// URIs, try using AssetFileDescriptor which is more efficient
+            try (android.content.res.AssetFileDescriptor afd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
+                if (afd != null) {
+                    long size = afd.getLength();
+                    if (size > 0) {
+                        return size;
+                    }
+                }
+            } catch (Exception e) {
+                // Fall through to stream method
+            }
+            
+            // Last resort: For content:// URIs, try reading the stream (but limit to avoid reading huge files)
+            // Only use this if other methods fail, and limit the read
+            try (java.io.InputStream inputStream = getContentResolver().openInputStream(uri)) {
+                if (inputStream != null) {
+                    // Use available() as a hint, but it's not always accurate
+                    int available = inputStream.available();
+                    if (available > 0 && available < Integer.MAX_VALUE) {
+                        return available;
+                    }
+                    // If available() doesn't work, we'll need to read, but limit it
+                    // For validation purposes, we can estimate or read a small portion
+                    return 0; // Return 0 to indicate we can't determine size reliably
+                }
+            }
+        } catch (Exception e) {
+            // Return 0 if we can't determine size
+        }
+        
         return 0;
     }
 

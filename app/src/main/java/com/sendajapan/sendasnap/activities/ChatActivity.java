@@ -205,7 +205,7 @@ public class ChatActivity extends AppCompatActivity {
         binding.layoutMemberAvatars.setVisibility(View.VISIBLE);
         binding.layoutMemberAvatars.removeAllViews();
 
-        int avatarSize = (int) (32 * getResources().getDisplayMetrics().density);
+        int avatarSize = (int) (24 * getResources().getDisplayMetrics().density);
         int overlapOffset = (int) (-12 * getResources().getDisplayMetrics().density);
         int maxAvatars = 5;
 

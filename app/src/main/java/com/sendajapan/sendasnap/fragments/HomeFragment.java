@@ -5,18 +5,24 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
@@ -65,6 +71,9 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Enable menu for this fragment
+        setHasOptionsMenu(true);
 
         initHelpers();
 
@@ -121,6 +130,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                 String userName = currentUser.getName();
                 if (userName != null && !userName.isEmpty()) {
                     binding.txtUserName.setText(userName + " san");
+                    binding.txtUserEmail.setText(currentUser.getEmail());
                 } else {
                     binding.txtUserName.setText("User");
                 }
@@ -381,6 +391,96 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         super.onResume();
         if (isAdded() && binding != null) {
             loadRecentVehicles();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        hapticHelper.vibrateClick();
+
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_notifications) {
+            openNotifications();
+            return true;
+        } else if (itemId == R.id.action_about) {
+            openAbout();
+            return true;
+        } else if (itemId == R.id.action_logout) {
+            handleLogout();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void openNotifications() {
+        Toast.makeText(requireContext(), "Notifications coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openAbout() {
+        Toast.makeText(requireContext(), "About coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void handleLogout() {
+        // Show confirmation dialog
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure you want to logout?");
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+
+        builder.setPositiveButton("Logout", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            performLogout();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            hapticHelper.vibrateClick();
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            if (positiveButton instanceof MaterialButton) {
+                ((MaterialButton) positiveButton).setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(
+                                getResources().getColor(R.color.error, null)
+                        )
+                );
+            } else {
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
+            }
+            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
+            positiveButton.setAllCaps(false);
+        }
+
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
+            negativeButton.setAllCaps(false);
+        }
+    }
+
+    private void performLogout() {
+        // Clear user session/preferences
+        SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(requireContext());
+        prefsManager.logout();
+
+        // Navigate to LoginActivity
+        Intent intent = new Intent(requireContext(), com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
+        // Finish parent activity
+        if (getActivity() != null) {
+            getActivity().finish();
         }
     }
 

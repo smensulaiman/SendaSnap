@@ -23,15 +23,15 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16"
                 android:layout_marginBottom="@dimen/dimen_8"
                 app:cardElevation="0dp">
 
                 <CalendarView
                     android:id="@+id/calendarView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/CustomCalendarView"/>
+                    android:layout_height="300dp"
+                    android:theme="@style/CustomCalendarView"
+                    android:firstDayOfWeek="2"/>
 
             </androidx.cardview.widget.CardView>
 

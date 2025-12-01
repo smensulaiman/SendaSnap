@@ -10,11 +10,12 @@
     tools:context=".activities.auth.LoginActivity">
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/porche_full"
+        android:alpha=".35"
         android:scaleType="centerCrop"
-        android:alpha=".35"/>
+        android:src="@drawable/porche_full" />
 
     <ImageView
         android:layout_width="match_parent"
