@@ -27,7 +27,8 @@
             app:navigationIconTint="@color/text_primary"
             app:title="Schedule Details"
             app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title"
-            app:titleTextColor="@color/text_primary" />
+            app:titleTextColor="@color/text_primary"
+            android:paddingEnd="@dimen/dimen_8"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

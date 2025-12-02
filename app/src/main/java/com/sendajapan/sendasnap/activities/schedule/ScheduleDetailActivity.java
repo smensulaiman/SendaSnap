@@ -1,6 +1,7 @@
 package com.sendajapan.sendasnap.activities.schedule;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -37,6 +39,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 public class ScheduleDetailActivity extends AppCompatActivity {
@@ -58,6 +61,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private Integer taskId;
 
     private List<UserData> allUsers = new ArrayList<>();
+    private SharedPrefsManager prefsManager;
+    private UserData currentUser;
+    
+    private static final String ROLE_ADMIN = "admin";
+    private static final String ROLE_MANAGER = "manager";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +97,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         chatService = ChatService.getInstance();
         apiManager = ApiManager.getInstance(this);
         taskViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(TaskViewModel.class);
+        prefsManager = SharedPrefsManager.getInstance(this);
+        currentUser = prefsManager.getUser();
     }
 
     private void setupRecyclerView() {
@@ -155,7 +165,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle("Task Details");
+            getSupportActionBar().setTitle("Schedule Details");
         }
 
         binding.toolbar.setNavigationOnClickListener(v -> {
@@ -169,7 +179,26 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_schedule_detail, menu);
         chatMenuItem = menu.findItem(R.id.action_chat);
         setupChatIcon();
+        
+        MenuItem editMenuItem = menu.findItem(R.id.action_edit);
+        if (editMenuItem != null) {
+            boolean canCreateTask = canUserCreateTask(currentUser);
+            if (!canCreateTask) {
+                editMenuItem.setEnabled(false);
+                Objects.requireNonNull(editMenuItem.getIcon()).setTint(ContextCompat.getColor(ScheduleDetailActivity.this, R.color.gray_100));
+                editMenuItem.getIcon().setTintMode(PorterDuff.Mode.SRC_IN);
+            }
+        }
+        
         return true;
+    }
+    
+    private boolean canUserCreateTask(UserData user) {
+        if (user == null) {
+            return false;
+        }
+        String role = user.getRole();
+        return role != null && (role.equalsIgnoreCase(ROLE_ADMIN) || role.equalsIgnoreCase(ROLE_MANAGER));
     }
 
     @Override

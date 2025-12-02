@@ -622,11 +622,18 @@ public class ScheduleFragment extends Fragment
             updateTaskStatusIfConnected(task, STATUS_CANCELLED, dialog);
         });
 
-        dialogBinding.btnDelete.setOnClickListener(v -> {
-            hapticHelper.vibrateClick();
-            dialog.dismiss();
-            showDeleteConfirmationDialog(task);
-        });
+        UserData currentUser = prefsManager.getUser();
+        boolean canCreateTask = canUserCreateTask(currentUser);
+        if (canCreateTask) {
+            dialogBinding.btnDelete.setVisibility(View.VISIBLE);
+            dialogBinding.btnDelete.setOnClickListener(v -> {
+                hapticHelper.vibrateClick();
+                dialog.dismiss();
+                showDeleteConfirmationDialog(task);
+            });
+        } else {
+            dialogBinding.btnDelete.setVisibility(View.INVISIBLE);
+        }
 
         dialogBinding.btnClose.setOnClickListener(v -> {
             hapticHelper.vibrateClick();
