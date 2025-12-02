@@ -30,6 +30,7 @@ import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+import com.sendajapan.sendasnap.utils.FcmTokenManager;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
@@ -175,6 +176,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             // Initialize user in Firebase
                             ChatService.getInstance().initializeUser(LoginActivity.this);
+                            
+                            // Register FCM token for push notifications
+                            FcmTokenManager.registerToken(LoginActivity.this);
 
                             // Handle "Remember Me" functionality
                             if (binding.cbRememberMe.isChecked()) {

@@ -35,8 +35,11 @@ import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.AlarmHelper;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
+import com.sendajapan.sendasnap.utils.FcmNotificationSender;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
+import com.sendajapan.sendasnap.utils.SoundHelper;
+import com.sendajapan.sendasnap.utils.TaskNotificationHelper;
 import com.sendajapan.sendasnap.viewmodel.TaskViewModel;
 import com.sendajapan.sendasnap.viewmodel.UserViewModel;
 
@@ -745,6 +748,59 @@ public class AddScheduleActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Task createdTask) {
                     AlarmHelper.setTaskAlarm(AddScheduleActivity.this, createdTask);
+
+                    // Use assignees from the created task (API response) if they have emails
+                    // Otherwise use selectedAssignees which should have full user data
+                    List<UserData> taskAssignees = createdTask.getAssignees();
+                    if (taskAssignees == null || taskAssignees.isEmpty()) {
+                        // Fallback to selectedAssignees if API didn't return assignees
+                        taskAssignees = selectedAssignees;
+                    } else {
+                        // Verify assignees have emails, if not, use selectedAssignees
+                        boolean allHaveEmails = true;
+                        for (UserData assignee : taskAssignees) {
+                            if (assignee == null || assignee.getEmail() == null || assignee.getEmail().isEmpty()) {
+                                allHaveEmails = false;
+                                break;
+                            }
+                        }
+                        if (!allHaveEmails) {
+                            // Use selectedAssignees which should have full user data with emails
+                            taskAssignees = selectedAssignees;
+                        }
+                    }
+
+                    // Send notifications via Firebase Realtime Database to assignees' devices
+                    // This will trigger notifications on assignee devices, not on creator's device
+                    android.util.Log.d("AddScheduleActivity", "Sending notifications to " + taskAssignees.size() + " assignees");
+                    for (UserData assignee : taskAssignees) {
+                        if (assignee != null) {
+                            android.util.Log.d("AddScheduleActivity", "Assignee: ID=" + assignee.getId() + 
+                                  ", Name=" + assignee.getName() + ", Email=" + assignee.getEmail());
+                        }
+                    }
+                    
+                    FcmNotificationSender.sendTaskAssignmentNotifications(
+                            AddScheduleActivity.this,
+                            createdTask,
+                            taskAssignees
+                    );
+
+                    // Show cookiebar notification with sound
+                    String notificationTitle = "Task Created";
+                    String notificationMessage = createdTask.getTitle() != null && !createdTask.getTitle().isEmpty()
+                            ? "Task \"" + createdTask.getTitle() + "\" has been created and assigned"
+                            : "Task has been created and assigned";
+                    
+                    CookieBarToastHelper.showSuccess(
+                            AddScheduleActivity.this,
+                            notificationTitle,
+                            notificationMessage,
+                            CookieBarToastHelper.SHORT_DURATION
+                    );
+                    
+                    // Play notification sound
+                    SoundHelper.playNotificationSound(AddScheduleActivity.this);
 
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("task", createdTask);

@@ -1,8 +1,10 @@
 package com.sendajapan.sendasnap.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -43,25 +46,27 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
+
+    private boolean isGroupChat = false;
+
     private ActivityChatBinding binding;
+    private MessageAdapter messageAdapter;
+
     private ChatService chatService;
     private FirebaseStorageService storageService;
     private HapticFeedbackHelper hapticHelper;
-    private MessageAdapter messageAdapter;
 
     private String chatId;
     private String currentUserId;
-    private String otherUserEmail;
     private String otherUserId;
     private String otherUserName;
-    private String taskId;
     private String taskTitle;
 
-    private boolean isGroupChat = false;
     private List<UserData> participants = new ArrayList<>();
 
     private ActivityResultLauncher<String> filePickerLauncher;
@@ -70,7 +75,6 @@ public class ChatActivity extends AppCompatActivity {
     private ActivityResultLauncher<Uri> cameraLauncher;
 
     private Uri cameraImageUri;
-    private String cameraImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +105,7 @@ public class ChatActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
 
-        if (currentUserId == null || currentUserId.isEmpty()) {
+        if (currentUserId.isEmpty()) {
             android.util.Log.w(TAG, "Current user ID is null or empty");
         }
     }
@@ -118,11 +122,9 @@ public class ChatActivity extends AppCompatActivity {
     private void getIntentData() {
         chatId = getIntent().getStringExtra("chatId");
         isGroupChat = getIntent().getBooleanExtra("isGroupChat", false);
-        taskId = getIntent().getStringExtra("taskId");
         taskTitle = getIntent().getStringExtra("taskTitle");
         otherUserId = getIntent().getStringExtra("otherUserId");
         otherUserName = getIntent().getStringExtra("otherUserName");
-        otherUserEmail = getIntent().getStringExtra("otherUserEmail");
 
         Serializable participantsSerializable = getIntent().getSerializableExtra("participants");
         if (participantsSerializable instanceof List) {
@@ -191,7 +193,6 @@ public class ChatActivity extends AppCompatActivity {
                     .getLayoutParams();
             if (insets.bottom > 200) {
                 params.bottomMargin = insets.bottom - 80;
-                Toast.makeText(this, "" + insets.bottom, Toast.LENGTH_SHORT).show();
             } else {
                 params.bottomMargin = (int) (8 * getResources().getDisplayMetrics().density);
             }
@@ -202,6 +203,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void setupMemberAvatars() {
         if (!isGroupChat || participants == null || participants.isEmpty()) {
             binding.layoutMemberAvatars.setVisibility(View.GONE);
@@ -303,7 +305,7 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.etMessage.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                binding.recyclerViewMessages.postDelayed(() -> scrollToBottom(), 100);
+                binding.recyclerViewMessages.postDelayed(this::scrollToBottom, 100);
             }
         });
     }
@@ -336,13 +338,6 @@ public class ChatActivity extends AppCompatActivity {
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 permissions -> {
-                    boolean allGranted = true;
-                    for (Boolean granted : permissions.values()) {
-                        if (!granted) {
-                            allGranted = false;
-                            break;
-                        }
-                    }
                 });
     }
 
@@ -415,7 +410,6 @@ public class ChatActivity extends AppCompatActivity {
 
         try {
             File photoFile = new File(getExternalFilesDir(null), "chat_image_" + System.currentTimeMillis() + ".jpg");
-            cameraImagePath = photoFile.getAbsolutePath();
             cameraImageUri = FileProvider.getUriForFile(this,
                     getPackageName() + ".fileprovider", photoFile);
             cameraLauncher.launch(cameraImageUri);
@@ -424,6 +418,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void openGallery() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
@@ -501,7 +496,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private String getFileName(Uri uri) {
         String result = null;
-        if (uri.getScheme().equals("content")) {
+        if (Objects.equals(uri.getScheme(), "content")) {
             try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     int nameIndex = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME);
@@ -573,12 +568,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void scrollToBottom() {
-        if (isFinishing() || binding == null || binding.recyclerViewMessages == null || messageAdapter == null) {
+        if (isFinishing() || binding == null || messageAdapter == null) {
             return;
         }
 
         binding.recyclerViewMessages.post(() -> {
-            if (isFinishing() || binding == null || binding.recyclerViewMessages == null || messageAdapter == null) {
+            if (isFinishing() || binding == null || messageAdapter == null) {
                 return;
             }
 

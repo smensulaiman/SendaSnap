@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,25 +22,28 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.activities.NotificationsActivity;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
 import com.sendajapan.sendasnap.dialogs.LoadingDialog;
 import com.sendajapan.sendasnap.dialogs.VehicleSearchDialog;
 import com.sendajapan.sendasnap.models.ErrorResponse;
+import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.models.Vehicle;
 import com.sendajapan.sendasnap.models.VehicleSearchResponse;
 import com.sendajapan.sendasnap.networking.ApiService;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.sendajapan.sendasnap.networking.RetrofitClient;
-import com.bumptech.glide.Glide;
-import com.sendajapan.sendasnap.models.UserData;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.utils.NotificationHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 import com.sendajapan.sendasnap.utils.VehicleCache;
 
@@ -58,6 +62,10 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private NetworkUtils networkUtils;
     private VehicleAdapter vehicleAdapter;
     private VehicleCache vehicleCache;
+    
+    private MenuItem notificationsMenuItem;
+    private TextView badgeTextView;
+    private ValueEventListener unreadCountListener;
 
     @Nullable
     @Override
@@ -72,16 +80,20 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Enable menu for this fragment
         setHasOptionsMenu(true);
 
         initHelpers();
-
         setupRecyclerView();
         setupClickListeners();
         setupFAB();
         loadUserProfile();
         loadRecentVehicles();
+
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isAdded() && getContext() != null) {
+                setupNotificationBadge();
+            }
+        }, 500);
     }
 
     private void initHelpers() {
@@ -123,9 +135,8 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     private void loadUserProfile() {
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(requireContext());
         UserData currentUser = prefsManager.getUser();
-        
+
         if (currentUser != null) {
-            // Set user name
             if (binding.txtUserName != null) {
                 String userName = currentUser.getName();
                 if (userName != null && !userName.isEmpty()) {
@@ -135,24 +146,21 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
                     binding.txtUserName.setText("User");
                 }
             }
-            
-            // Set user role
+
             if (binding.txtUserRole != null) {
                 String userRole = currentUser.getRole();
                 if (userRole != null && !userRole.isEmpty()) {
-                    // Capitalize first letter
-                    String capitalizedRole = userRole.substring(0, 1).toUpperCase() + 
-                                            userRole.substring(1).toLowerCase();
+                    String capitalizedRole = userRole.substring(0, 1).toUpperCase() +
+                            userRole.substring(1).toLowerCase();
                     binding.txtUserRole.setText(capitalizedRole);
                 } else {
                     binding.txtUserRole.setText("User");
                 }
             }
-            
-            // Load user avatar
+
             if (binding.imgProfile != null) {
                 String avatarUrl = currentUser.getAvatarUrl() != null ? currentUser.getAvatarUrl() : currentUser.getAvatar();
-                
+
                 if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
                     Glide.with(requireContext())
                             .load(avatarUrl)
@@ -389,15 +397,59 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     @Override
     public void onResume() {
         super.onResume();
-        if (isAdded() && binding != null) {
+        if (isAdded() && binding != null && getContext() != null) {
             loadRecentVehicles();
+            if (SharedPrefsManager.getInstance(getContext()).isLoggedIn()) {
+                NotificationHelper.getUnreadNotificationCount(getContext(), new NotificationHelper.UnreadCountCallback() {
+                    @Override
+                    public void onSuccess(int unreadCount) {
+                        updateNotificationBadge(unreadCount);
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                    }
+                });
+            }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (unreadCountListener != null && getContext() != null) {
+            NotificationHelper.removeUnreadCountListener(getContext(), unreadCountListener);
+            unreadCountListener = null;
+        }
+
+        hideLoadingDialog();
+        binding = null;
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_menu, menu);
+        setupNotificationIcon(menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+    
+    private void setupNotificationIcon(Menu menu) {
+        notificationsMenuItem = menu.findItem(R.id.action_notifications);
+        if (notificationsMenuItem != null) {
+            View actionView = getLayoutInflater().inflate(R.layout.menu_notification_badge, null);
+            notificationsMenuItem.setActionView(actionView);
+            badgeTextView = actionView.findViewById(R.id.badge_text);
+            
+            android.util.Log.d("HomeFragment", "Notification icon setup - badgeTextView: " + (badgeTextView != null));
+
+            actionView.setOnClickListener(v -> {
+                hapticHelper.vibrateClick();
+                openNotifications();
+            });
+        } else {
+            android.util.Log.w("HomeFragment", "Notifications menu item not found");
+        }
     }
 
     @Override
@@ -419,7 +471,72 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void openNotifications() {
-        Toast.makeText(requireContext(), "Notifications coming soon", Toast.LENGTH_SHORT).show();
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+        Intent intent = new Intent(getContext(), NotificationsActivity.class);
+        startActivity(intent);
+    }
+    
+    private void setupNotificationBadge() {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+
+        if (!SharedPrefsManager.getInstance(getContext()).isLoggedIn()) {
+            return;
+        }
+
+        NotificationHelper.getUnreadNotificationCount(getContext(), new NotificationHelper.UnreadCountCallback() {
+            @Override
+            public void onSuccess(int unreadCount) {
+                updateNotificationBadge(unreadCount);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+            }
+        });
+
+        unreadCountListener = NotificationHelper.addUnreadCountListener(getContext(), new NotificationHelper.UnreadCountCallback() {
+            @Override
+            public void onSuccess(int unreadCount) {
+                updateNotificationBadge(unreadCount);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+            }
+        });
+    }
+    
+    private void updateNotificationBadge(int unreadCount) {
+        if (!isAdded() || getActivity() == null) {
+            return;
+        }
+
+        getActivity().runOnUiThread(() -> {
+            if (!isAdded() || getActivity() == null) {
+                return;
+            }
+
+            if (badgeTextView == null && notificationsMenuItem != null) {
+                View actionView = notificationsMenuItem.getActionView();
+                if (actionView != null) {
+                    badgeTextView = actionView.findViewById(R.id.badge_text);
+                }
+            }
+
+            if (badgeTextView != null) {
+                if (unreadCount > 0) {
+                    String badgeText = String.valueOf(unreadCount > 99 ? "99+" : unreadCount);
+                    badgeTextView.setText(badgeText);
+                    badgeTextView.setVisibility(View.VISIBLE);
+                } else {
+                    badgeTextView.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private void openAbout() {
@@ -427,7 +544,6 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void handleLogout() {
-        // Show confirmation dialog
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         builder.setTitle("Logout");
         builder.setMessage("Are you sure you want to logout?");
@@ -469,25 +585,15 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
     }
 
     private void performLogout() {
-        // Clear user session/preferences
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(requireContext());
         prefsManager.logout();
 
-        // Navigate to LoginActivity
         Intent intent = new Intent(requireContext(), com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        // Finish parent activity
         if (getActivity() != null) {
             getActivity().finish();
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        hideLoadingDialog();
-        binding = null;
     }
 }

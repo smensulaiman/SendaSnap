@@ -1,14 +1,25 @@
 package com.sendajapan.sendasnap.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -24,9 +35,12 @@ import com.sendajapan.sendasnap.fragments.HomeFragment;
 import com.sendajapan.sendasnap.fragments.ProfileFragment;
 import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
+import com.google.firebase.database.ValueEventListener;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.DrawerController;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.utils.NotificationHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
 
@@ -37,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
     private NetworkUtils networkUtils;
 
     private boolean isNetworkToastShowing = false;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    
+    private android.view.MenuItem notificationsMenuItem;
+    private TextView badgeTextView;
+    private ValueEventListener unreadCountListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,35 +78,54 @@ public class MainActivity extends AppCompatActivity {
         setupBottomNavigation();
         setupNetworkMonitoring();
         setupBackPressHandler();
+        checkAndRequestNotificationPermission();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
         } else {
-            // Ensure menu is updated when activity is recreated
             invalidateOptionsMenu();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
-        // Menu is now handled by HomeFragment
-        // Only inflate menu if no fragment is handling it
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (currentFragment == null || !(currentFragment instanceof HomeFragment)) {
             getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+            setupNotificationIcon(menu);
         }
         return true;
     }
 
+    private void setupNotificationIcon(android.view.Menu menu) {
+        notificationsMenuItem = menu.findItem(R.id.action_notifications);
+        if (notificationsMenuItem != null) {
+            View actionView = getLayoutInflater().inflate(R.layout.menu_notification_badge, null);
+            notificationsMenuItem.setActionView(actionView);
+            badgeTextView = actionView.findViewById(R.id.badge_text);
+            
+            android.util.Log.d("MainActivity", "Notification icon setup - badgeTextView: " + (badgeTextView != null));
+
+            actionView.setOnClickListener(v -> {
+                hapticHelper.vibrateClick();
+                openNotifications();
+            });
+            
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                setupNotificationBadge();
+            }, 300);
+        } else {
+            android.util.Log.w("MainActivity", "Notifications menu item not found");
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
-        // Let fragments handle their own menu items first
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (currentFragment != null && currentFragment.onOptionsItemSelected(item)) {
             return true;
         }
-        
-        // Fallback to activity handling if fragment didn't handle it
+
         hapticHelper.vibrateClick();
         int itemId = item.getItemId();
         if (itemId == R.id.action_notifications) {
@@ -104,11 +142,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openNotifications() {
-        Toast.makeText(this, "Notifications coming soon", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, NotificationsActivity.class);
+        startActivity(intent);
+    }
+    
+    private void setupNotificationBadge() {
+        if (!SharedPrefsManager.getInstance(this).isLoggedIn()) {
+            return;
+        }
+        
+        // Get initial count
+        NotificationHelper.getUnreadNotificationCount(this, new NotificationHelper.UnreadCountCallback() {
+            @Override
+            public void onSuccess(int unreadCount) {
+                updateNotificationBadge(unreadCount);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // Silently fail
+            }
+        });
+        
+        // Setup real-time listener
+        unreadCountListener = NotificationHelper.addUnreadCountListener(this, new NotificationHelper.UnreadCountCallback() {
+            @Override
+            public void onSuccess(int unreadCount) {
+                updateNotificationBadge(unreadCount);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // Silently fail
+            }
+        });
+    }
+    
+    private void updateNotificationBadge(int unreadCount) {
+        runOnUiThread(() -> {
+            if (badgeTextView == null && notificationsMenuItem != null) {
+                View actionView = notificationsMenuItem.getActionView();
+                if (actionView != null) {
+                    badgeTextView = actionView.findViewById(R.id.badge_text);
+                    android.util.Log.d("MainActivity", "Badge TextView found: " + (badgeTextView != null));
+                } else {
+                    android.util.Log.w("MainActivity", "Action view is null");
+                }
+            }
+
+            if (badgeTextView != null) {
+                android.util.Log.d("MainActivity", "Updating badge with count: " + unreadCount);
+                if (unreadCount > 0) {
+                    String badgeText = String.valueOf(unreadCount > 99 ? "99+" : unreadCount);
+                    badgeTextView.setText(badgeText);
+                    badgeTextView.setVisibility(View.VISIBLE);
+                    badgeTextView.invalidate();
+                    badgeTextView.requestLayout();
+                } else {
+                    badgeTextView.setVisibility(View.GONE);
+                }
+            } else {
+                android.util.Log.w("MainActivity", "Badge TextView is null, cannot update");
+            }
+        });
     }
 
     private void handleLogout() {
-        // Show confirmation dialog
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Logout");
         builder.setMessage("Are you sure you want to logout?");
@@ -150,26 +249,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performLogout() {
-        // Clear user session/preferences
-        com.sendajapan.sendasnap.utils.SharedPrefsManager prefsManager =
-                com.sendajapan.sendasnap.utils.SharedPrefsManager.getInstance(this);
+        // Remove notification listener before logout
+        com.sendajapan.sendasnap.utils.FcmNotificationSender.removeNotificationListener();
+        
+        SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(this);
         prefsManager.logout();
 
-        // Navigate to LoginActivity
         Intent intent = new Intent(this, com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        // Finish current activity
         finish();
-    }
-
-    private void openSettings() {
-        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
-    }
-
-    private void openHelp() {
-        Toast.makeText(this, "coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void openAbout() {
@@ -181,9 +271,146 @@ public class MainActivity extends AppCompatActivity {
         hapticHelper = HapticFeedbackHelper.getInstance(this);
     }
 
+    /**
+     * Check and request notification permission
+     * For Android 13+ (API 33+): Requires POST_NOTIFICATIONS permission
+     * For Android 11 (API 30): Checks if notifications are enabled in system settings
+     */
+    private void checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ requires POST_NOTIFICATIONS permission
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                
+                // Check if we should show rationale
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS)) {
+                    // Show explanation dialog
+                    showNotificationPermissionRationale();
+                } else {
+                    // Request permission directly
+                    ActivityCompat.requestPermissions(
+                            this,
+                            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                            NOTIFICATION_PERMISSION_REQUEST_CODE
+                    );
+                }
+            } else {
+                // Permission granted, check if notifications are enabled in system settings
+                checkNotificationSettings();
+            }
+        } else {
+            // Android 11 and below: Check if notifications are enabled in system settings
+            checkNotificationSettings();
+        }
+    }
+
+    /**
+     * Show rationale dialog for notification permission
+     */
+    private void showNotificationPermissionRationale() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Notification Permission Required")
+                .setMessage("SendaSnap needs notification permission to notify you about new task assignments. " +
+                        "Please allow notifications to receive important updates.")
+                .setPositiveButton("Allow", (dialog, which) -> {
+                    ActivityCompat.requestPermissions(
+                            MainActivity.this,
+                            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                            NOTIFICATION_PERMISSION_REQUEST_CODE
+                    );
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                    // Show info that notifications won't work
+                    CookieBarToastHelper.showWarning(
+                            this,
+                            "Notifications Disabled",
+                            "You can enable notifications later in app settings",
+                            CookieBarToastHelper.SHORT_DURATION
+                    );
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    /**
+     * Check if notifications are enabled in system settings
+     * For Android 11 and below, this is the only way to check
+     */
+    private void checkNotificationSettings() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (!notificationManager.areNotificationsEnabled()) {
+            // Notifications are disabled, show dialog to open settings
+            showNotificationSettingsDialog();
+        }
+    }
+
+    /**
+     * Show dialog to open notification settings
+     */
+    private void showNotificationSettingsDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Enable Notifications")
+                .setMessage("Notifications are currently disabled. Please enable them in system settings to receive task assignment notifications.")
+                .setPositiveButton("Open Settings", (dialog, which) -> {
+                    openNotificationSettings();
+                })
+                .setNegativeButton("Later", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .setCancelable(true)
+                .show();
+    }
+
+    /**
+     * Open app notification settings
+     */
+    private void openNotificationSettings() {
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        } else {
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+        }
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, check system notification settings
+                checkNotificationSettings();
+                CookieBarToastHelper.showSuccess(
+                        this,
+                        "Permission Granted",
+                        "You will now receive task assignment notifications",
+                        CookieBarToastHelper.SHORT_DURATION
+                );
+            } else {
+                // Permission denied
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS)) {
+                    // User denied but can still be asked again
+                    CookieBarToastHelper.showWarning(
+                            this,
+                            "Permission Denied",
+                            "Notifications are disabled. You can enable them in app settings",
+                            CookieBarToastHelper.LONG_DURATION
+                    );
+                } else {
+                    // User denied and selected "Don't ask again"
+                    showNotificationSettingsDialog();
+                }
+            }
+        }
+    }
+
     private void setupDrawer() {
         setSupportActionBar(binding.toolbar);
-        // Ensure menu is created after setting support action bar
         supportInvalidateOptionsMenu();
         new DrawerController(this,
                 binding.drawerLayout,
@@ -228,25 +455,20 @@ public class MainActivity extends AppCompatActivity {
     private void updateToolbarTitle(Fragment fragment) {
         if (fragment instanceof HomeFragment) {
             binding.toolbar.setTitle("Home");
-            // Show menu items for HomeFragment
             invalidateOptionsMenu();
         } else if (fragment instanceof ScheduleFragment) {
             binding.toolbar.setTitle("Work Schedule");
-            // Hide menu items for other fragments
             invalidateOptionsMenu();
         } else if (fragment instanceof ProfileFragment) {
             binding.toolbar.setTitle("Profile");
-            // Hide menu items for other fragments
             invalidateOptionsMenu();
         }
     }
 
     @Override
     public boolean onPrepareOptionsMenu(android.view.Menu menu) {
-        // Get current fragment
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
-        // HomeFragment now manages its own menu, so hide menu items for other fragments
         boolean showMenu = currentFragment instanceof HomeFragment;
 
         android.view.MenuItem notificationsItem = menu.findItem(R.id.action_notifications);
@@ -301,6 +523,32 @@ public class MainActivity extends AppCompatActivity {
     private void showExitConfirmationDialog() {
         hapticHelper.vibrateClick();
 
+        AlertDialog dialog = getAlertDialog();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            if (positiveButton instanceof MaterialButton) {
+                positiveButton.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(
+                                getResources().getColor(R.color.red_700, null)
+                        )
+                );
+            } else {
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.red_700, null));
+            }
+            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
+            positiveButton.setAllCaps(false);
+        }
+
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
+            negativeButton.setAllCaps(false);
+        }
+    }
+
+    @NonNull
+    private AlertDialog getAlertDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Exit App?");
         builder.setMessage("Are you sure you want to exit SendaSnap?");
@@ -318,32 +566,19 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
-
-        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        if (positiveButton != null) {
-            if (positiveButton instanceof MaterialButton) {
-                ((MaterialButton) positiveButton).setBackgroundTintList(
-                        android.content.res.ColorStateList.valueOf(
-                                getResources().getColor(R.color.error, null)
-                        )
-                );
-            } else {
-                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
-            }
-            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
-            positiveButton.setAllCaps(false);
-        }
-
-        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        if (negativeButton != null) {
-            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
-            negativeButton.setAllCaps(false);
-        }
+        return dialog;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
+        // Remove notification listener
+        if (unreadCountListener != null) {
+            NotificationHelper.removeUnreadCountListener(this, unreadCountListener);
+            unreadCountListener = null;
+        }
+        
         if (networkUtils != null) {
             networkUtils.stopNetworkCallback();
         }

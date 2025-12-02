@@ -95,11 +95,27 @@
             android:theme="@style/Theme.SendaSnap"
             android:windowSoftInputMode="adjustResize" />
         
+        <!-- Notifications Activity -->
+        <activity
+            android:name=".activities.NotificationsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.SendaSnap" />
+        
         <!-- Task Alarm Receiver -->
         <receiver
             android:name=".receivers.TaskAlarmReceiver"
             android:enabled="true"
             android:exported="false" />
+        
+        <!-- Firebase Cloud Messaging Service -->
+        <service
+            android:name=".services.FcmMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         
         <!-- Chat Activity -->
         <activity
