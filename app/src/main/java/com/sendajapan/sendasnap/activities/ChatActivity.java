@@ -44,6 +44,7 @@ import com.sendajapan.sendasnap.services.FirebaseStorageService;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.FirebaseUtils;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
+import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 import java.io.File;
 import java.io.Serializable;
@@ -75,6 +76,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatService chatService;
     private FirebaseStorageService storageService;
     private HapticFeedbackHelper hapticHelper;
+    private SharedPrefsManager prefsManager;
 
     private String chatId;
     private String currentUserId;
@@ -83,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
     private String taskTitle;
 
     private List<UserData> participants = new ArrayList<>();
+    private long lastMessageTimestamp = 0L;
 
     private ActivityResultLauncher<String> filePickerLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
@@ -118,7 +121,12 @@ public class ChatActivity extends AppCompatActivity {
         chatService = ChatService.getInstance();
         storageService = FirebaseStorageService.getInstance();
         hapticHelper = HapticFeedbackHelper.getInstance(this);
+        prefsManager = SharedPrefsManager.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
+    }
+
+    public String getChatId() {
+        return chatId;
     }
 
     private void initializeCurrentUser() {
@@ -527,6 +535,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 try {
+                    checkAndTriggerNewMessageFeedback(messages);
                     messageAdapter.updateMessages(messages);
                     updateEmptyState(messages.isEmpty());
                     scrollToBottom();
@@ -541,6 +550,37 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void checkAndTriggerNewMessageFeedback(List<Message> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return;
+        }
+
+        Message latestMessage = messages.get(messages.size() - 1);
+        if (latestMessage == null) {
+            return;
+        }
+
+        long messageTimestamp = latestMessage.getTimestamp();
+        
+        if (lastMessageTimestamp == 0L) {
+            lastMessageTimestamp = messageTimestamp;
+            return;
+        }
+
+        if (messageTimestamp <= lastMessageTimestamp) {
+            return;
+        }
+
+        if (latestMessage.getSenderId() != null && latestMessage.getSenderId().equals(currentUserId)) {
+            lastMessageTimestamp = messageTimestamp;
+            return;
+        }
+
+        lastMessageTimestamp = messageTimestamp;
+
+        markMessagesAsSeen();
     }
 
     private void updateEmptyState(boolean isEmpty) {

@@ -457,6 +457,9 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         if (itemId == R.id.action_notifications) {
             openNotifications();
             return true;
+        } else if (itemId == R.id.action_chat) {
+            openChat();
+            return true;
         } else if (itemId == R.id.action_about) {
             openAbout();
             return true;
@@ -473,6 +476,13 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         }
         Intent intent = new Intent(getContext(), NotificationsActivity.class);
         startActivity(intent);
+    }
+
+    private void openChat() {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+        Toast.makeText(getContext(), "Under development", Toast.LENGTH_SHORT).show();
     }
     
     private void setupNotificationBadge() {

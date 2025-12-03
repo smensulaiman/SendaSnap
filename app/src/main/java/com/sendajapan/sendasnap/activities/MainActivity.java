@@ -42,6 +42,7 @@ import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.google.firebase.database.ValueEventListener;
 import com.sendajapan.sendasnap.activities.auth.LoginActivity;
+import com.sendajapan.sendasnap.utils.ChatMessageListener;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.DrawerController;
 import com.sendajapan.sendasnap.utils.FcmNotificationSender;
@@ -247,6 +248,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void performLogout() {
         FcmNotificationSender.removeNotificationListener();
+        ChatMessageListener.removeChatMessageListener();
+        ChatMessageListener.clearProcessedTimestamps();
         
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(this);
         prefsManager.logout();

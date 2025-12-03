@@ -14,12 +14,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.sendajapan.sendasnap.utils.ChatMessageListener;
 import com.sendajapan.sendasnap.utils.FcmNotificationSender;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 
 public class MyApplication extends Application {
 
-    private static final String TAG = "MyApplication";
     private static MyApplication instance;
     private int activityCount = 0;
     private Activity currentActivity;
@@ -64,16 +64,17 @@ public class MyApplication extends Application {
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
                 currentActivity = activity;
-                
-                // Setup notification listener when user is logged in and app comes to foreground
+
                 SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(MyApplication.this);
                 if (prefsManager.isLoggedIn()) {
                     FcmNotificationSender.setupNotificationListener(MyApplication.this);
+                    ChatMessageListener.setupChatMessageListener(MyApplication.this);
                 }
             }
 
             @Override
-            public void onActivityPaused(@NonNull Activity activity) {}
+            public void onActivityPaused(@NonNull Activity activity) {
+            }
 
             @Override
             public void onActivityStopped(@NonNull Activity activity) {
@@ -87,7 +88,8 @@ public class MyApplication extends Application {
             }
 
             @Override
-            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+            }
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
@@ -97,33 +99,32 @@ public class MyApplication extends Application {
             }
         });
 
-        // Setup notification listener on app start if user is logged in
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(this);
         if (prefsManager.isLoggedIn()) {
             FcmNotificationSender.setupNotificationListener(this);
+            ChatMessageListener.setupChatMessageListener(this);
         }
     }
 
     private void applyWindowSettings(Activity activity) {
-        if (activity.getWindow() == null) return;
+        if (activity.getWindow() == null)
+            return;
 
         activity.getWindow().setStatusBarColor(
-            activity.getResources().getColor(R.color.status_bar_color, activity.getTheme())
-        );
+                activity.getResources().getColor(R.color.status_bar_color, activity.getTheme()));
         activity.getWindow().setNavigationBarColor(
-            activity.getResources().getColor(R.color.navigation_bar_color, activity.getTheme())
-        );
+                activity.getResources().getColor(R.color.navigation_bar_color, activity.getTheme()));
 
         WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(
-            activity.getWindow().getDecorView()
-        );
+                activity.getWindow().getDecorView());
         if (controller != null) {
             controller.setAppearanceLightStatusBars(false);
         }
     }
 
     public static void applyWindowInsets(View rootView) {
-        if (rootView == null) return;
+        if (rootView == null)
+            return;
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -132,4 +133,3 @@ public class MyApplication extends Application {
         });
     }
 }
-

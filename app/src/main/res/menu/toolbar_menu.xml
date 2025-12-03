@@ -10,6 +10,14 @@
         app:showAsAction="ifRoom"
         app:iconTint="@color/text_primary" />
 
+    <!-- Chat Icon -->
+    <item
+        android:id="@+id/action_chat"
+        android:icon="@drawable/ic_chat_outlined"
+        android:title="Chat"
+        app:showAsAction="ifRoom"
+        app:iconTint="@color/text_primary" />
+
     <!-- Three Dot Menu -->
     <item
         android:id="@+id/action_more"
