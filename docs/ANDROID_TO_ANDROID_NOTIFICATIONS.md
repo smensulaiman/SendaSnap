@@ -24,6 +24,7 @@ This document explains how push notifications are sent directly from Android app
    - Stores FCM tokens in Firebase
    - Writes task assignment notifications to Firebase
    - Sets up Firebase listeners for incoming notifications
+   - **Important**: Marks notifications as read in Firebase BEFORE showing UI to prevent duplicate notifications when navigating between activities
 
 3. **TaskNotificationHelper** (`utils/TaskNotificationHelper.java`)
    - Shows local notifications when triggered by Firebase listeners
@@ -138,20 +139,25 @@ Assignee's device (any state: foreground, background, or killed)
       └─> Detects new notification in task_notifications/{assigneeId}/
           └─> handleNotification()
               ├─> Check if notification is unread (read == false)
-              ├─> Check if notification is recent (< 5 minutes old)
+              ├─> Check if notification is recent (< 10 minutes old)
               │
-              ├─> TaskNotificationHelper.sendTaskAssignmentNotificationFromFirebase()
-              │   ├─> Create local notification
-              │   ├─> Set title: "New Task Assigned: [Task Title]"
-              │   ├─> Set message: "[Creator Name] assigned you a task: [Description]"
-              │   ├─> Set intent to open ScheduleDetailActivity
-              │   └─> Show notification
+              ├─> Mark notification as read in Firebase IMMEDIATELY (prevents duplicates when navigating)
+              │   └─> Update: task_notifications/{assigneeId}/{notificationId}/read = true
               │
-              ├─> SoundHelper.playNotificationSound()
-              │   └─> Play notification sound
+              ├─> If app in foreground:
+              │   ├─> CookieBarToastHelper.showInfo()
+              │   │   ├─> Title: "New Task Assigned" (white text)
+              │   │   ├─> Message: "[Creator Name] assigned you: [Task Title]" (white text)
+              │   │   └─> Icon: White colored icon
+              │   └─> SoundHelper.playNotificationSound()
               │
-              └─> Mark notification as read
-                  └─> Update: task_notifications/{assigneeId}/{notificationId}/read = true
+              └─> If app in background:
+                  └─> TaskNotificationHelper.sendTaskAssignmentNotificationFromFirebase()
+                      ├─> Create local notification
+                      ├─> Set title: "New Task Assigned: [Task Title]"
+                      ├─> Set message: "[Creator Name] assigned you a task: [Description]"
+                      ├─> Set intent to open ScheduleDetailActivity
+                      └─> Show notification
 ```
 
 ## Code Examples
@@ -263,6 +269,7 @@ To make this work, you need to configure Firebase Realtime Database security rul
 2. **Device B, C, D**:
    - Each should receive notification independently
    - Verify notifications are not duplicated
+   - **Test**: Navigate between activities (ScheduleDetailActivity, ChatActivity) and verify notification appears only once
 
 ### Test Scenario 4: Token Refresh
 
@@ -299,13 +306,23 @@ To make this work, you need to configure Firebase Realtime Database security rul
 
 ### Duplicate Notifications
 
-- **Cause**: Listener triggering multiple times for same notification
-- **Solution**: Notification is marked as `read: true` after showing to prevent duplicates
+- **Cause**: Listener triggering multiple times for same notification when navigating between activities (e.g., ScheduleDetailActivity, ChatActivity)
+- **Solution**: Notification is marked as `read: true` in Firebase **BEFORE** showing the CookieBar UI to prevent duplicates
+- **Implementation**: In `FcmNotificationSender.handleNotification()`, the notification is marked as read immediately after validation, before calling `showForegroundNotification()` or `showSystemNotification()`
+
+### CookieBar Styling
+
+- **Icon Color**: All CookieBar icons are white colored
+  - Icons use `android:tint="@android:color/white"` in their drawable XML files
+  - Icons: `ic_check_circle` (success), `ic_error` (error), `ic_info` (info), `ic_warning` (warning), `ic_wifi_off` (no internet)
+- **Text Color**: Title and message text are white (`Color.WHITE`)
+  - Set via `.setTitleColor(android.graphics.Color.WHITE)` and `.setMessageColor(android.graphics.Color.WHITE)` in `CookieBarToastHelper`
+- **Location**: `utils/CookieBarToastHelper.java`
 
 ### Old Notifications Showing
 
 - **Cause**: Listener processing old unread notifications
-- **Solution**: Code checks `created_at` timestamp and only shows notifications < 5 minutes old
+- **Solution**: Code checks `created_at` timestamp and only shows notifications < 10 minutes old (NOTIFICATION_TIME_LIMIT_MS = 600000ms)
 
 ## Data Cleanup
 

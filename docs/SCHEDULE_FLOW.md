@@ -773,13 +773,14 @@ MyApplication.onCreate() or Activity.onResume()
           │   ├─> Check if unread (read == false)
           │   ├─> Check if created within last 10 minutes (prevent old notifications)
           │   ├─> If valid:
-          │   │   ├─> Mark as read immediately (prevent duplicates)
+          │   │   ├─> Mark as read in Firebase immediately (prevent duplicates when navigating)
           │   │   ├─> Check if app is in foreground
           │   │   │
           │   │   ├─> If foreground:
           │   │   │   ├─> CookieBarToastHelper.showInfo()
-          │   │   │   │   ├─> Title: "New Task Assigned"
-          │   │   │   │   ├─> Message: "[Creator Name] assigned you: [Task Title]"
+          │   │   │   │   ├─> Title: "New Task Assigned" (white text)
+          │   │   │   │   ├─> Message: "[Creator Name] assigned you: [Task Title]" (white text)
+          │   │   │   │   ├─> Icon: White colored icon
           │   │   │   │   └─> Duration: LONG_DURATION
           │   │   │   └─> SoundHelper.playNotificationSound()
           │   │   │
@@ -849,6 +850,8 @@ task_notifications/
   - `setupNotificationListener()`: Sets up global Firebase listener in MyApplication
   - `removeNotificationListener()`: Cleans up listener on logout
   - `handleNotification()`: Processes incoming notifications and shows appropriate UI (CookieBar or system notification)
+    - **Important**: Marks notification as read in Firebase BEFORE showing UI to prevent duplicate notifications when navigating between activities
+  - `showForegroundNotification()`: Shows CookieBar notification when app is in foreground
   - `showSystemNotification()`: Shows system notification when app is in background
 - **TaskNotificationHelper**: `utils/TaskNotificationHelper.java`
   - `sendTaskAssignmentNotificationFromFirebase()`: Creates and displays system notification
@@ -860,9 +863,9 @@ task_notifications/
   - Setup: When app starts (if user logged in) and when any activity resumes
   - Cleanup: When user logs out
 - **Duplicate Prevention**: 
-  - Notifications marked as read immediately
-  - Only processes notifications created in last 10 minutes
-  - Listener prevents duplicates by checking read status
+  - Notifications marked as read in Firebase **BEFORE** showing UI (prevents duplicates when navigating between activities)
+  - Only processes notifications created in last 10 minutes (NOTIFICATION_TIME_LIMIT_MS = 600000ms)
+  - Listener prevents duplicates by checking read status before processing
 - **Token Storage**: FCM tokens stored in Firebase Realtime Database (`fcm_tokens/{userId}`)
 - **Works Offline**: Firebase Realtime Database handles offline sync automatically
 - **Notification Click Behavior**:
@@ -930,6 +933,10 @@ Firebase Realtime Database
 - **CookieBar Method**: `showSuccess(context, title, message, duration)`
 - **Sound Method**: `playNotificationSound(context)`
 - **Called From**: `AddScheduleActivity.saveTask()` after successful task creation and notification sending
+- **CookieBar Styling**:
+  - All icons are white colored (via drawable tint: `@android:color/white`)
+  - Title and message text are white (`Color.WHITE`)
+  - Icons used: `ic_check_circle` (success), `ic_error` (error), `ic_info` (info), `ic_warning` (warning), `ic_wifi_off` (no internet)
 
 ---
 
@@ -1036,11 +1043,13 @@ Assignee's Device:
   │
   → Firebase Listener detects new notification
   │   ├─> Check if unread and created within last 10 minutes
-  │   ├─> Mark as read immediately
+  │   ├─> Mark as read in Firebase immediately (prevents duplicates when navigating)
   │   │
   │   ├─> If app in foreground:
   │   │   ├─> CookieBarToastHelper.showInfo()
-  │   │   │   └─> "New Task Assigned: [Creator Name] assigned you: [Task Title]"
+  │   │   │   ├─> Title: "New Task Assigned" (white text)
+  │   │   │   ├─> Message: "[Creator Name] assigned you: [Task Title]" (white text)
+  │   │   │   └─> Icon: White colored icon
   │   │   └─> SoundHelper.playNotificationSound()
   │   │
   │   └─> If app in background:

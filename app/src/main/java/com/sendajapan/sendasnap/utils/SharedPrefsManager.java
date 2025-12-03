@@ -109,9 +109,8 @@ public class SharedPrefsManager {
         vehicles.removeIf(v -> v.getId() != null && v.getId().equals(vehicle.getId()));
         vehicles.add(0, vehicle);
 
-        // Limit cache size to 50 vehicles
-        if (vehicles.size() > 50) {
-            vehicles = vehicles.subList(0, 50);
+        if (vehicles.size() > 100) {
+            vehicles = new ArrayList<>(vehicles.subList(0, 100));
         }
 
         saveRecentVehicles(vehicles);

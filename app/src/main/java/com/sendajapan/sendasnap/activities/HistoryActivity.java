@@ -6,13 +6,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.sendajapan.sendasnap.R;
+import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityHistoryBinding;
 import com.sendajapan.sendasnap.models.Vehicle;
@@ -35,17 +34,12 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+
         binding = ActivityHistoryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar_color, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.navigation_bar_color, getTheme()));
-
-        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(true);
-            controller.setAppearanceLightNavigationBars(true);
-        }
+        MyApplication.applyWindowInsets(binding.getRoot());
 
         initHelpers();
         setupToolbar();
@@ -122,9 +116,7 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
         } else {
             String lowerQuery = query.toLowerCase();
             for (Vehicle vehicle : allVehicles) {
-                if (vehicle.getChassisModel().toLowerCase().contains(lowerQuery) ||
-                        vehicle.getMake().toLowerCase().contains(lowerQuery) ||
-                        vehicle.getModel().toLowerCase().contains(lowerQuery)) {
+                if (matchesSearchQuery(vehicle, lowerQuery)) {
                     filteredVehicles.add(vehicle);
                 }
             }
@@ -132,6 +124,12 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
 
         vehicleAdapter.updateVehicles(filteredVehicles);
         updateEmptyState();
+    }
+
+    private boolean matchesSearchQuery(Vehicle vehicle, String lowerQuery) {
+        return vehicle.getChassisModel().toLowerCase().contains(lowerQuery) ||
+                vehicle.getMake().toLowerCase().contains(lowerQuery) ||
+                vehicle.getModel().toLowerCase().contains(lowerQuery);
     }
 
     private void updateEmptyState() {
@@ -148,19 +146,21 @@ public class HistoryActivity extends AppCompatActivity implements VehicleAdapter
         new AlertDialog.Builder(this)
                 .setTitle("Clear History")
                 .setMessage("Are you sure you want to clear all search history? This action cannot be undone.")
-                .setPositiveButton("Clear", (dialog, which) -> {
-                    vehicleCache.clearCache();
-                    allVehicles.clear();
-                    filteredVehicles.clear();
-                    vehicleAdapter.updateVehicles(filteredVehicles);
-                    updateEmptyState();
-
-                    CookieBarToastHelper.showSuccess(this, "History Cleared",
-                            "All search history has been removed",
-                            CookieBarToastHelper.LONG_DURATION);
-                })
+                .setPositiveButton("Clear", (dialog, which) -> clearHistory())
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void clearHistory() {
+        vehicleCache.clearCache();
+        allVehicles.clear();
+        filteredVehicles.clear();
+        vehicleAdapter.updateVehicles(filteredVehicles);
+        updateEmptyState();
+
+        CookieBarToastHelper.showSuccess(this, "History Cleared",
+                "All search history has been removed",
+                CookieBarToastHelper.LONG_DURATION);
     }
 
     @Override

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -98,9 +99,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-        if (currentFragment == null || !(currentFragment instanceof HomeFragment)) {
+        if (!(currentFragment instanceof HomeFragment)) {
             getMenuInflater().inflate(R.menu.toolbar_menu, menu);
             setupNotificationIcon(menu);
+            
+            if (currentFragment instanceof ScheduleFragment || currentFragment instanceof ProfileFragment) {
+                MenuItem chatMenuItem = menu.findItem(R.id.action_chat);
+                if (chatMenuItem != null) {
+                    chatMenuItem.setVisible(false);
+                }
+            }
         }
         return true;
     }
@@ -117,14 +125,12 @@ public class MainActivity extends AppCompatActivity {
                 openNotifications();
             });
             
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                setupNotificationBadge();
-            }, 300);
+            new Handler(Looper.getMainLooper()).postDelayed(this::setupNotificationBadge, 300);
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (currentFragment != null && currentFragment.onOptionsItemSelected(item)) {
             return true;
@@ -206,6 +212,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleLogout() {
+        AlertDialog dialog = getDialog();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            if (positiveButton instanceof MaterialButton) {
+                positiveButton.setBackgroundTintList(
+                        ColorStateList.valueOf(
+                                getResources().getColor(R.color.error, null)
+                        )
+                );
+            } else {
+                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
+            }
+            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
+            positiveButton.setAllCaps(false);
+        }
+
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
+            negativeButton.setAllCaps(false);
+        }
+    }
+
+    @NonNull
+    private AlertDialog getDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Logout");
         builder.setMessage("Are you sure you want to logout?");
@@ -223,27 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
-
-        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        if (positiveButton != null) {
-            if (positiveButton instanceof MaterialButton) {
-                ((MaterialButton) positiveButton).setBackgroundTintList(
-                        ColorStateList.valueOf(
-                                getResources().getColor(R.color.error, null)
-                        )
-                );
-            } else {
-                positiveButton.setBackgroundColor(getResources().getColor(R.color.error, null));
-            }
-            positiveButton.setTextColor(getResources().getColor(R.color.on_primary, null));
-            positiveButton.setAllCaps(false);
-        }
-
-        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        if (negativeButton != null) {
-            negativeButton.setTextColor(getResources().getColor(R.color.text_secondary, null));
-            negativeButton.setAllCaps(false);
-        }
+        return dialog;
     }
 
     private void performLogout() {
@@ -306,6 +318,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Show rationale dialog for notification permission
      */
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void showNotificationPermissionRationale() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Notification Permission Required")
@@ -366,13 +379,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void openNotificationSettings() {
         Intent intent = new Intent();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-        } else {
-            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-        }
+        intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
         startActivity(intent);
     }
 
@@ -550,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog getAlertDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Exit App?");
-        builder.setMessage("Are you sure you want to exit SendaSnap?");
+        builder.setMessage("Are you sure you want to exit Senda Snap?");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
 
         builder.setPositiveButton("Exit", (dialog, which) -> {

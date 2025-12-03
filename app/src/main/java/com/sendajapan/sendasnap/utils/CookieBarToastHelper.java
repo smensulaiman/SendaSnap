@@ -54,7 +54,9 @@ public class CookieBarToastHelper {
                 .setIconAnimation(R.animator.fade_in)
                 .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
-                .setEnableAutoDismiss(true);
+                .setEnableAutoDismiss(true)
+                .setTitleColor(R.color.white)
+                .setMessageColor(R.color.white);
     }
 
     private static CookieBar.Builder buildCookieWithListener(@NonNull Context context, String title, String message,
@@ -75,6 +77,8 @@ public class CookieBarToastHelper {
                 .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(true)
+                .setTitleColor(android.graphics.Color.WHITE)
+                .setMessageColor(android.graphics.Color.WHITE)
                 .setCookieListener(cookieBarDismissListener);
     }
 
@@ -157,6 +161,8 @@ public class CookieBarToastHelper {
                 .setActionColor(R.color.white)
                 .setIcon(icon)
                 .setIconAnimation(R.animator.fade_in)
+                .setTitleColor(android.graphics.Color.WHITE)
+                .setMessageColor(android.graphics.Color.WHITE)
                 .setAction(actionText, action::run)
                 .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
@@ -182,6 +188,8 @@ public class CookieBarToastHelper {
                 .setActionColor(R.color.white)
                 .setIcon(icon)
                 .setIconAnimation(R.animator.fade_in)
+                .setTitleColor(android.graphics.Color.WHITE)
+                .setMessageColor(android.graphics.Color.WHITE)
                 .setAction(dismissText, () -> {})
                 .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
@@ -223,6 +231,8 @@ public class CookieBarToastHelper {
                 .setBackgroundColor(backgroundColor)
                 .setIcon(iconRes)
                 .setIconAnimation(R.animator.fade_in)
+                .setTitleColor(android.graphics.Color.WHITE)
+                .setMessageColor(android.graphics.Color.WHITE)
                 .setCookiePosition(Gravity.TOP)
                 .setSwipeToDismiss(true)
                 .setEnableAutoDismiss(true)

@@ -214,7 +214,7 @@ public class ChatActivity extends AppCompatActivity {
             float density = getResources().getDisplayMetrics().density;
             
             if (insets.bottom > KEYBOARD_THRESHOLD_DP) {
-                params.bottomMargin = insets.bottom - KEYBOARD_MARGIN_OFFSET_DP;
+                params.bottomMargin = insets.bottom;
             } else {
                 params.bottomMargin = (int) (DEFAULT_MARGIN_DP * density);
             }

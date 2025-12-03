@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/blur_background"
+    android:background="@color/color_background"
+    android:elevation="12dp"
+    android:fitsSystemWindows="true"
     tools:context=".activities.HistoryActivity">
 
-    <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:elevation="0dp">
+        app:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -22,57 +24,69 @@
             android:background="@android:color/transparent"
             app:title="Search History"
             app:titleTextColor="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            app:titleTextAppearance="@style/TextAppearance.Material3.ActionBar.Title"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="@color/text_primary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:overScrollMode="never"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="@dimen/dimen_16"
+            android:paddingBottom="32dp">
 
-            <!-- Search Filter -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/dimen_16"
                 android:hint="Search history..."
                 app:boxStrokeColor="@color/primary"
+                app:boxStrokeWidthFocused="2dp"
                 app:hintTextColor="@color/text_secondary"
-                app:startIconDrawable="@drawable/ic_search">
+                app:startIconDrawable="@drawable/ic_search"
+                app:startIconTint="@color/black"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearchFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textSize="@dimen/text_size_small"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textColor="@color/text_black" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Clear History Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnClearHistory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/dimen_16"
                 android:text="Clear History"
-                android:textSize="@dimen/text_size_small"
-                app:backgroundTint="@color/error"
-                app:cornerRadius="16dp"
+                android:textAppearance="@style/TextAppearance.Montserrat.LabelMedium"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:minWidth="140dp"
+                app:backgroundTint="@color/error_dark"
+                app:cornerRadius="4dp"
                 app:icon="@drawable/ic_clear"
-                app:iconGravity="textStart" />
+                app:iconGravity="textStart"
+                app:iconPadding="@dimen/dimen_8"
+                app:iconTint="@android:color/white"
+                app:rippleColor="@color/error" />
 
-            <!-- History RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewHistory"
                 android:layout_width="match_parent"
@@ -80,12 +94,11 @@
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_vehicle" />
 
-            <!-- Empty State -->
             <LinearLayout
                 android:id="@+id/layoutEmptyState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="@dimen/dimen_24"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:visibility="gone">
@@ -99,17 +112,20 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/dimen_16"
                     android:text="No search history"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                    android:textSize="@dimen/text_size_medium"
+                    android:fontFamily="@font/montserrat_semi_bold"
+                    android:textStyle="bold"
                     android:textColor="@color/text_hint" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/dimen_8"
                     android:text="Your vehicle searches will appear here"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textSize="@dimen/text_size_small"
+                    android:fontFamily="@font/montserrat_semi_bold"
                     android:textColor="@color/text_hint" />
 
             </LinearLayout>

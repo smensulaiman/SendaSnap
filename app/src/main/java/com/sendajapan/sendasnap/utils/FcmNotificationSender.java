@@ -195,10 +195,34 @@ public class FcmNotificationSender {
                 return;
             }
 
+            String notificationKey = notificationSnapshot.getKey();
+            if (notificationKey == null || notificationKey.isEmpty()) {
+                return;
+            }
+
             String taskIdStr = notificationSnapshot.child("task_id").getValue(String.class);
             String taskTitle = notificationSnapshot.child("task_title").getValue(String.class);
             String taskDescription = notificationSnapshot.child("task_description").getValue(String.class);
             String creatorName = notificationSnapshot.child("creator_name").getValue(String.class);
+
+            SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(context);
+            UserData user = prefsManager.getUser();
+            
+            if (user == null || user.getEmail() == null) {
+                return;
+            }
+
+            String userId = FirebaseUtils.sanitizeEmailForKey(user.getEmail());
+            if (userId.isEmpty()) {
+                return;
+            }
+
+            DatabaseReference notificationRef = FirebaseDatabase.getInstance()
+                    .getReference(TASK_NOTIFICATIONS_PATH)
+                    .child(userId)
+                    .child(notificationKey);
+
+            notificationRef.child("read").setValue(true);
 
             MyApplication app = MyApplication.getInstance();
             boolean isForeground = app != null && app.isAppInForeground();

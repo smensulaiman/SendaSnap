@@ -1,6 +1,7 @@
 package com.sendajapan.sendasnap.activities.schedule;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,7 +19,6 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.material.chip.Chip;
 import com.google.firebase.database.ValueEventListener;
 import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
@@ -313,10 +313,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
         binding.editTextTime.setText(task.getWorkTime());
 
-        setStatusChip(task.getStatus());
+        displayStatus(task.getStatus());
 
         if (task.getPriority() != null) {
-            setPriorityChip(task.getPriority());
+            displayPriority(task.getPriority());
         }
 
         if (task.getAttachments() != null && !task.getAttachments().isEmpty()) {
@@ -330,62 +330,98 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void setStatusChip(Task.TaskStatus status) {
-        binding.chipGroupStatus.clearCheck();
+    private void displayStatus(Task.TaskStatus status) {
+        if (binding == null || binding.layoutStatusBadge == null || binding.textStatusValue == null) {
+            return;
+        }
+
+        int backgroundColor;
+        int iconRes;
+        String statusText;
+
         switch (status) {
             case RUNNING:
-                Chip runningChip = binding.chipGroupStatus.findViewById(R.id.chipRunning);
-                if (runningChip != null) {
-                    runningChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.primary);
+                iconRes = R.drawable.ic_time;
+                statusText = "In Progress";
                 break;
             case PENDING:
-                Chip pendingChip = binding.chipGroupStatus.findViewById(R.id.chipPending);
-                if (pendingChip != null) {
-                    pendingChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.warning_dark);
+                iconRes = R.drawable.ic_warning;
+                statusText = "Pending";
                 break;
             case COMPLETED:
-                Chip completedChip = binding.chipGroupStatus.findViewById(R.id.chipCompleted);
-                if (completedChip != null) {
-                    completedChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.success_dark);
+                iconRes = R.drawable.ic_check_circle;
+                statusText = "Completed";
                 break;
             case CANCELLED:
-                Chip cancelledChip = binding.chipGroupStatus.findViewById(R.id.chipCancelled);
-                if (cancelledChip != null) {
-                    cancelledChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.error_dark);
+                iconRes = R.drawable.ic_error;
+                statusText = "Cancelled";
                 break;
+            default:
+                backgroundColor = ContextCompat.getColor(this, R.color.gray_500);
+                iconRes = R.drawable.ic_info;
+                statusText = "Unknown";
+                break;
+        }
+
+        binding.layoutStatusBadge.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        binding.textStatusValue.setText(statusText);
+        
+        if (binding.imgStatusIcon != null) {
+            binding.imgStatusIcon.setImageResource(iconRes);
+            binding.imgStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.white), android.graphics.PorterDuff.Mode.SRC_IN);
         }
     }
 
-    private void setPriorityChip(Task.TaskPriority priority) {
-        binding.chipGroupPriority.clearCheck();
+    private void displayPriority(Task.TaskPriority priority) {
+        if (binding == null || binding.layoutPriorityBadge == null || binding.textPriorityValue == null) {
+            return;
+        }
+
+        int backgroundColor;
+        int iconRes;
+        String priorityText;
 
         switch (priority) {
             case LOW:
-                Chip lowChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityLow);
-                if (lowChip != null) {
-                    lowChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.warning_dark);
+                iconRes = R.drawable.ic_info;
+                priorityText = "Low";
                 break;
             case NORMAL:
-                Chip mediumChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityNormal);
-                if (mediumChip != null) {
-                    mediumChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.success_dark);
+                iconRes = R.drawable.ic_check_circle;
+                priorityText = "Normal";
                 break;
             case HIGH:
-                Chip highChip = binding.chipGroupPriority.findViewById(R.id.chipPriorityHigh);
-                if (highChip != null) {
-                    highChip.setChecked(true);
-                }
+                backgroundColor = ContextCompat.getColor(this, R.color.error_dark);
+                iconRes = R.drawable.ic_warning;
+                priorityText = "High";
                 break;
+            default:
+                backgroundColor = ContextCompat.getColor(this, R.color.gray_500);
+                iconRes = R.drawable.ic_info;
+                priorityText = "Unknown";
+                break;
+        }
+
+        binding.layoutPriorityBadge.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        binding.textPriorityValue.setText(priorityText);
+        
+        if (binding.imgPriorityIcon != null) {
+            binding.imgPriorityIcon.setImageResource(iconRes);
+            binding.imgPriorityIcon.setColorFilter(ContextCompat.getColor(this, R.color.white), android.graphics.PorterDuff.Mode.SRC_IN);
         }
     }
 
     private void displayAssignees() {
+        if (binding == null || binding.chipGroupAssignees == null) {
+            return;
+        }
+
         binding.chipGroupAssignees.removeAllViews();
 
         List<UserData> assignees = task.getAssignees();
@@ -395,7 +431,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
             for (UserData assignee : assignees) {
                 if (assignee == null) continue;
-                Chip chip = new Chip(this);
+                com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(this);
                 chip.setText(assignee.getName() != null ? assignee.getName() : "");
                 chip.setCloseIconVisible(false);
                 chip.setClickable(false);
@@ -404,7 +440,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         } else if (task.getAssignee() != null) {
             UserData assignee = task.getAssignee();
             binding.editTextAssignee.setText(assignee.getName() != null ? assignee.getName() : "");
-            Chip chip = new Chip(this);
+            com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(this);
             chip.setText(assignee.getName() != null ? assignee.getName() : "");
             chip.setCloseIconVisible(false);
             chip.setClickable(false);
@@ -417,23 +453,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     private void makeFieldsReadOnly() {
-        // Fields are already read-only TextViews in the detail layout
-        // Just disable chip interactions
-        for (int i = 0; i < binding.chipGroupStatus.getChildCount(); i++) {
-            View child = binding.chipGroupStatus.getChildAt(i);
-            if (child instanceof Chip) {
-                ((Chip) child).setClickable(false);
-            }
-        }
-
-        if (binding.chipGroupPriority != null) {
-            for (int i = 0; i < binding.chipGroupPriority.getChildCount(); i++) {
-                View child = binding.chipGroupPriority.getChildAt(i);
-                if (child instanceof Chip) {
-                    ((Chip) child).setClickable(false);
-                }
-            }
-        }
     }
 
     private void fetchUsers() {

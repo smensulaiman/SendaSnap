@@ -44,9 +44,79 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/dimen_16">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end">
+
+                <LinearLayout
+                    android:id="@+id/layoutStatusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/dimen_8"
+                    android:layout_marginEnd="@dimen/dimen_8"
+                    android:background="@drawable/shimmer_placeholder"
+                    android:backgroundTint="@color/primary">
+
+                    <ImageView
+                        android:id="@+id/imgStatusIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="@dimen/dimen_4"
+                        android:src="@drawable/ic_check_circle"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/textStatusValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Pending"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_small"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutPriorityBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/dimen_8"
+                    android:background="@drawable/shimmer_placeholder"
+                    android:backgroundTint="@color/success">
+
+                    <ImageView
+                        android:id="@+id/imgPriorityIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="@dimen/dimen_4"
+                        android:src="@drawable/ic_info"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/textPriorityValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Normal"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_small"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <!-- Task Info -->
             <com.google.android.material.card.MaterialCardView
@@ -77,7 +147,7 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:textColor="@color/text_black"
-                            android:textSize="@dimen/text_size_small"
+                            android:textSize="@dimen/text_size_medium"
                             android:includeFontPadding="false"
                             tools:text="Inspect Vehicle Engine" />
 
@@ -96,7 +166,7 @@
                             android:layout_marginBottom="4dp"
                             android:fontFamily="@font/montserrat_semi_bold"
                             android:text="Description"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/gray_400"
                             android:textSize="@dimen/text_size_small"
                             android:includeFontPadding="false" />
 
@@ -104,12 +174,11 @@
                             android:id="@+id/editTextDescription"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_semi_bold"
+                            android:fontFamily="@font/montserrat_medium"
                             android:maxLines="1000"
                             android:scrollbars="none"
-                            android:textColor="@color/text_black"
-                            android:textSize="@dimen/text_size_small"
-                            android:includeFontPadding="false"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_large"
                             tools:text="Inspect the engine, check oil levels, and report any visible issues." />
                     </LinearLayout>
 
@@ -246,186 +315,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Status -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_16"
-                app:cardBackgroundColor="@color/primary_light"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/primary"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/dimen_12">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/dimen_8"
-                        android:fontFamily="@font/montserrat_semi_bold"
-                        android:text="Status"
-                        android:textColor="@color/text_black"
-                        android:textSize="@dimen/text_size_medium"
-                        android:includeFontPadding="false" />
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="-8dp"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPending"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_semi_bold"
-                            android:text="Pending"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_small"
-                            app:chipBackgroundColor="@color/white"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/warning_dark"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRunning"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_semi_bold"
-                            android:text="In Progress"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_small"
-                            app:chipBackgroundColor="@color/primary_light"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/primary"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipCompleted"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_semi_bold"
-                            android:text="Completed"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_small"
-                            app:chipBackgroundColor="@color/success_light"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/success_dark"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipCancelled"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_semi_bold"
-                            android:text="Cancelled"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_small"
-                            app:chipBackgroundColor="@color/error_light"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/error_dark"
-                            app:chipStrokeWidth="2dp" />
-
-                    </com.google.android.material.chip.ChipGroup>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Priority -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_16"
-                app:cardBackgroundColor="@color/success_light"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/success_dark"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/dimen_12">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/dimen_8"
-                        android:fontFamily="@font/montserrat_semi_bold"
-                        android:text="Priority"
-                        android:textColor="@color/text_black"
-                        android:textSize="@dimen/text_size_medium"
-                        android:includeFontPadding="false" />
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupPriority"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="-8dp"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPriorityLow"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_bold"
-                            android:text="Low"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_medium"
-                            app:chipBackgroundColor="@color/warning"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/black"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPriorityNormal"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_bold"
-                            android:text="Normal"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_medium"
-                            app:chipBackgroundColor="@color/success"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/black"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPriorityHigh"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/montserrat_bold"
-                            android:text="High"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/text_size_medium"
-                            app:chipBackgroundColor="@color/error"
-                            app:chipCornerRadius="24dp"
-                            app:chipStrokeColor="@color/black"
-                            app:chipStrokeWidth="2dp" />
-
-                    </com.google.android.material.chip.ChipGroup>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- Attachments -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -435,7 +324,6 @@
                 app:cardBackgroundColor="@color/warning_light"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="@color/warning_dark"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
