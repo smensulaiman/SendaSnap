@@ -3,7 +3,6 @@ package com.sendajapan.sendasnap.services;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.models.ErrorResponse;
@@ -79,18 +78,12 @@ public class VehicleImageUploadService {
                 try {
                     fileToUpload = compressImage(imageFile);
                     if (fileToUpload != null && fileToUpload.exists()) {
-                        tempFiles.add(fileToUpload); // Track for cleanup
-                        Log.d(TAG, "Compressed image: " + imageFile.getName() +
-                                " from " + (imageFile.length() / 1024) + "KB to " +
-                                (fileToUpload.length() / 1024) + "KB");
+                        tempFiles.add(fileToUpload);
                     } else {
-                        // Compression failed, use original
-                        Log.w(TAG, "Compression failed for: " + imageFile.getName() + ", using original");
                         fileToUpload = imageFile;
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "Error compressing image: " + imageFile.getName(), e);
-                    // Use original file if compression fails
+                    fileToUpload = imageFile;
                     fileToUpload = imageFile;
                 }
             }
@@ -158,7 +151,6 @@ public class VehicleImageUploadService {
                 // Clean up temporary compressed files
                 cleanupTempFiles(tempFiles);
 
-                Log.e(TAG, "Upload failed", t);
                 String errorMessage = "Network error. Please check your connection and try again.";
                 if (t.getMessage() != null) {
                     errorMessage = t.getMessage();
@@ -190,7 +182,6 @@ public class VehicleImageUploadService {
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error parsing error response", e);
             }
         }
 
@@ -226,7 +217,6 @@ public class VehicleImageUploadService {
 
             Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
             if (bitmap == null) {
-                Log.e(TAG, "Failed to decode bitmap: " + imageFile.getName());
                 return null;
             }
 
@@ -287,10 +277,8 @@ public class VehicleImageUploadService {
             return compressedFile;
 
         } catch (IOException e) {
-            Log.e(TAG, "Error compressing image: " + imageFile.getName(), e);
             return null;
         } catch (OutOfMemoryError e) {
-            Log.e(TAG, "Out of memory while compressing image: " + imageFile.getName(), e);
             return null;
         }
     }
@@ -323,13 +311,9 @@ public class VehicleImageUploadService {
         for (File tempFile : tempFiles) {
             try {
                 if (tempFile != null && tempFile.exists()) {
-                    boolean deleted = tempFile.delete();
-                    if (!deleted) {
-                        Log.w(TAG, "Failed to delete temp file: " + tempFile.getName());
-                    }
+                    tempFile.delete();
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error deleting temp file: " + tempFile.getName(), e);
             }
         }
         tempFiles.clear();

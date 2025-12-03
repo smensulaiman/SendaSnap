@@ -1,7 +1,6 @@
 package com.sendajapan.sendasnap.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -86,13 +85,11 @@ public class NotificationHelper {
                         }
                     }
                 }
-                Log.d(TAG, "Unread notification count: " + unreadCount + " for user: " + user.getEmail());
                 callback.onSuccess(unreadCount);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Failed to get unread notification count", error.toException());
                 callback.onFailure(error.toException());
             }
         });
@@ -154,7 +151,6 @@ public class NotificationHelper {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Failed to listen for unread notification count", error.toException());
                 callback.onFailure(error.toException());
             }
         };
@@ -246,7 +242,6 @@ public class NotificationHelper {
                                     try {
                                         notification.setTaskId(Integer.parseInt(taskIdStr));
                                     } catch (NumberFormatException e) {
-                                        Log.e(TAG, "Invalid task_id: " + taskIdStr);
                                     }
                                 }
                                 
@@ -277,7 +272,6 @@ public class NotificationHelper {
                                 notifications.add(notification);
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "Error parsing notification", e);
                         }
                     }
                 }
@@ -290,7 +284,6 @@ public class NotificationHelper {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Failed to get notifications", error.toException());
                 callback.onFailure(error.toException());
             }
         });
@@ -323,8 +316,8 @@ public class NotificationHelper {
                 .child("read");
 
         notificationRef.setValue(true)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification marked as read: " + notificationId))
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to mark notification as read: " + notificationId, e));
+                .addOnFailureListener(e -> {
+                });
     }
 }
 

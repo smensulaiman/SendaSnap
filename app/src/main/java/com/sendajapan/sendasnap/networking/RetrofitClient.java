@@ -1,7 +1,6 @@
 package com.sendajapan.sendasnap.networking;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.sendajapan.sendasnap.BuildConfig;
 
@@ -31,7 +30,6 @@ public class RetrofitClient {
         // Only enable logging in debug builds for security
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> {
-                Log.d("OkHttp", message);
             });
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             clientBuilder.addInterceptor(loggingInterceptor);

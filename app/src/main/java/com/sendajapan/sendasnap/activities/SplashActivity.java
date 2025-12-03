@@ -26,7 +26,14 @@ import com.sendajapan.sendasnap.utils.SharedPrefsManager;
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_DELAY = 2000;
+    private static final int SPLASH_DELAY_MS = 2000;
+    private static final int ANIMATION_DURATION_MS = 800;
+    private static final int BOUNCE_DURATION_MS = 200;
+    private static final float INITIAL_SCALE = 0.0f;
+    private static final float FINAL_SCALE = 1.0f;
+    private static final float BOUNCE_SCALE = 0.95f;
+    private static final float INITIAL_ALPHA = 0.0f;
+    private static final float FINAL_ALPHA = 1.0f;
 
     private ActivitySplashBinding binding;
 
@@ -53,19 +60,19 @@ public class SplashActivity extends AppCompatActivity {
 
         startLogoAnimation();
 
-        new Handler(Looper.getMainLooper()).postDelayed(this::navigateToNextActivity, SPLASH_DELAY);
+        new Handler(Looper.getMainLooper()).postDelayed(this::navigateToNextActivity, SPLASH_DELAY_MS);
     }
 
     private void startLogoAnimation() {
         View logoView = findViewById(R.id.imgLogo);
 
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(logoView, "scaleX", 0.0f, 1.0f);
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(logoView, "scaleY", 0.0f, 1.0f);
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(logoView, "alpha", 0.0f, 1.0f);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(logoView, "scaleX", INITIAL_SCALE, FINAL_SCALE);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(logoView, "scaleY", INITIAL_SCALE, FINAL_SCALE);
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(logoView, "alpha", INITIAL_ALPHA, FINAL_ALPHA);
 
-        scaleX.setDuration(800);
-        scaleY.setDuration(800);
-        alpha.setDuration(800);
+        scaleX.setDuration(ANIMATION_DURATION_MS);
+        scaleY.setDuration(ANIMATION_DURATION_MS);
+        alpha.setDuration(ANIMATION_DURATION_MS);
 
         scaleX.setInterpolator(new AccelerateDecelerateInterpolator());
         scaleY.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -78,12 +85,11 @@ public class SplashActivity extends AppCompatActivity {
         scaleX.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                // Small bounce back effect
-                ObjectAnimator bounceX = ObjectAnimator.ofFloat(logoView, "scaleX", 1.0f, 0.95f, 1.0f);
-                ObjectAnimator bounceY = ObjectAnimator.ofFloat(logoView, "scaleY", 1.0f, 0.95f, 1.0f);
+                ObjectAnimator bounceX = ObjectAnimator.ofFloat(logoView, "scaleX", FINAL_SCALE, BOUNCE_SCALE, FINAL_SCALE);
+                ObjectAnimator bounceY = ObjectAnimator.ofFloat(logoView, "scaleY", FINAL_SCALE, BOUNCE_SCALE, FINAL_SCALE);
 
-                bounceX.setDuration(200);
-                bounceY.setDuration(200);
+                bounceX.setDuration(BOUNCE_DURATION_MS);
+                bounceY.setDuration(BOUNCE_DURATION_MS);
 
                 bounceX.start();
                 bounceY.start();

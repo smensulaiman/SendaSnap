@@ -3,10 +3,15 @@ package com.sendajapan.sendasnap.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -36,8 +41,10 @@ import com.sendajapan.sendasnap.fragments.ProfileFragment;
 import com.sendajapan.sendasnap.fragments.ScheduleFragment;
 import com.sendajapan.sendasnap.networking.NetworkUtils;
 import com.google.firebase.database.ValueEventListener;
+import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.utils.CookieBarToastHelper;
 import com.sendajapan.sendasnap.utils.DrawerController;
+import com.sendajapan.sendasnap.utils.FcmNotificationSender;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
 import com.sendajapan.sendasnap.utils.NotificationHelper;
 import com.sendajapan.sendasnap.utils.SharedPrefsManager;
@@ -53,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isNetworkToastShowing = false;
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
     
-    private android.view.MenuItem notificationsMenuItem;
+    private MenuItem notificationsMenuItem;
     private TextView badgeTextView;
     private ValueEventListener unreadCountListener;
 
@@ -88,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (currentFragment == null || !(currentFragment instanceof HomeFragment)) {
             getMenuInflater().inflate(R.menu.toolbar_menu, menu);
@@ -97,30 +104,26 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void setupNotificationIcon(android.view.Menu menu) {
+    private void setupNotificationIcon(Menu menu) {
         notificationsMenuItem = menu.findItem(R.id.action_notifications);
         if (notificationsMenuItem != null) {
             View actionView = getLayoutInflater().inflate(R.layout.menu_notification_badge, null);
             notificationsMenuItem.setActionView(actionView);
             badgeTextView = actionView.findViewById(R.id.badge_text);
-            
-            android.util.Log.d("MainActivity", "Notification icon setup - badgeTextView: " + (badgeTextView != null));
 
             actionView.setOnClickListener(v -> {
                 hapticHelper.vibrateClick();
                 openNotifications();
             });
             
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 setupNotificationBadge();
             }, 300);
-        } else {
-            android.util.Log.w("MainActivity", "Notifications menu item not found");
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (currentFragment != null && currentFragment.onOptionsItemSelected(item)) {
             return true;
@@ -184,14 +187,10 @@ public class MainActivity extends AppCompatActivity {
                 View actionView = notificationsMenuItem.getActionView();
                 if (actionView != null) {
                     badgeTextView = actionView.findViewById(R.id.badge_text);
-                    android.util.Log.d("MainActivity", "Badge TextView found: " + (badgeTextView != null));
-                } else {
-                    android.util.Log.w("MainActivity", "Action view is null");
                 }
             }
 
             if (badgeTextView != null) {
-                android.util.Log.d("MainActivity", "Updating badge with count: " + unreadCount);
                 if (unreadCount > 0) {
                     String badgeText = String.valueOf(unreadCount > 99 ? "99+" : unreadCount);
                     badgeTextView.setText(badgeText);
@@ -201,8 +200,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     badgeTextView.setVisibility(View.GONE);
                 }
-            } else {
-                android.util.Log.w("MainActivity", "Badge TextView is null, cannot update");
             }
         });
     }
@@ -230,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         if (positiveButton != null) {
             if (positiveButton instanceof MaterialButton) {
                 ((MaterialButton) positiveButton).setBackgroundTintList(
-                        android.content.res.ColorStateList.valueOf(
+                        ColorStateList.valueOf(
                                 getResources().getColor(R.color.error, null)
                         )
                 );
@@ -249,13 +246,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performLogout() {
-        // Remove notification listener before logout
-        com.sendajapan.sendasnap.utils.FcmNotificationSender.removeNotificationListener();
+        FcmNotificationSender.removeNotificationListener();
         
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(this);
         prefsManager.logout();
 
-        Intent intent = new Intent(this, com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
@@ -466,13 +462,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(android.view.Menu menu) {
+    public boolean onPrepareOptionsMenu(Menu menu) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
         boolean showMenu = currentFragment instanceof HomeFragment;
 
-        android.view.MenuItem notificationsItem = menu.findItem(R.id.action_notifications);
-        android.view.MenuItem moreItem = menu.findItem(R.id.action_more);
+        MenuItem notificationsItem = menu.findItem(R.id.action_notifications);
+        MenuItem moreItem = menu.findItem(R.id.action_more);
 
         if (notificationsItem != null) {
             notificationsItem.setVisible(showMenu);
@@ -529,7 +525,7 @@ public class MainActivity extends AppCompatActivity {
         if (positiveButton != null) {
             if (positiveButton instanceof MaterialButton) {
                 positiveButton.setBackgroundTintList(
-                        android.content.res.ColorStateList.valueOf(
+                        ColorStateList.valueOf(
                                 getResources().getColor(R.color.red_700, null)
                         )
                 );

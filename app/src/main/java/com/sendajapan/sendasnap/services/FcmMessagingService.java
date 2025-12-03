@@ -213,9 +213,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
         // The backend should store this token associated with the user ID
         // Example: POST /api/users/{userId}/fcm-token
         // Body: { "fcm_token": token }
-        
-        android.util.Log.d(TAG, "New FCM token: " + token);
-        // You should implement this to send the token to your backend
     }
 }
 

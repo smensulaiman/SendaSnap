@@ -1,6 +1,5 @@
 package com.sendajapan.sendasnap.services.chat;
 
-import android.util.Log;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -50,7 +49,6 @@ public class UnreadCountManager {
             
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Failed to get unread count", error.toException());
                 callback.onFailure(error.toException());
             }
         });
@@ -86,20 +84,16 @@ public class UnreadCountManager {
                         }
                     }
                 }
-                Log.d(TAG, "Unread count listener fired for chat " + chatId + ", user " + userId + ": " + unreadCount);
                 callback.onSuccess(unreadCount);
             }
             
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Unread count listener cancelled for chat " + chatId + ", user " + userId, error.toException());
                 callback.onFailure(error.toException());
             }
         };
         
-        // addValueEventListener creates a PERSISTENT listener that fires on every change
         userChatRef.addValueEventListener(listener);
-        Log.d(TAG, "Added PERSISTENT unread count listener for chat: " + chatId + ", user: " + userId);
         return listener;
     }
     
@@ -120,7 +114,6 @@ public class UnreadCountManager {
             .child(chatId);
             
         userChatRef.removeEventListener(listener);
-        Log.d(TAG, "Removed unread count listener for chat: " + chatId + ", user: " + userId);
     }
     
     /**
@@ -137,10 +130,8 @@ public class UnreadCountManager {
             
         unreadRef.setValue(0)
             .addOnSuccessListener(aVoid -> {
-                Log.d(TAG, "Marked chat as seen for user: " + userId + ", chat: " + chatId);
             })
             .addOnFailureListener(e -> {
-                Log.e(TAG, "Failed to mark chat as seen for user: " + userId + ", chat: " + chatId, e);
             });
     }
     

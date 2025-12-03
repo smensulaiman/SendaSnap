@@ -14,6 +14,7 @@ import com.sendajapan.sendasnap.MyApplication;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.adapters.ContactAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityContactsBinding;
+import com.sendajapan.sendasnap.models.Chat;
 import com.sendajapan.sendasnap.models.ChatUser;
 import com.sendajapan.sendasnap.services.ChatService;
 import com.sendajapan.sendasnap.utils.HapticFeedbackHelper;
@@ -158,7 +159,7 @@ public class ContactsActivity extends AppCompatActivity {
                 user.getEmail(),
                 new ChatService.ChatCallback() {
                     @Override
-                    public void onSuccess(com.sendajapan.sendasnap.models.Chat chat) {
+                    public void onSuccess(Chat chat) {
                         Intent intent = new Intent(ContactsActivity.this, ChatActivity.class);
                         intent.putExtra("chatId", chat.getChatId());
                         intent.putExtra("otherUserId", chat.getOtherUserId());

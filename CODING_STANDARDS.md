@@ -33,9 +33,38 @@ This document defines the coding standards, architecture patterns, and best prac
 - Use Android Studio's "Optimize Imports" feature (Ctrl+Alt+O / Cmd+Option+O)
 
 ### Import Rules
-- Never use wildcard imports
-- Remove imports for classes that are no longer used
-- Keep imports organized and consistent
+- **Never use fully qualified class names** - Always use proper imports instead of `com.package.ClassName`
+- **Never use wildcard imports** - Use explicit imports for each class
+- **Remove imports for classes that are no longer used**
+- **Keep imports organized and consistent**
+- **Always import classes you use** - Do not use fully qualified names like `android.view.Menu` or `com.sendajapan.sendasnap.utils.FcmNotificationSender`
+- **Exception**: Only use fully qualified names when there are naming conflicts (e.g., two classes with the same name from different packages)
+
+### Examples of Proper Imports
+
+**Correct:**
+```java
+import android.view.Menu;
+import android.view.MenuItem;
+import android.content.res.ColorStateList;
+import com.sendajapan.sendasnap.utils.FcmNotificationSender;
+import com.sendajapan.sendasnap.activities.auth.LoginActivity;
+
+// Then use short names:
+Menu menu;
+MenuItem item;
+ColorStateList colorStateList;
+FcmNotificationSender.removeNotificationListener();
+Intent intent = new Intent(this, LoginActivity.class);
+```
+
+**Incorrect:**
+```java
+// Don't use fully qualified names:
+android.view.Menu menu;
+com.sendajapan.sendasnap.utils.FcmNotificationSender.removeNotificationListener();
+Intent intent = new Intent(this, com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+```
 
 ## Variable Management
 
@@ -100,9 +129,18 @@ This document defines the coding standards, architecture patterns, and best prac
 
 ### Error Handling
 - Handle exceptions gracefully
-- Log errors appropriately using Log.e() or Log.w()
 - Provide user-friendly error messages
-- Never silently swallow exceptions without logging
+- Use proper error callbacks instead of logging
+- Never silently swallow exceptions - handle them appropriately through callbacks or user feedback
+
+### Logging Guidelines
+- **Remove ALL logging statements** - No `Log.d()`, `Log.e()`, `Log.w()`, `Log.i()`, or `Log.v()` statements should be present in the codebase
+- **No logging in production code** - All logging statements must be removed before committing
+- **Remove `import android.util.Log;` statements** - If no logging is used, remove the import
+- **Exception handling should not include logging** - Handle errors silently or through proper error callbacks
+- **Never log sensitive information** - Passwords, tokens, API keys, personal data should never be logged
+- **Search for and remove all logs** - Before committing, search for `Log.` and remove all instances
+- **Use error callbacks instead** - Pass errors to callbacks, show user-friendly messages, or handle silently
 
 ### Resource Management
 - Close resources in finally blocks or use try-with-resources
@@ -161,6 +199,8 @@ Before submitting code, ensure:
 - [ ] All unused imports are removed
 - [ ] All unused variables and methods are removed
 - [ ] No unnecessary comments are present
+- [ ] All logging statements (`Log.d()`, `Log.e()`, `Log.w()`, `Log.i()`, `Log.v()`) are removed
+- [ ] All `import android.util.Log;` statements are removed
 - [ ] Code follows naming conventions
 - [ ] Methods are focused and not too long
 - [ ] Error handling is appropriate
@@ -201,7 +241,9 @@ Before submitting code, ensure:
 
 ## Security Guidelines
 
-- Never log sensitive information
+- Never log sensitive information (passwords, tokens, API keys, personal data)
+- All logging statements must be removed from the codebase
+- Never use `Log.d()` as it may expose sensitive information in production
 - Validate user input
 - Use secure storage for sensitive data
 - Follow Android security best practices

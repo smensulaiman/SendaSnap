@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.HistoryActivity;
 import com.sendajapan.sendasnap.databinding.FragmentProfileBinding;
 import com.sendajapan.sendasnap.models.UserData;
@@ -65,31 +67,92 @@ public class ProfileFragment extends Fragment {
         UserData user = prefsManager.getUser();
 
         if (user != null) {
-            if (user.getName() != null && !user.getName().isEmpty()) {
-                binding.txtUserName.setText(user.getName());
-            } else if (user.getName() != null && !user.getName().isEmpty()) {
-                binding.txtUserName.setText(user.getName());
+            String userName = user.getName();
+            String userEmail = user.getEmail();
+            String userRole = user.getRole();
+
+            if (userName != null && !userName.isEmpty()) {
+                binding.txtUserName.setText(userName);
+                binding.txtFullName.setText(userName);
+            } else {
+                binding.txtUserName.setText("User");
+                binding.txtFullName.setText("User");
             }
 
-            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-                binding.txtUserEmail.setText(user.getEmail());
+            if (userEmail != null && !userEmail.isEmpty()) {
+                binding.txtUserEmail.setText(userEmail);
+                binding.txtEmailAddress.setText(userEmail);
+            } else {
+                String email = prefsManager.getEmail();
+                if (email != null && !email.isEmpty()) {
+                    binding.txtUserEmail.setText(email);
+                    binding.txtEmailAddress.setText(email);
+                }
             }
+
+            if (userRole != null && !userRole.isEmpty()) {
+                String capitalizedRole = userRole.substring(0, 1).toUpperCase() +
+                        userRole.substring(1).toLowerCase();
+                binding.txtRole.setText(capitalizedRole);
+                binding.txtUserRole.setText(capitalizedRole);
+            } else {
+                binding.txtRole.setText("User");
+                binding.txtUserRole.setText("User");
+            }
+
+            loadProfilePicture(user);
         } else {
             String username = prefsManager.getUsername();
             String email = prefsManager.getEmail();
 
             if (username != null && !username.isEmpty()) {
                 binding.txtUserName.setText(username);
+                binding.txtFullName.setText(username);
+            } else {
+                binding.txtUserName.setText("User");
+                binding.txtFullName.setText("User");
             }
 
             if (email != null && !email.isEmpty()) {
                 binding.txtUserEmail.setText(email);
+                binding.txtEmailAddress.setText(email);
             }
+
+            binding.txtRole.setText("User");
+            binding.txtUserRole.setText("User");
         }
 
-        // Load settings
+        if (user != null) {
+            loadProfilePicture(user);
+        } else {
+            binding.imgProfile.setImageResource(R.drawable.avater_placeholder);
+        }
+
         binding.switchNotifications.setChecked(prefsManager.isNotificationsEnabled());
         binding.switchHaptic.setChecked(prefsManager.isHapticEnabled());
+    }
+
+    private void loadProfilePicture(UserData user) {
+        if (binding.imgProfile == null || user == null) {
+            return;
+        }
+
+        String avatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getAvatar();
+
+        if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
+            Glide.with(requireContext())
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.avater_placeholder)
+                    .error(R.drawable.avater_placeholder)
+                    .circleCrop()
+                    .into(binding.imgProfile);
+        } else {
+            binding.imgProfile.setImageResource(R.drawable.avater_placeholder);
+        }
+    }
+
+    private boolean isValidUrl(String url) {
+        return url != null && (url.startsWith("http://") || url.startsWith("https://"));
     }
 
     private void openHistory() {

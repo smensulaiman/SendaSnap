@@ -1,6 +1,8 @@
 package com.sendajapan.sendasnap.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +46,6 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
 
     public void setOnAttachmentActionListener(OnAttachmentActionListener listener) {
         this.actionListener = listener;
-        android.util.Log.d("TaskAttachmentAdapter", "Action listener set: " + (listener != null ? "not null" : "null"));
     }
 
     public void setContext(Context context) {
@@ -117,8 +118,6 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
 
 
                 if (isUrl || isRelativePath) {
-                    // Server file - show "Open" button to open in browser
-                    android.util.Log.d("AttachmentAdapter", "Showing Open button");
                     btnAction.setVisibility(View.VISIBLE);
                     btnAction.setEnabled(true);
                     btnAction.setClickable(true);
@@ -129,15 +128,11 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
                     // Store reference to adapter in the click listener to avoid null issues
                     final TaskAttachmentAdapter adapterRef = TaskAttachmentAdapter.this;
                     btnAction.setOnClickListener(v -> {
-                        android.util.Log.d("AttachmentAdapter", "Open button clicked, actionListener: " + (actionListener != null ? "not null" : "NULL"));
-                        // Try multiple ways to get the listener
                         OnAttachmentActionListener listener = actionListener;
                         if (listener == null) {
-                            android.util.Log.e("AttachmentAdapter", "actionListener is null! Attempting to get from adapter");
                             listener = adapterRef.actionListener;
                         }
                         if (listener == null) {
-                            // Try to get from RecyclerView
                             View parent = (View) itemView.getParent();
                             if (parent != null && parent instanceof RecyclerView) {
                                 RecyclerView.Adapter<?> rvAdapter = ((RecyclerView) parent).getAdapter();
@@ -149,8 +144,6 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
                         if (listener != null) {
                             listener.onOpen(position, attachment);
                         } else {
-                            android.util.Log.e("AttachmentAdapter", "Still null after all attempts. Opening URL directly.");
-                            // Fallback: open URL directly
                             String fileUrl = attachment.getFileUrl();
                             if (fileUrl == null || fileUrl.isEmpty()) {
                                 fileUrl = attachment.getFilePath();
@@ -164,11 +157,10 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
                                     }
                                 }
                                 try {
-                                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
-                                    intent.setData(android.net.Uri.parse(fileUrl));
-                                    ctx.startActivity(android.content.Intent.createChooser(intent, "Open file"));
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setData(Uri.parse(fileUrl));
+                                    ctx.startActivity(Intent.createChooser(intent, "Open file"));
                                 } catch (Exception e) {
-                                    android.util.Log.e("AttachmentAdapter", "Error opening URL: " + e.getMessage());
                                 }
                             }
                         }
@@ -183,11 +175,8 @@ public class TaskAttachmentAdapter extends RecyclerView.Adapter<TaskAttachmentAd
                     btnAction.setIcon(ctx.getResources().getDrawable(R.drawable.ic_file, null));
                     btnAction.setIconTint(ctx.getResources().getColorStateList(R.color.primary, null));
                     btnAction.setOnClickListener(v -> {
-                        android.util.Log.d("AttachmentAdapter", "View button clicked for position: " + position);
                         if (actionListener != null) {
                             actionListener.onOpen(position, attachment);
-                        } else {
-                            android.util.Log.e("AttachmentAdapter", "actionListener is null!");
                         }
                     });
                 } else {

@@ -1,7 +1,6 @@
 package com.sendajapan.sendasnap.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,13 +26,11 @@ public class FcmTokenManager {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                             return;
                         }
 
                         // Get new FCM registration token
                         String token = task.getResult();
-                        Log.d(TAG, "FCM Registration Token: " + token);
 
                         // Store token in Firebase Realtime Database (for direct Android-to-Android notifications)
                         FcmNotificationSender.storeFcmTokenInFirebase(context, token);
@@ -57,7 +54,6 @@ public class FcmTokenManager {
         UserData user = prefsManager.getUser();
         
         if (user == null || user.getId() <= 0) {
-            Log.w(TAG, "User not logged in, cannot send FCM token to backend");
             return;
         }
         
@@ -71,20 +67,11 @@ public class FcmTokenManager {
         //     @Override
         //     public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
         //         if (response.isSuccessful()) {
-        //             Log.d(TAG, "FCM token sent to backend successfully");
-        //         } else {
-        //             Log.e(TAG, "Failed to send FCM token to backend: " + response.code());
-        //         }
         //     }
         //     @Override
         //     public void onFailure(Call<ApiResponse> call, Throwable t) {
-        //         Log.e(TAG, "Error sending FCM token to backend", t);
         //     }
         // });
-        
-        // For now, just log it
-        Log.d(TAG, "FCM Token to send to backend for user " + user.getId() + ": " + token);
-        Log.d(TAG, "Backend should store this token and use Firebase Admin SDK (V1 API) with Service Account to send notifications");
     }
     
     /**
@@ -106,10 +93,6 @@ public class FcmTokenManager {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         String msg = "Subscribed to topic: " + topic;
-                        if (!task.isSuccessful()) {
-                            msg = "Failed to subscribe to topic: " + topic;
-                        }
-                        Log.d(TAG, msg);
                     }
                 });
     }
@@ -123,10 +106,6 @@ public class FcmTokenManager {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         String msg = "Unsubscribed from topic: " + topic;
-                        if (!task.isSuccessful()) {
-                            msg = "Failed to unsubscribe from topic: " + topic;
-                        }
-                        Log.d(TAG, msg);
                     }
                 });
     }

@@ -1,12 +1,12 @@
 package com.sendajapan.sendasnap.data.repository;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.sendajapan.sendasnap.data.dto.PagedResult;
+import com.sendajapan.sendasnap.data.dto.StatusUpdateRequest;
 import com.sendajapan.sendasnap.data.dto.TaskResponseDto;
 import com.sendajapan.sendasnap.data.dto.TasksListResponseDto;
 import com.sendajapan.sendasnap.data.mapper.TaskMapper;
@@ -190,38 +190,21 @@ public class TaskRepositoryImpl implements TaskRepository {
             }
         }
 
-        Log.d(TAG, "update: id=" + id + ", params=" + params);
-        Log.d(TAG, "update: files count=" + (files != null ? files.size() : 0) + ", attachmentsUpdate=" + attachmentsUpdate);
-        
-        if (params != null && params instanceof UpdateTaskParams) {
-            UpdateTaskParams updateParams = (UpdateTaskParams) params;
-            Log.d(TAG, "update: UpdateTaskParams details - title=" + updateParams.title + 
-                    ", description=" + (updateParams.description != null ? updateParams.description.substring(0, Math.min(50, updateParams.description.length())) : "null") + 
-                    ", workDate=" + updateParams.workDate + 
-                    ", workTime=" + updateParams.workTime + 
-                    ", priority=" + updateParams.priority + 
-                    ", assignedTo=" + (updateParams.assignedTo != null ? updateParams.assignedTo.size() + " users" : "null"));
-        }
-        
         List<MultipartBody.Part> parts = buildMultipartParts(params, files, attachmentsUpdate);
-        Log.d(TAG, "update: built " + parts.size() + " multipart parts total");
         
         // Count non-file parts (fields)
         int fieldPartsCount = 0;
         int filePartsCount = 0;
-        // Log what parts are being sent
         for (int i = 0; i < parts.size(); i++) {
             MultipartBody.Part part = parts.get(i);
             if (part != null && part.headers() != null) {
                 String contentDisposition = part.headers().get("Content-Disposition");
                 if (contentDisposition != null) {
-                    // Extract field name from Content-Disposition header
                     if (contentDisposition.contains("name=\"")) {
                         int start = contentDisposition.indexOf("name=\"") + 6;
                         int end = contentDisposition.indexOf("\"", start);
                         if (end > start) {
                             String fieldName = contentDisposition.substring(start, end);
-                            Log.d(TAG, "update: part " + i + " = " + fieldName);
                             if (fieldName.startsWith("attachments[")) {
                                 filePartsCount++;
                             } else {
@@ -232,11 +215,9 @@ public class TaskRepositoryImpl implements TaskRepository {
                 }
             }
         }
-        Log.d(TAG, "update: sending " + fieldPartsCount + " field parts and " + filePartsCount + " file parts");
         
         // Warn if no fields are being sent (only files or attachments_update)
         if (fieldPartsCount == 0 && files == null) {
-            Log.w(TAG, "update: WARNING - No field parts being sent! Only attachments_update or no data at all.");
         }
 
         Call<ApiResponse<TaskResponseDto>> call = apiService.updateTask(id, parts);
@@ -244,37 +225,26 @@ public class TaskRepositoryImpl implements TaskRepository {
             @Override
             public void onResponse(Call<ApiResponse<TaskResponseDto>> call,
                                    Response<ApiResponse<TaskResponseDto>> response) {
-                Log.d(TAG, "update response: code=" + response.code() + ", isSuccessful=" + response.isSuccessful());
-                
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<TaskResponseDto> apiResponse = response.body();
 
                     if (apiResponse.getSuccess() != null && apiResponse.getSuccess()) {
                         if (apiResponse.getData() != null && apiResponse.getData().getTask() != null) {
                             Task task = TaskMapper.toDomain(apiResponse.getData().getTask());
-                            Log.d(TAG, "update: success, task id=" + task.getId() + 
-                                    ", title=" + task.getTitle() + 
-                                    ", workDate=" + task.getWorkDate() + 
-                                    ", priority=" + task.getPriority());
                             callback.onSuccess(task);
                         } else {
-                            Log.e(TAG, "update: failed - no task data in response");
                             callback.onError("Failed to update task", response.code());
                         }
                     } else {
                         String errorMessage = parseErrorMessage(apiResponse, response);
-                        Log.e(TAG, "update: API returned error - " + errorMessage);
                         callback.onError(errorMessage, response.code());
                     }
                 } else {
                     String errorMessage = parseErrorMessage(response);
-                    Log.e(TAG, "update: HTTP error - " + errorMessage + " (code: " + response.code() + ")");
                     if (response.errorBody() != null) {
                         try {
-                            String errorBody = response.errorBody().string();
-                            Log.e(TAG, "update: error body - " + errorBody);
+                            response.errorBody().string();
                         } catch (Exception e) {
-                            Log.e(TAG, "update: failed to read error body", e);
                         }
                     }
                     callback.onError(errorMessage, response.code());
@@ -334,8 +304,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     public void updateStatus(Integer id, Task.TaskStatus status, TaskRepositoryCallback<Task> callback) {
         // Convert enum to string for API
         String statusStr = status != null ? status.name().toLowerCase() : "pending";
-        com.sendajapan.sendasnap.data.dto.StatusUpdateRequest request =
-                new com.sendajapan.sendasnap.data.dto.StatusUpdateRequest(statusStr);
+        StatusUpdateRequest request = new StatusUpdateRequest(statusStr);
 
         Call<ApiResponse<TaskResponseDto>> call = apiService.updateTaskStatus(id, request);
         call.enqueue(new Callback<ApiResponse<TaskResponseDto>>() {
@@ -394,33 +363,16 @@ public class TaskRepositoryImpl implements TaskRepository {
             }
         } else if (params instanceof UpdateTaskParams) {
             UpdateTaskParams updateParams = (UpdateTaskParams) params;
-            Log.d(TAG, "buildMultipartParts - UpdateTaskParams: title=" + updateParams.title + 
-                    ", description=" + updateParams.description + 
-                    ", workDate=" + updateParams.workDate + 
-                    ", workTime=" + updateParams.workTime + 
-                    ", priority=" + updateParams.priority + 
-                    ", dueDate=" + updateParams.dueDate);
             
-            // For updates, only send fields that have values (not null/empty)
-            // Backend uses array_filter to remove null values, so only sent fields are updated
-            // This allows partial updates - fields not sent will remain unchanged
-            int partsBefore = parts.size();
             addPart(parts, "title", updateParams.title);
             addPart(parts, "description", updateParams.description);
             addPart(parts, "work_date", updateParams.workDate);
             addPart(parts, "work_time", updateParams.workTime);
             addPart(parts, "priority", updateParams.priority);
             addPart(parts, "due_date", updateParams.dueDate);
-            int partsAfter = parts.size();
-            Log.d(TAG, "buildMultipartParts - added " + (partsAfter - partsBefore) + " field parts");
 
-            // Always send assigned_to if it's not null (even if empty array)
-            // Backend uses $request->has('assigned_to') to check if it should update
             if (updateParams.assignedTo != null) {
-                Log.d(TAG, "buildMultipartParts - assignedTo count: " + updateParams.assignedTo.size());
                 if (updateParams.assignedTo.isEmpty()) {
-                    // Send empty array - backend will clear all assignments
-                    // Laravel expects at least one part with the array key to recognize it as an array
                     addPart(parts, "assigned_to[]", "");
                 } else {
                     for (Integer userId : updateParams.assignedTo) {
@@ -429,20 +381,13 @@ public class TaskRepositoryImpl implements TaskRepository {
                         }
                     }
                 }
-            } else {
-                Log.d(TAG, "buildMultipartParts - assignedTo is null (will not update assignments)");
             }
 
             if (attachmentsUpdate != null) {
-                // Send as "1" or "0" for better Laravel boolean() compatibility
                 addPart(parts, "attachments_update", attachmentsUpdate ? "1" : "0");
-                Log.d(TAG, "buildMultipartParts - attachments_update: " + attachmentsUpdate);
             }
             
-            // Add _method=PUT for Laravel method spoofing (some backends need this for PUT with multipart)
-            // This ensures Laravel recognizes it as a PUT request even with multipart/form-data
             addPart(parts, "_method", "PUT");
-            Log.d(TAG, "buildMultipartParts - added _method=PUT for Laravel method spoofing");
         }
 
         // Add file attachments
@@ -462,14 +407,9 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     private void addPart(List<MultipartBody.Part> parts, String key, String value) {
-        // For updates, we only send non-null, non-empty values
-        // Backend uses array_filter to remove null values, so only sent fields are updated
         if (value != null && !value.trim().isEmpty()) {
             RequestBody body = RequestBody.create(MediaType.parse("text/plain"), value);
             parts.add(MultipartBody.Part.createFormData(key, null, body));
-            Log.d(TAG, "addPart: added " + key + " = " + value);
-        } else {
-            Log.d(TAG, "addPart: skipping " + key + " (null or empty - will not update this field)");
         }
     }
 

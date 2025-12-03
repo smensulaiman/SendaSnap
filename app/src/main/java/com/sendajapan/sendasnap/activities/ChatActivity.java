@@ -3,13 +3,16 @@ package com.sendajapan.sendasnap.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,7 +53,19 @@ import java.util.Objects;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private static final String TAG = "ChatActivity";
+    private static final int MAX_AVATARS = 5;
+    private static final int AVATAR_SIZE_DP = 18;
+    private static final int OVERLAP_OFFSET_DP = -4;
+    private static final int SCROLL_DELAY_MS = 100;
+    private static final int KEYBOARD_THRESHOLD_DP = 200;
+    private static final int KEYBOARD_MARGIN_OFFSET_DP = 80;
+    private static final int DEFAULT_MARGIN_DP = 8;
+    private static final String IMAGE_MIME_TYPE = "image/*";
+    private static final String ALL_FILES_MIME_TYPE = "*/*";
+    private static final String FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider";
+    private static final String CAMERA_IMAGE_PREFIX = "chat_image_";
+    private static final String CAMERA_IMAGE_SUFFIX = ".jpg";
+    private static final String DEFAULT_FILE_NAME = "file";
 
     private boolean isGroupChat = false;
 
@@ -104,17 +119,12 @@ public class ChatActivity extends AppCompatActivity {
         storageService = FirebaseStorageService.getInstance();
         hapticHelper = HapticFeedbackHelper.getInstance(this);
         currentUserId = FirebaseUtils.getCurrentUserId(this);
-
-        if (currentUserId.isEmpty()) {
-            android.util.Log.w(TAG, "Current user ID is null or empty");
-        }
     }
 
     private void initializeCurrentUser() {
         try {
             chatService.initializeUser(this);
         } catch (Exception e) {
-            android.util.Log.e(TAG, "Failed to initialize user in Firebase", e);
         }
     }
 
@@ -131,7 +141,6 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 participants = (List<UserData>) participantsSerializable;
             } catch (ClassCastException e) {
-                android.util.Log.e(TAG, "Failed to cast participants list", e);
                 participants = new ArrayList<>();
             }
         }
@@ -144,17 +153,16 @@ public class ChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        if (isGroupChat && taskTitle != null) {
-            binding.toolbar.setTitle(taskTitle);
-        } else {
-            binding.toolbar.setTitle(otherUserName != null ? otherUserName : "Chat");
-        }
+        String toolbarTitle = isGroupChat && taskTitle != null 
+                ? taskTitle 
+                : (otherUserName != null ? otherUserName : "Chat");
+        binding.toolbar.setTitle(toolbarTitle);
 
         binding.toolbar.post(() -> {
             TextView titleView = findTitleTextView(binding.toolbar);
             if (titleView != null) {
                 titleView.setMaxLines(2);
-                titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                titleView.setEllipsize(TextUtils.TruncateAt.END);
                 titleView.setSingleLine(false);
             }
         });
@@ -170,8 +178,12 @@ public class ChatActivity extends AppCompatActivity {
             View child = parent.getChildAt(i);
             if (child instanceof TextView) {
                 TextView textView = (TextView) child;
-                String toolbarTitle = binding.toolbar.getTitle() != null ? binding.toolbar.getTitle().toString() : "";
-                String textViewText = textView.getText() != null ? textView.getText().toString() : "";
+                String toolbarTitle = binding.toolbar.getTitle() != null 
+                        ? binding.toolbar.getTitle().toString() 
+                        : "";
+                String textViewText = textView.getText() != null 
+                        ? textView.getText().toString() 
+                        : "";
                 if (textViewText.equals(toolbarTitle) && textView.getVisibility() == View.VISIBLE) {
                     return textView;
                 }
@@ -191,14 +203,15 @@ public class ChatActivity extends AppCompatActivity {
 
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.cardInput
                     .getLayoutParams();
-            if (insets.bottom > 200) {
-                params.bottomMargin = insets.bottom - 80;
+            float density = getResources().getDisplayMetrics().density;
+            
+            if (insets.bottom > KEYBOARD_THRESHOLD_DP) {
+                params.bottomMargin = insets.bottom - KEYBOARD_MARGIN_OFFSET_DP;
             } else {
-                params.bottomMargin = (int) (8 * getResources().getDisplayMetrics().density);
+                params.bottomMargin = (int) (DEFAULT_MARGIN_DP * density);
             }
 
             binding.cardInput.setLayoutParams(params);
-
             return windowInsets;
         });
     }
@@ -213,56 +226,65 @@ public class ChatActivity extends AppCompatActivity {
         binding.layoutMemberAvatars.setVisibility(View.VISIBLE);
         binding.layoutMemberAvatars.removeAllViews();
 
-        int avatarSize = (int) (18 * getResources().getDisplayMetrics().density);
-        int overlapOffset = (int) (-4 * getResources().getDisplayMetrics().density);
-        int maxAvatars = 5;
-
-        int displayCount = Math.min(participants.size(), maxAvatars);
+        float density = getResources().getDisplayMetrics().density;
+        int avatarSize = (int) (AVATAR_SIZE_DP * density);
+        int overlapOffset = (int) (OVERLAP_OFFSET_DP * density);
+        int displayCount = Math.min(participants.size(), MAX_AVATARS);
 
         for (int i = 0; i < displayCount; i++) {
             UserData user = participants.get(i);
-            ImageView avatarView = new ImageView(this);
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
-            if (i > 0) {
-                params.setMargins(overlapOffset, 0, 0, 0);
-            }
-            avatarView.setLayoutParams(params);
-
-            avatarView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            avatarView.setBackgroundResource(R.drawable.avater_placeholder);
-
-            String avatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getAvatar();
-            if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
-                Glide.with(this)
-                        .load(avatarUrl)
-                        .placeholder(R.drawable.avater_placeholder)
-                        .error(R.drawable.avater_placeholder)
-                        .circleCrop()
-                        .into(avatarView);
-            } else {
-                Glide.with(this)
-                        .load(R.drawable.avater_placeholder)
-                        .circleCrop()
-                        .into(avatarView);
-            }
-
+            ImageView avatarView = createAvatarView(avatarSize, overlapOffset, i);
+            loadAvatarImage(user, avatarView);
             binding.layoutMemberAvatars.addView(avatarView);
         }
 
-        if (participants.size() > maxAvatars) {
-            TextView moreTextView = new TextView(this);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
-            params.setMargins(overlapOffset, 0, 0, 0);
-            moreTextView.setLayoutParams(params);
-            moreTextView.setText("+" + (participants.size() - maxAvatars));
-            moreTextView.setTextSize(10);
-            moreTextView.setTextColor(getColor(R.color.white));
-            moreTextView.setGravity(android.view.Gravity.CENTER);
-            moreTextView.setBackgroundResource(R.drawable.avater_placeholder);
-            moreTextView.setBackgroundTintList(getColorStateList(R.color.primary));
+        if (participants.size() > MAX_AVATARS) {
+            TextView moreTextView = createMoreTextView(avatarSize, overlapOffset);
             binding.layoutMemberAvatars.addView(moreTextView);
         }
+    }
+
+    private ImageView createAvatarView(int avatarSize, int overlapOffset, int index) {
+        ImageView avatarView = new ImageView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
+        if (index > 0) {
+            params.setMargins(overlapOffset, 0, 0, 0);
+        }
+        avatarView.setLayoutParams(params);
+        avatarView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        avatarView.setBackgroundResource(R.drawable.avater_placeholder);
+        return avatarView;
+    }
+
+    private void loadAvatarImage(UserData user, ImageView avatarView) {
+        String avatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : user.getAvatar();
+        if (avatarUrl != null && !avatarUrl.isEmpty() && isValidUrl(avatarUrl)) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.avater_placeholder)
+                    .error(R.drawable.avater_placeholder)
+                    .circleCrop()
+                    .into(avatarView);
+        } else {
+            Glide.with(this)
+                    .load(R.drawable.avater_placeholder)
+                    .circleCrop()
+                    .into(avatarView);
+        }
+    }
+
+    private TextView createMoreTextView(int avatarSize, int overlapOffset) {
+        TextView moreTextView = new TextView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(avatarSize, avatarSize);
+        params.setMargins(overlapOffset, 0, 0, 0);
+        moreTextView.setLayoutParams(params);
+        moreTextView.setText("+" + (participants.size() - MAX_AVATARS));
+        moreTextView.setTextSize(10);
+        moreTextView.setTextColor(getColor(R.color.white));
+        moreTextView.setGravity(Gravity.CENTER);
+        moreTextView.setBackgroundResource(R.drawable.avater_placeholder);
+        moreTextView.setBackgroundTintList(getColorStateList(R.color.primary));
+        return moreTextView;
     }
 
     private boolean isValidUrl(String url) {
@@ -296,7 +318,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         binding.etMessage.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND) {
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
                 sendTextMessage();
                 return true;
             }
@@ -305,7 +327,7 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.etMessage.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                binding.recyclerViewMessages.postDelayed(this::scrollToBottom, 100);
+                binding.recyclerViewMessages.postDelayed(this::scrollToBottom, SCROLL_DELAY_MS);
             }
         });
     }
@@ -342,7 +364,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendTextMessage() {
-        String messageText = binding.etMessage.getText() != null ? binding.etMessage.getText().toString().trim() : "";
+        String messageText = binding.etMessage.getText() != null 
+                ? binding.etMessage.getText().toString().trim() 
+                : "";
 
         if (TextUtils.isEmpty(messageText)) {
             return;
@@ -350,33 +374,27 @@ public class ChatActivity extends AppCompatActivity {
 
         binding.etMessage.setText("");
 
+        ChatService.MessageCallback callback = createMessageCallback();
         if (isGroupChat) {
-            chatService.sendGroupMessage(chatId, messageText, new ChatService.MessageCallback() {
-                @Override
-                public void onSuccess(Message message) {
-                    scrollToBottom();
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    CookieBarToastHelper.showError(ChatActivity.this, "Error",
-                            "Failed to send message", CookieBarToastHelper.LONG_DURATION);
-                }
-            });
+            chatService.sendGroupMessage(chatId, messageText, callback);
         } else {
-            chatService.sendMessage(chatId, otherUserId, messageText, new ChatService.MessageCallback() {
-                @Override
-                public void onSuccess(Message message) {
-                    scrollToBottom();
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    CookieBarToastHelper.showError(ChatActivity.this, "Error",
-                            "Failed to send message", CookieBarToastHelper.LONG_DURATION);
-                }
-            });
+            chatService.sendMessage(chatId, otherUserId, messageText, callback);
         }
+    }
+
+    private ChatService.MessageCallback createMessageCallback() {
+        return new ChatService.MessageCallback() {
+            @Override
+            public void onSuccess(Message message) {
+                scrollToBottom();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                CookieBarToastHelper.showError(ChatActivity.this, "Error",
+                        "Failed to send message", CookieBarToastHelper.LONG_DURATION);
+            }
+        };
     }
 
     private void showAttachmentBottomSheet() {
@@ -390,7 +408,9 @@ public class ChatActivity extends AppCompatActivity {
 
         bottomSheetBinding.layoutGallery.setOnClickListener(v -> {
             bottomSheet.dismiss();
-            openGallery();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                openGallery();
+            }
         });
 
         bottomSheetBinding.layoutFile.setOnClickListener(v -> {
@@ -403,15 +423,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
+                != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(new String[] { Manifest.permission.CAMERA });
             return;
         }
 
         try {
-            File photoFile = new File(getExternalFilesDir(null), "chat_image_" + System.currentTimeMillis() + ".jpg");
+            File photoFile = new File(getExternalFilesDir(null), 
+                    CAMERA_IMAGE_PREFIX + System.currentTimeMillis() + CAMERA_IMAGE_SUFFIX);
             cameraImageUri = FileProvider.getUriForFile(this,
-                    getPackageName() + ".fileprovider", photoFile);
+                    getPackageName() + FILE_PROVIDER_AUTHORITY_SUFFIX, photoFile);
             cameraLauncher.launch(cameraImageUri);
         } catch (Exception e) {
             Toast.makeText(this, "Failed to open camera", Toast.LENGTH_SHORT).show();
@@ -426,11 +448,11 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        galleryLauncher.launch("image/*");
+        galleryLauncher.launch(IMAGE_MIME_TYPE);
     }
 
     private void openFilePicker() {
-        filePickerLauncher.launch("*/*");
+        filePickerLauncher.launch(ALL_FILES_MIME_TYPE);
     }
 
     private void uploadImage(Uri imageUri) {
@@ -441,18 +463,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String downloadUrl) {
                 chatService.sendImageMessage(chatId, otherUserId, downloadUrl,
-                        new ChatService.MessageCallback() {
-                            @Override
-                            public void onSuccess(Message message) {
-                                scrollToBottom();
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                CookieBarToastHelper.showError(ChatActivity.this, "Error",
-                                        "Failed to send image", CookieBarToastHelper.LONG_DURATION);
-                            }
-                        });
+                        createMessageCallback());
             }
 
             @Override
@@ -472,18 +483,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String downloadUrl) {
                 chatService.sendFileMessage(chatId, otherUserId, downloadUrl, fileName,
-                        new ChatService.MessageCallback() {
-                            @Override
-                            public void onSuccess(Message message) {
-                                scrollToBottom();
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                CookieBarToastHelper.showError(ChatActivity.this, "Error",
-                                        "Failed to send file", CookieBarToastHelper.LONG_DURATION);
-                            }
-                        });
+                        createMessageCallback());
             }
 
             @Override
@@ -497,7 +497,7 @@ public class ChatActivity extends AppCompatActivity {
     private String getFileName(Uri uri) {
         String result = null;
         if (Objects.equals(uri.getScheme(), "content")) {
-            try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     int nameIndex = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME);
                     if (nameIndex >= 0) {
@@ -515,7 +515,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         }
-        return result != null ? result : "file";
+        return result != null ? result : DEFAULT_FILE_NAME;
     }
 
     private void loadMessages() {
@@ -531,14 +531,12 @@ public class ChatActivity extends AppCompatActivity {
                     updateEmptyState(messages.isEmpty());
                     scrollToBottom();
                 } catch (Exception e) {
-                    android.util.Log.e(TAG, "Error updating messages", e);
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
                 if (!isFinishing() && binding != null) {
-                    android.util.Log.e(TAG, "Failed to load messages", e);
                     updateEmptyState(true);
                 }
             }
@@ -585,7 +583,6 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 binding.recyclerViewMessages.smoothScrollToPosition(itemCount - 1);
             } catch (Exception e) {
-                android.util.Log.e(TAG, "Error scrolling to bottom", e);
             }
         });
     }

@@ -770,16 +770,6 @@ public class AddScheduleActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Send notifications via Firebase Realtime Database to assignees' devices
-                    // This will trigger notifications on assignee devices, not on creator's device
-                    android.util.Log.d("AddScheduleActivity", "Sending notifications to " + taskAssignees.size() + " assignees");
-                    for (UserData assignee : taskAssignees) {
-                        if (assignee != null) {
-                            android.util.Log.d("AddScheduleActivity", "Assignee: ID=" + assignee.getId() + 
-                                  ", Name=" + assignee.getName() + ", Email=" + assignee.getEmail());
-                        }
-                    }
-                    
                     FcmNotificationSender.sendTaskAssignmentNotifications(
                             AddScheduleActivity.this,
                             createdTask,

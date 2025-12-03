@@ -3,7 +3,6 @@ package com.sendajapan.sendasnap.services;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.util.Log;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -78,7 +77,6 @@ public class FirebaseStorageService {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(Exception e) {
-                            Log.e(TAG, "Failed to get download URL", e);
                             callback.onFailure(e);
                         }
                     });
@@ -86,13 +84,11 @@ public class FirebaseStorageService {
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(Exception e) {
-                    Log.e(TAG, "Failed to upload image", e);
                     callback.onFailure(e);
                 }
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "Error uploading image", e);
             callback.onFailure(e);
         }
     }
@@ -143,7 +139,6 @@ public class FirebaseStorageService {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(Exception e) {
-                            Log.e(TAG, "Failed to get download URL", e);
                             callback.onFailure(e);
                         }
                     });
@@ -151,13 +146,11 @@ public class FirebaseStorageService {
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(Exception e) {
-                    Log.e(TAG, "Failed to upload file", e);
                     callback.onFailure(e);
                 }
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "Error uploading file", e);
             callback.onFailure(e);
         }
     }
@@ -172,7 +165,6 @@ public class FirebaseStorageService {
                     .addOnSuccessListener(onSuccess)
                     .addOnFailureListener(onFailure);
         } catch (Exception e) {
-            Log.e(TAG, "Error deleting file", e);
             if (onFailure != null) {
                 onFailure.onFailure(e);
             }

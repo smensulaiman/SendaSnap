@@ -1,7 +1,6 @@
 package com.sendajapan.sendasnap.services.chat;
 
 import android.content.Context;
-import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.sendajapan.sendasnap.models.UserData;
@@ -32,7 +31,6 @@ public class UserManager {
     public void initializeCurrentUser(Context context) {
         String userId = FirebaseUtils.getCurrentUserId(context);
         if (userId.isEmpty()) {
-            Log.w(TAG, "Current user ID is empty, cannot initialize");
             return;
         }
         
@@ -40,7 +38,6 @@ public class UserManager {
         UserData userData = prefsManager.getUser();
         
         if (userData == null) {
-            Log.e(TAG, "UserData is null, cannot initialize in Firebase");
             return;
         }
         
@@ -56,13 +53,11 @@ public class UserManager {
      */
     public void initializeUserData(UserData userData) {
         if (userData == null || userData.getEmail() == null || userData.getEmail().isEmpty()) {
-            Log.e(TAG, "UserData is null or email is empty, cannot initialize in Firebase");
             return;
         }
         
         String userId = FirebaseUtils.sanitizeEmailForKey(userData.getEmail());
         if (userId.isEmpty()) {
-            Log.e(TAG, "Failed to generate userId from email");
             return;
         }
         
@@ -74,10 +69,8 @@ public class UserManager {
         // Save to Firebase
         userRef.setValue(firebaseUserData)
             .addOnSuccessListener(aVoid -> {
-                Log.d(TAG, "User initialized/updated in Firebase: " + userId);
             })
             .addOnFailureListener(e -> {
-                Log.e(TAG, "Failed to initialize/update user in Firebase: " + userId, e);
             });
     }
     

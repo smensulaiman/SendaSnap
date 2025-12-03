@@ -3,7 +3,6 @@ package com.sendajapan.sendasnap;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -46,7 +45,6 @@ public class MyApplication extends Application {
         try {
             database.setPersistenceEnabled(false);
         } catch (Exception e) {
-            Log.w(TAG, "Firebase persistence may already be enabled: " + e.getMessage());
         }
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -61,7 +59,6 @@ public class MyApplication extends Application {
             public void onActivityStarted(@NonNull Activity activity) {
                 activityCount++;
                 currentActivity = activity;
-                Log.d(TAG, "Activity started. Count: " + activityCount);
             }
 
             @Override
@@ -87,7 +84,6 @@ public class MyApplication extends Application {
                 if (currentActivity == activity) {
                     currentActivity = null;
                 }
-                Log.d(TAG, "Activity stopped. Count: " + activityCount);
             }
 
             @Override
@@ -106,8 +102,6 @@ public class MyApplication extends Application {
         if (prefsManager.isLoggedIn()) {
             FcmNotificationSender.setupNotificationListener(this);
         }
-
-        Log.d(TAG, "MyApplication initialized");
     }
 
     private void applyWindowSettings(Activity activity) {

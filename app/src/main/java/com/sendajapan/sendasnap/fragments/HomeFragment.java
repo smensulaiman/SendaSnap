@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.NotificationsActivity;
 import com.sendajapan.sendasnap.activities.VehicleDetailsActivity;
+import com.sendajapan.sendasnap.activities.auth.LoginActivity;
 import com.sendajapan.sendasnap.adapters.VehicleAdapter;
 import com.sendajapan.sendasnap.databinding.FragmentHomeBinding;
 import com.sendajapan.sendasnap.dialogs.LoadingDialog;
@@ -440,15 +441,11 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
             View actionView = getLayoutInflater().inflate(R.layout.menu_notification_badge, null);
             notificationsMenuItem.setActionView(actionView);
             badgeTextView = actionView.findViewById(R.id.badge_text);
-            
-            android.util.Log.d("HomeFragment", "Notification icon setup - badgeTextView: " + (badgeTextView != null));
 
             actionView.setOnClickListener(v -> {
                 hapticHelper.vibrateClick();
                 openNotifications();
             });
-        } else {
-            android.util.Log.w("HomeFragment", "Notifications menu item not found");
         }
     }
 
@@ -588,7 +585,7 @@ public class HomeFragment extends Fragment implements VehicleAdapter.OnVehicleCl
         SharedPrefsManager prefsManager = SharedPrefsManager.getInstance(requireContext());
         prefsManager.logout();
 
-        Intent intent = new Intent(requireContext(), com.sendajapan.sendasnap.activities.auth.LoginActivity.class);
+        Intent intent = new Intent(requireContext(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 

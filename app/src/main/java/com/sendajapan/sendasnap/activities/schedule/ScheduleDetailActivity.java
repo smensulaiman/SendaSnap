@@ -3,6 +3,9 @@ package com.sendajapan.sendasnap.activities.schedule;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +25,7 @@ import com.sendajapan.sendasnap.R;
 import com.sendajapan.sendasnap.activities.ChatActivity;
 import com.sendajapan.sendasnap.adapters.TaskAttachmentAdapter;
 import com.sendajapan.sendasnap.databinding.ActivityScheduleDetailBinding;
+import com.sendajapan.sendasnap.models.Chat;
 import com.sendajapan.sendasnap.models.Task;
 import com.sendajapan.sendasnap.models.TaskAttachment;
 import com.sendajapan.sendasnap.models.UserData;
@@ -86,7 +90,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         fetchUsers();
 
         if (task != null) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 loadUnreadCount();
             }, 500);
         }
@@ -461,7 +465,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 badgeTextView.setPadding(4, 2, 4, 2);
                 badgeTextView.setMinWidth((int) (18 * getResources().getDisplayMetrics().density));
                 badgeTextView.setMinHeight((int) (18 * getResources().getDisplayMetrics().density));
-                badgeTextView.setGravity(android.view.Gravity.CENTER);
+                badgeTextView.setGravity(Gravity.CENTER);
                 badgeTextView.setVisibility(View.GONE);
             } else {
                 badgeTextView.setVisibility(View.GONE);
@@ -670,7 +674,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         String chatId = getTaskChatId();
         chatService.createOrGetGroupChatWithParticipants(String.valueOf(task.getId()), task.getTitle(), participants, new ChatService.GroupChatCallback() {
             @Override
-            public void onSuccess(com.sendajapan.sendasnap.models.Chat chat) {
+            public void onSuccess(Chat chat) {
                 isChatOpening = false;
                 if (chatActionView != null) {
                     chatActionView.setEnabled(true);
